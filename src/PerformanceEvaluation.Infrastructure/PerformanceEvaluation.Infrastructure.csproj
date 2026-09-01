@@ -8,10 +8,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PerformanceEvaluation.Application\PerformanceEvaluation.Application.csproj" />
+    <ProjectReference Include="..\PerformanceEvaluation.Domain\PerformanceEvaluation.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\Configurations\" />
     <Folder Include="Security\" />
     <Folder Include="Repositories\" />
   </ItemGroup>
