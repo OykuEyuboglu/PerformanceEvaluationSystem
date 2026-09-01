@@ -1,0 +1,17 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using PerformanceEvaluation.Application.DTOs;
+using PerformanceEvaluation.Application.Interfaces;
+
+namespace PerformanceEvaluation.API.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class AuthController(IAuthService authService) : ControllerBase
+{
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
+    {
+        var result = await authService.LoginAsync(request);
+        return Ok(result);
+    }
+}

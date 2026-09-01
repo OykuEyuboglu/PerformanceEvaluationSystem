@@ -1,7 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PerformanceEvaluation.Application.Interfaces;
 using PerformanceEvaluation.Infrastructure.Data;
+using PerformanceEvaluation.Infrastructure.Repositories;
+using PerformanceEvaluation.Infrastructure.Security;
 
 namespace PerformanceEvaluation.Infrastructure;
 
@@ -13,7 +16,9 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-        // Repository ve Security kayıtları buraya eklenecek (Adım 8+++)
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
         return services;
     }
