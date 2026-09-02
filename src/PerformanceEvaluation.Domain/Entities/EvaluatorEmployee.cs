@@ -2,7 +2,6 @@
 
 namespace PerformanceEvaluation.Domain.Entities;
 
-// Evaluator - Employee ilişkisi (FR6 icin)
 public class EvaluatorEmployee : BaseEntity
 {
     public int EvaluatorId { get; set; }

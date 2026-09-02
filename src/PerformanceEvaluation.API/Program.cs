@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplicationServices();
 
-builder.Services.AddValidatorsFromAssemblyContaining<CreateUserValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateUserDtoValidator>();
 builder.Services.AddFluentValidationAutoValidation();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -98,7 +98,7 @@ builder.Services.AddSwaggerGen(options =>
 
 //İlk admin eklenmesi için oluşturulması
 //Console.WriteLine(
-//    BCrypt.Net.BCrypt.HashPassword("password")
+//    BCrypt.Net.BCrypt.HashPassword("a")
 //);
 
 var app = builder.Build();

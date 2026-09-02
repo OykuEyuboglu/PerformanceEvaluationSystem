@@ -12,7 +12,7 @@ public class PasswordHasher : IPasswordHasher
     //ilk admin eklenmesi için password oluşturulması
     //public void TestHash()
     //{
-    //    var hash = BCrypt.Net.BCrypt.HashPassword("password");
+    //    var hash = BCrypt.Net.BCrypt.HashPassword("a");
     //    Console.WriteLine(hash);
     //}
 }

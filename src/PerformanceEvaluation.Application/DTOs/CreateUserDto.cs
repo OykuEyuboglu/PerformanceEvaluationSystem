@@ -1,4 +1,6 @@
-﻿namespace PerformanceEvaluation.Application.DTOs
+﻿using PerformanceEvaluation.Domain.Enums;
+
+namespace PerformanceEvaluation.Application.DTOs
 {
     public class CreateUserDto
     {
