@@ -31,7 +31,7 @@ public class UserService : IUserService
         return _mapper.Map<UserDto>(user);
     }
 
-    public async Task<UserDto> CreateAsync(CreateUserDto dto)
+    public async Task<UserDto> CreateAsync(CreateUserDto dto, int createdBy)
     {
         var existing = await _userRepository.GetByEmailAsync(dto.Email);
         if (existing is not null)
@@ -46,11 +46,16 @@ public class UserService : IUserService
             Role = dto.Role,
             DepartmentId = dto.DepartmentId,
             JobPositionId = dto.JobPositionId,
-            IsActive = true
+            IsActive = true,
+            CreatedAt = DateTime.Now,
+            UpdatedAt = DateTime.Now,
+            CreatedBy = createdBy,
         };
 
         await _userRepository.AddAsync(user);
         await _userRepository.SaveChangesAsync();
+
+        var createdUser = await _userRepository.GetByIdAsync(user.Id);
 
         return _mapper.Map<UserDto>(user);
     }
@@ -66,10 +71,45 @@ public class UserService : IUserService
         user.DepartmentId = dto.DepartmentId;
         user.JobPositionId = dto.JobPositionId;
         user.IsActive = dto.IsActive;
+        user.UpdatedAt = DateTime.Now;
+
+        _userRepository.Update(user);
+        await _userRepository.SaveChangesAsync();
+        var updatedUser = await _userRepository.GetByIdAsync(user.Id);
+
+        return _mapper.Map<UserDto>(user);
+    }
+
+    public async Task<UserDto> PatchAsync(int id, UpdatePatchUserDto dto)
+    {
+        var user = await _userRepository.GetByIdAsync(id)
+            ?? throw new KeyNotFoundException("Kullanıcı bulunamadı.");
+
+        if (dto.FirstName is not null)
+            user.FirstName = dto.FirstName;
+
+        if (dto.LastName is not null)
+            user.LastName = dto.LastName;
+
+        if (dto.Role.HasValue)
+            user.Role = dto.Role.Value;
+
+        if (dto.DepartmentId.HasValue)
+            user.DepartmentId = dto.DepartmentId.Value;
+
+        if (dto.JobPositionId.HasValue)
+            user.JobPositionId = dto.JobPositionId.Value;
+
+        if (dto.IsActive.HasValue)
+            user.IsActive = dto.IsActive.Value;
+
+        user.UpdatedAt = DateTime.Now;
 
         _userRepository.Update(user);
         await _userRepository.SaveChangesAsync();
 
-        return _mapper.Map<UserDto>(user);
+        var updatedUser = await _userRepository.GetByIdAsync(user.Id);
+
+        return _mapper.Map<UserDto>(updatedUser);
     }
 }

@@ -1,8 +1,11 @@
 ﻿using PerformanceEvaluation.Application.DTOs;
 
-public class LoginResponseDto
+namespace PerformanceEvaluation.Application.DTOs
 {
-    public string Token { get; set; } = string.Empty;
-    public DateTime ExpiresAt { get; set; }
-    public UserDto User { get; set; } = null!;
+    public class LoginResponseDto
+    {
+        public string Token { get; set; } = string.Empty;
+        public DateTime ExpiresAt { get; set; }
+        public UserDto User { get; set; } = null!;
+    }
 }

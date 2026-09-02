@@ -14,8 +14,13 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(u => u.Email).IsUnique();
 
         builder.Property(u => u.Role)
-            .HasConversion<string>()
-            .HasMaxLength(20);
+            .HasConversion<int>()
+            .HasColumnType("int");
+
+        builder.HasOne<User>()
+    .WithMany()
+    .HasForeignKey(u => u.CreatedBy)
+    .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(u => u.Department)
             .WithMany(d => d.Users)

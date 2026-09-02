@@ -27,7 +27,8 @@ public class UserController(IUserService userService) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateUserDto dto)
     {
-        var user = await userService.CreateAsync(dto);
+        var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+        var user = await userService.CreateAsync(dto, userId);
         return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
     }
 
@@ -35,6 +36,13 @@ public class UserController(IUserService userService) : ControllerBase
     public async Task<IActionResult> Update(int id, [FromBody] UpdateUserDto dto)
     {
         var user = await userService.UpdateAsync(id, dto);
+        return Ok(user);
+    }
+
+    [HttpPatch("{id}")]
+    public async Task<IActionResult> Patch(int id, [FromBody] UpdatePatchUserDto dto)
+    {
+        var user = await userService.PatchAsync(id, dto);
         return Ok(user);
     }
 }
