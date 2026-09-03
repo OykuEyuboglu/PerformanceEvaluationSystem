@@ -6,7 +6,7 @@ using PerformanceEvaluation.Infrastructure;
 using System.Text;
 using FluentValidation.AspNetCore;
 using PerformanceEvaluation.Application.Validators.User;
-
+using PerformanceEvaluation.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -107,6 +107,8 @@ builder.Services.AddSwaggerGen(options =>
 //);
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

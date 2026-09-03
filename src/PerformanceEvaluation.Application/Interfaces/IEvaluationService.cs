@@ -1,0 +1,14 @@
+﻿using PerformanceEvaluation.Application.DTOs.Evaluation;
+using System.Security.Claims;
+
+namespace PerformanceEvaluation.Application.Interfaces;
+
+public interface IEvaluationService
+{
+    Task<EvaluationDto> CreateAsync(CreateEvaluationDto dto, ClaimsPrincipal evaluatorClaims);
+    Task<IEnumerable<EvaluationDto>> GetAllAsync();
+    Task<IEnumerable<EvaluationDto>> GetMyEvaluationsAsync(ClaimsPrincipal employeeClaims);
+    Task<EvaluationDto> GetByIdAsync(
+        int id,
+        ClaimsPrincipal userClaims);
+}

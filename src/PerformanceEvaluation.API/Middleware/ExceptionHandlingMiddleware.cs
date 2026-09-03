@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using Microsoft.EntityFrameworkCore;
+using PerformanceEvaluation.Domain.Common;
+using System.Net;
 using System.Text.Json;
 
 namespace PerformanceEvaluation.API.Middleware;
@@ -28,17 +30,23 @@ public class ExceptionHandlingMiddleware
             context.Response.StatusCode = ex switch
             {
                 UnauthorizedAccessException => (int)HttpStatusCode.Unauthorized,
+                ForbiddenAccessException => (int)HttpStatusCode.Forbidden,
                 KeyNotFoundException => (int)HttpStatusCode.NotFound,
                 InvalidOperationException => (int)HttpStatusCode.Conflict,
                 ArgumentException => (int)HttpStatusCode.BadRequest,
+                DbUpdateException => (int)HttpStatusCode.BadRequest,
                 _ => (int)HttpStatusCode.InternalServerError
             };
+
+            var message = ex is DbUpdateException
+              ? "Geçersiz ilişkili veri"
+              : ex.Message;
 
             var response = new
             {
                 status = context.Response.StatusCode,
                 error = ex.GetType().Name,
-                message = ex.Message
+                message
             };
 
             await context.Response.WriteAsync(JsonSerializer.Serialize(response));

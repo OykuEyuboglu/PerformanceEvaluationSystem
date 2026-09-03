@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PerformanceEvaluation.Application.Interfaces;
+using PerformanceEvaluation.Application.Services;
 using PerformanceEvaluation.Infrastructure.Data;
 using PerformanceEvaluation.Infrastructure.Repositories;
 using PerformanceEvaluation.Infrastructure.Security;
@@ -21,6 +22,10 @@ public static class DependencyInjection
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<IPerformanceCategoryRepository, PerformanceCategoryRepository>();
         services.AddScoped<IPerformanceCriterionRepository, PerformanceCriterionRepository>();
+        services.AddScoped<IEvaluationRepository, EvaluationRepository>();
+        services.AddScoped<IEvaluatorEmployeeRepository, EvaluatorEmployeeRepository>();
+        
+        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
         return services;
     }
