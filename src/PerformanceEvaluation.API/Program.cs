@@ -2,10 +2,10 @@
 using Microsoft.IdentityModel.Tokens;
 using FluentValidation;
 using PerformanceEvaluation.API.Extensions;
-using PerformanceEvaluation.Application.Validators;
 using PerformanceEvaluation.Infrastructure;
 using System.Text;
 using FluentValidation.AspNetCore;
+using PerformanceEvaluation.Application.Validators.User;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -69,8 +69,11 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(options =>
 {
+    options.EnableAnnotations();
+
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -80,6 +83,7 @@ builder.Services.AddSwaggerGen(options =>
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
         Description = "JWT token'ı 'Bearer {token}' formatında giriniz."
     });
+
     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {
         {
@@ -95,6 +99,7 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
 
 //İlk admin eklenmesi için oluşturulması
 //Console.WriteLine(

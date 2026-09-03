@@ -18,6 +18,7 @@ public static class ServiceExtensions
 
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ICriteriaService, CriteriaService>();
 
         return services;
     }

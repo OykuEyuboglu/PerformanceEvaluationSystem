@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using PerformanceEvaluation.Application.DTOs;
+using PerformanceEvaluation.Application.DTOs.User;
 using PerformanceEvaluation.Application.Interfaces;
 using PerformanceEvaluation.Domain.Entities;
 

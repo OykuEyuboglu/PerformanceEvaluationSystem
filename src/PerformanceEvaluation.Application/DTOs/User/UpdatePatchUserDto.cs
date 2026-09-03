@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PerformanceEvaluation.Application.DTOs
+namespace PerformanceEvaluation.Application.DTOs.User
 {
     public class UpdatePatchUserDto
     {
