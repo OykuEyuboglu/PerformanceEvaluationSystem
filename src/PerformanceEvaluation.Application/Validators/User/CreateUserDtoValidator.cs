@@ -1,12 +1,12 @@
 ﻿using FluentValidation;
-using PerformanceEvaluation.Application.DTOs;
+using PerformanceEvaluation.Application.DTOs.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PerformanceEvaluation.Application.Validators
+namespace PerformanceEvaluation.Application.Validators.User
 {
     public class CreateUserDtoValidator : AbstractValidator<CreateUserDto>
     {

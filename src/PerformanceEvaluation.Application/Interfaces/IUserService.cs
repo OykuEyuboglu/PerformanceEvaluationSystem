@@ -1,4 +1,4 @@
-﻿using PerformanceEvaluation.Application.DTOs;
+﻿using PerformanceEvaluation.Application.DTOs.User;
 
 namespace PerformanceEvaluation.Application.Interfaces;
 

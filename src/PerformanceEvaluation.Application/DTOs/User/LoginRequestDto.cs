@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace PerformanceEvaluation.Application.DTOs
+namespace PerformanceEvaluation.Application.DTOs.User
 {
     public class LoginRequestDto
     {

@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using PerformanceEvaluation.Application.DTOs;
+using PerformanceEvaluation.Application.DTOs.User;
 
-namespace PerformanceEvaluation.Application.Validators;
+namespace PerformanceEvaluation.Application.Validators.User;
 
 public class LoginValidator : AbstractValidator<LoginRequestDto>
 {

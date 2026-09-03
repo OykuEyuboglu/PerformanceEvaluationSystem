@@ -1,5 +1,5 @@
 ﻿using PerformanceEvaluation.Domain.Enums;
-namespace PerformanceEvaluation.Application.DTOs 
+namespace PerformanceEvaluation.Application.DTOs.User 
 { 
     public class UpdateUserDto 
     { 

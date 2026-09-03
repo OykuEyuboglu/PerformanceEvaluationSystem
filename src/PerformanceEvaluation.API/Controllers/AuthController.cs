@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PerformanceEvaluation.Application.DTOs;
+using PerformanceEvaluation.Application.DTOs.User;
 using PerformanceEvaluation.Application.Interfaces;
 
 namespace PerformanceEvaluation.API.Controllers;

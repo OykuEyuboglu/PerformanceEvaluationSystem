@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using PerformanceEvaluation.Application.DTOs;
+using PerformanceEvaluation.Application.DTOs.User;
 
 public class UpdateUserValidator : AbstractValidator<UpdateUserDto>
 {

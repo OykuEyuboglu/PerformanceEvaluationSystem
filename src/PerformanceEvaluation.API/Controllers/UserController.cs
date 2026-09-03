@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PerformanceEvaluation.Application.DTOs;
+using PerformanceEvaluation.Application.DTOs.User;
 using PerformanceEvaluation.Application.Interfaces;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace PerformanceEvaluation.API.Controllers;
 
@@ -11,6 +12,7 @@ namespace PerformanceEvaluation.API.Controllers;
 public class UserController(IUserService userService) : ControllerBase
 {
     [HttpGet]
+    [SwaggerOperation(Summary = "Tüm kullanıcıları getir")]
     public async Task<IActionResult> GetAll()
     {
         var users = await userService.GetAllAsync();
@@ -18,6 +20,7 @@ public class UserController(IUserService userService) : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [SwaggerOperation(Summary = "ID ile kullanıcı getir")]
     public async Task<IActionResult> GetById(int id)
     {
         var user = await userService.GetByIdAsync(id);
@@ -25,6 +28,7 @@ public class UserController(IUserService userService) : ControllerBase
     }
 
     [HttpPost]
+    [SwaggerOperation(Summary = "Yeni kullanıcı oluştur")]
     public async Task<IActionResult> Create([FromBody] CreateUserDto dto)
     {
         var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
@@ -33,6 +37,7 @@ public class UserController(IUserService userService) : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [SwaggerOperation(Summary = "Kullanıcı bilgilerini tamamen güncelle")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateUserDto dto)
     {
         var user = await userService.UpdateAsync(id, dto);
@@ -40,6 +45,7 @@ public class UserController(IUserService userService) : ControllerBase
     }
 
     [HttpPatch("{id}")]
+    [SwaggerOperation(Summary = "Kullanıcı bilgilerini kısmi olarak güncelle")]
     public async Task<IActionResult> Patch(int id, [FromBody] UpdatePatchUserDto dto)
     {
         var user = await userService.PatchAsync(id, dto);
