@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using PerformanceEvaluation.Application.DTOs.Criteria;
+using PerformanceEvaluation.Application.DTOs.Evaluation;
 using PerformanceEvaluation.Application.DTOs.User;
 using PerformanceEvaluation.Domain.Entities;
 
@@ -22,5 +23,15 @@ public class MappingProfile : Profile
 
         CreateMap<CriterionJobPosition, CriterionJobPositionDto>()
             .ForMember(dest => dest.JobPositionName, opt => opt.MapFrom(src => src.JobPosition.Name));
+
+        CreateMap<Evaluation, EvaluationDto>()
+            .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => $"{src.Employee.FirstName} {src.Employee.LastName}"))
+            .ForMember(dest => dest.EvaluatorName, opt => opt.MapFrom(src => $"{src.Evaluator.FirstName} {src.Evaluator.LastName}"))
+            .ForMember(dest => dest.EvaluationPeriodName, opt => opt.MapFrom(src => src.EvaluationPeriod.Name))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+
+        CreateMap<EvaluationDetail, EvaluationDetailDto>()
+            .ForMember(dest => dest.CriterionName, opt => opt.MapFrom(src => src.PerformanceCriterion.Name))
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.PerformanceCriterion.PerformanceCategory.Name));
     }
 }

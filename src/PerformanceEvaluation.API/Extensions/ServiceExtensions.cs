@@ -19,6 +19,11 @@ public static class ServiceExtensions
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ICriteriaService, CriteriaService>();
+        services.AddScoped<IEvaluationService, EvaluationService>();
+        services.AddScoped<IReportService, ReportService>();
+        services.AddScoped<IExportService, ExportService>();
+        services.AddScoped<IEvaluatorEmployeeService, EvaluatorEmployeeService>();
+        services.AddScoped<IEvaluationPeriodService, EvaluationPeriodService>();
 
         return services;
     }

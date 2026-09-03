@@ -7,10 +7,22 @@ namespace PerformanceEvaluation.Infrastructure.Repositories;
 
 public class PerformanceCriterionRepository : Repository<PerformanceCriterion>, IPerformanceCriterionRepository
 {
-    public PerformanceCriterionRepository(AppDbContext context) : base(context) { }
+    public PerformanceCriterionRepository(AppDbContext context) : base(context)
+    {
+    }
 
     public async Task<IEnumerable<PerformanceCriterion>> GetAllWithDescriptionsAsync() =>
         await _dbSet
+            .Include(c => c.PerformanceCategory)
+            .Include(c => c.JobPositionDescriptions)
+                .ThenInclude(jd => jd.JobPosition)
+            .ToListAsync();
+
+    public async Task<IEnumerable<PerformanceCriterion>> GetActiveWithDescriptionsAsync() =>
+        await _dbSet
+            .Where(c =>
+                c.IsActive &&
+                c.PerformanceCategory.IsActive)
             .Include(c => c.PerformanceCategory)
             .Include(c => c.JobPositionDescriptions)
                 .ThenInclude(jd => jd.JobPosition)
@@ -22,4 +34,10 @@ public class PerformanceCriterionRepository : Repository<PerformanceCriterion>, 
             .Include(c => c.JobPositionDescriptions)
                 .ThenInclude(jd => jd.JobPosition)
             .FirstOrDefaultAsync(c => c.Id == id);
+
+    public async Task<bool> HasEvaluationDetailsAsync(int criterionId)
+    {
+        return await _context.EvaluationDetails
+            .AnyAsync(x => x.PerformanceCriterionId == criterionId);
+    }
 }

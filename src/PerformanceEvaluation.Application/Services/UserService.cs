@@ -57,7 +57,7 @@ public class UserService : IUserService
 
         var createdUser = await _userRepository.GetByIdAsync(user.Id);
 
-        return _mapper.Map<UserDto>(user);
+        return _mapper.Map<UserDto>(createdUser);
     }
 
     public async Task<UserDto> UpdateAsync(int id, UpdateUserDto dto)
@@ -75,9 +75,10 @@ public class UserService : IUserService
 
         _userRepository.Update(user);
         await _userRepository.SaveChangesAsync();
+
         var updatedUser = await _userRepository.GetByIdAsync(user.Id);
 
-        return _mapper.Map<UserDto>(user);
+        return _mapper.Map<UserDto>(updatedUser);
     }
 
     public async Task<UserDto> PatchAsync(int id, UpdatePatchUserDto dto)
@@ -111,5 +112,22 @@ public class UserService : IUserService
         var updatedUser = await _userRepository.GetByIdAsync(user.Id);
 
         return _mapper.Map<UserDto>(updatedUser);
+    }
+    public async Task DeleteAsync(int id)
+    {
+        var user = await _userRepository.GetByIdAsync(id)
+            ?? throw new KeyNotFoundException(
+                "Kullanıcı bulunamadı.");
+
+        if (!user.IsActive)
+            throw new InvalidOperationException(
+                "Kullanıcı zaten pasif durumda.");
+
+        user.IsActive = false;
+        user.UpdatedAt = DateTime.Now;
+
+        _userRepository.Update(user);
+
+        await _userRepository.SaveChangesAsync();
     }
 }

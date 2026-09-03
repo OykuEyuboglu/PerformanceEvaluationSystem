@@ -29,6 +29,10 @@ public class CriteriaService : ICriteriaService
 
     public async Task<PerformanceCategoryDto> CreateCategoryAsync(CreatePerformanceCategoryDto dto)
     {
+        await ValidateCategoryWeightAsync(
+     null,
+     dto.Weight);
+
         var category = new PerformanceCategory
         {
             Name = dto.Name,
@@ -45,7 +49,14 @@ public class CriteriaService : ICriteriaService
     public async Task<PerformanceCategoryDto> UpdateCategoryAsync(int id, UpdatePerformanceCategoryDto dto)
     {
         var category = await _categoryRepository.GetByIdAsync(id)
-            ?? throw new KeyNotFoundException("Ana başlık bulunamadı.");
+       ?? throw new KeyNotFoundException("Ana başlık bulunamadı.");
+
+        if (dto.IsActive)
+        {
+            await ValidateCategoryWeightAsync(
+                id,
+                dto.Weight);
+        }
 
         category.Name = dto.Name;
         category.Weight = dto.Weight;
@@ -56,6 +67,7 @@ public class CriteriaService : ICriteriaService
 
         return _mapper.Map<PerformanceCategoryDto>(category);
     }
+
 
     public async Task<IEnumerable<PerformanceCriterionDto>> GetAllCriteriaAsync()
     {
@@ -110,5 +122,61 @@ public class CriteriaService : ICriteriaService
 
         var updated = await _criterionRepository.GetByIdWithDescriptionsAsync(id);
         return _mapper.Map<PerformanceCriterionDto>(updated);
+    }
+
+    public async Task DeleteCategoryAsync(int id)
+    {
+        var category = await _categoryRepository.GetByIdAsync(id)
+            ?? throw new KeyNotFoundException(
+                "Ana başlık bulunamadı.");
+
+        var criteria = await _criterionRepository.FindAsync(
+            c => c.PerformanceCategoryId == id);
+
+        if (criteria.Any())
+            throw new InvalidOperationException(
+                "Bu ana başlığa bağlı kriterler bulunduğu için silinemez.");
+
+        _categoryRepository.Remove(category);
+
+        await _categoryRepository.SaveChangesAsync();
+    }
+
+    public async Task DeleteCriterionAsync(int id)
+    {
+        var criterion =
+            await _criterionRepository.GetByIdWithDescriptionsAsync(id)
+            ?? throw new KeyNotFoundException(
+                "Kriter bulunamadı.");
+
+        var hasEvaluationDetails =
+            await _criterionRepository.HasEvaluationDetailsAsync(id);
+
+        if (hasEvaluationDetails)
+            throw new InvalidOperationException(
+                "Değerlendirmelerde kullanılmış kriter silinemez.");
+
+        _criterionRepository.Remove(criterion);
+
+        await _criterionRepository.SaveChangesAsync();
+    }
+
+    private async Task ValidateCategoryWeightAsync(
+    int? categoryId,
+    decimal newWeight)
+    {
+        if (newWeight < 0 || newWeight > 100)
+            throw new InvalidOperationException(
+                "Kategori ağırlığı 0 ile 100 arasında olmalıdır.");
+
+        var categories = await _categoryRepository.GetAllAsync();
+
+        var totalWeight = categories
+            .Where(c => c.IsActive && c.Id != categoryId)
+            .Sum(c => c.Weight);
+
+        if (totalWeight + newWeight > 100)
+            throw new InvalidOperationException(
+                "Aktif kategori ağırlıklarının toplamı 100'ü geçemez.");
     }
 }

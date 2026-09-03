@@ -51,4 +51,15 @@ public class UserController(IUserService userService) : ControllerBase
         var user = await userService.PatchAsync(id, dto);
         return Ok(user);
     }
+
+    [HttpDelete("{id}")]
+    [SwaggerOperation(
+    Summary = "Kullanıcıyı sil",
+    Description = "Admin tarafından belirtilen kullanıcıyı sistemden siler.")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        await userService.DeleteAsync(id);
+
+        return NoContent();
+    }
 }

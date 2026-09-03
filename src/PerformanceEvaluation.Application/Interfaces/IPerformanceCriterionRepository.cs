@@ -10,5 +10,7 @@ namespace PerformanceEvaluation.Application.Interfaces;
 public interface IPerformanceCriterionRepository : IRepository<PerformanceCriterion>
 {
     Task<IEnumerable<PerformanceCriterion>> GetAllWithDescriptionsAsync();
+    Task<IEnumerable<PerformanceCriterion>> GetActiveWithDescriptionsAsync();
     Task<PerformanceCriterion?> GetByIdWithDescriptionsAsync(int id);
+    Task<bool> HasEvaluationDetailsAsync(int criterionId);
 }

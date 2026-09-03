@@ -63,4 +63,23 @@ public class CriteriaController(ICriteriaService criteriaService) : ControllerBa
         var criterion = await criteriaService.UpdateCriterionAsync(id, dto);
         return Ok(criterion);
     }
+
+    [HttpDelete("categories/{id}")]
+    [SwaggerOperation(
+    Summary = "Performans kategorisini sil")]
+    public async Task<IActionResult> DeleteCategory(int id)
+    {
+        await criteriaService.DeleteCategoryAsync(id);
+        return NoContent();
+    }
+
+    [HttpDelete("criteria/{id}")]
+    [SwaggerOperation(
+        Summary = "Performans kriterini sil")]
+    public async Task<IActionResult> DeleteCriterion(int id)
+    {
+        await criteriaService.DeleteCriterionAsync(id);
+        return NoContent();
+    }
+
 }

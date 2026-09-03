@@ -12,4 +12,6 @@ public interface ICriteriaService
     Task<IEnumerable<PerformanceCriterionDto>> GetAllCriteriaAsync();
     Task<PerformanceCriterionDto> CreateCriterionAsync(CreatePerformanceCriterionDto dto);
     Task<PerformanceCriterionDto> UpdateCriterionAsync(int id, UpdatePerformanceCriterionDto dto);
+    Task DeleteCategoryAsync(int id);
+    Task DeleteCriterionAsync(int id);
 }
