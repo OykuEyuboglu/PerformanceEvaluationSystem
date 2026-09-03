@@ -2,6 +2,7 @@
 using PerformanceEvaluation.Application.DTOs.User;
 using PerformanceEvaluation.Application.Interfaces;
 using PerformanceEvaluation.Domain.Entities;
+using System.Globalization;
 
 namespace PerformanceEvaluation.Application.Services;
 
@@ -37,10 +38,12 @@ public class UserService : IUserService
         if (existing is not null)
             throw new InvalidOperationException("Bu email adresi zaten kayıtlı.");
 
+        var turkishCulture = new CultureInfo("tr-TR");
+
         var user = new User
         {
-            FirstName = dto.FirstName,
-            LastName = dto.LastName,
+            FirstName = dto.FirstName.Trim().ToUpper(turkishCulture),
+            LastName = dto.LastName.Trim().ToUpper(turkishCulture),
             Email = dto.Email,
             PasswordHash = _passwordHasher.Hash(dto.Password),
             Role = dto.Role,
@@ -64,9 +67,10 @@ public class UserService : IUserService
     {
         var user = await _userRepository.GetByIdAsync(id)
             ?? throw new KeyNotFoundException("Kullanıcı bulunamadı.");
+        var turkishCulture = new CultureInfo("tr-TR");
 
-        user.FirstName = dto.FirstName;
-        user.LastName = dto.LastName;
+        user.FirstName = dto.FirstName.Trim().ToUpper(turkishCulture);
+        user.LastName = dto.LastName.Trim().ToUpper(turkishCulture);
         user.Role = dto.Role;
         user.DepartmentId = dto.DepartmentId;
         user.JobPositionId = dto.JobPositionId;
@@ -85,12 +89,14 @@ public class UserService : IUserService
     {
         var user = await _userRepository.GetByIdAsync(id)
             ?? throw new KeyNotFoundException("Kullanıcı bulunamadı.");
+        var turkishCulture = new CultureInfo("tr-TR");
 
         if (dto.FirstName is not null)
-            user.FirstName = dto.FirstName;
+            user.FirstName = dto.FirstName.Trim().ToUpper(turkishCulture);
+
 
         if (dto.LastName is not null)
-            user.LastName = dto.LastName;
+            user.LastName = dto.LastName.Trim().ToUpper(turkishCulture);
 
         if (dto.Role.HasValue)
             user.Role = dto.Role.Value;
