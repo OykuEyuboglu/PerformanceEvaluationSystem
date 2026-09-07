@@ -1,18 +1,31 @@
-﻿import { AppBar, Toolbar, Box, IconButton } from '@mui/material'
-import { LightMode, DarkMode } from '@mui/icons-material'
+﻿import {
+    AppBar,
+    Toolbar,
+    Box,
+    IconButton,
+} from '@mui/material'
+import {
+    LightMode,
+    DarkMode,
+    MenuOpen,
+    Menu as MenuIcon,
+} from '@mui/icons-material'
 import Logo from '../shared/components/logo'
 
 type HeaderProps = {
     mode: 'light' | 'dark'
     setMode: React.Dispatch<React.SetStateAction<'light' | 'dark'>>
+    sidebarOpen: boolean
+    onToggleSidebar: () => void
 }
 
-export default function Header({ mode, setMode }: HeaderProps) {
+export default function Header({
+    mode,
+    setMode,
+    sidebarOpen,
+    onToggleSidebar,
+}: HeaderProps) {
     const isDark = mode === 'dark'
-
-    const handleThemeChange = () => {
-        setMode(isDark ? 'light' : 'dark')
-    }
 
     return (
         <AppBar
@@ -25,8 +38,34 @@ export default function Header({ mode, setMode }: HeaderProps) {
                 borderColor: 'divider',
             }}
         >
-            <Toolbar sx={{ minHeight: 72, px: { xs: 2, md: 4 } }}>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Toolbar
+                sx={{
+                    height: 64,
+                    minHeight: '64px !important',
+                    px: { xs: 2, md: 3 },
+                }}
+            >
+                <IconButton
+                    onClick={onToggleSidebar}
+                    sx={{
+                        color: 'text.primary',
+                        mr: 1,
+                        display: {
+                            xs: 'none',
+                            md: 'inline-flex',
+                        },
+                    }}
+                    aria-label="Menüyü daralt/genişlet"
+                >
+                    {sidebarOpen ? <MenuOpen /> : <MenuIcon />}
+                </IconButton>
+
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                    }}
+                >
                     <Logo
                         variant={isDark ? 'light' : 'dark'}
                         size={40}
@@ -35,13 +74,21 @@ export default function Header({ mode, setMode }: HeaderProps) {
 
                 <Box sx={{ marginLeft: 'auto' }}>
                     <IconButton
-                        onClick={handleThemeChange}
+                        onClick={() =>
+                            setMode(
+                                isDark ? 'light' : 'dark'
+                            )
+                        }
                         sx={{
                             color: 'text.primary',
                         }}
                         aria-label="Tema değiştir"
                     >
-                        {isDark ? <LightMode /> : <DarkMode />}
+                        {isDark ? (
+                            <LightMode />
+                        ) : (
+                            <DarkMode />
+                        )}
                     </IconButton>
                 </Box>
             </Toolbar>
