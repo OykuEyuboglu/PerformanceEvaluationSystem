@@ -12,7 +12,7 @@ axiosInstance.interceptors.request.use((config) => {
     const token = useAuthStore.getState().token
 
     if (token) {
-        config.headers.set('Authorization', `Bearer ${ token } `)
+        config.headers.set('Authorization', `Bearer ${token}`)
     }
 
     return config
@@ -22,7 +22,7 @@ axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            useAuthStore.getState().logout()
+            useAuthStore.getState().expireSession()
             window.location.href = '/login'
         }
 
