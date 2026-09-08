@@ -24,6 +24,8 @@ public static class ServiceExtensions
         services.AddScoped<IExportService, ExportService>();
         services.AddScoped<IEvaluatorEmployeeService, EvaluatorEmployeeService>();
         services.AddScoped<IEvaluationPeriodService, EvaluationPeriodService>();
+        services.AddScoped<IDepartmentService, DepartmentService>();
+        services.AddScoped<IJobPositionService, JobPositionService>();
 
         return services;
     }

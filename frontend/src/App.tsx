@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { Typography } from '@mui/material'
 import LoginPage from './features/auth/pages/LoginPage'
-import DashboardPlaceholder from './features/dashboard/DashboardPlaceholder'
+import DashboardPage from './features/dashboard/pages/DashboardPage'
 import ProtectedRoute from './shared/components/ProtectedRoute'
 import MainLayout from './layouts/MainLayout'
 
@@ -29,7 +29,7 @@ export default function App({ mode, setMode }: AppProps) {
 
             <Route element={<ProtectedRoute />}>
                 <Route element={<MainLayout mode={mode} setMode={setMode} />}>
-                    <Route path="/dashboard" element={<DashboardPlaceholder />} />
+                    <Route path="/dashboard" element={<DashboardPage />} />
 
                     <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
                         <Route path="/users" element={<UsersPage />} />

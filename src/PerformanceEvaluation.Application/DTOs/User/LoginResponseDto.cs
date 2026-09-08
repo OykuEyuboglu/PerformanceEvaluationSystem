@@ -1,4 +1,12 @@
-﻿namespace PerformanceEvaluation.Application.DTOs.User
+﻿using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
+using PerformanceEvaluation.Application.DTOs.Department;
+using PerformanceEvaluation.Application.DTOs.JobPosition;
+using PerformanceEvaluation.Application.Interfaces;
+using PerformanceEvaluation.Application.Services;
+using PerformanceEvaluation.Domain.Entities;
+using System.Runtime.InteropServices;
+
+namespace PerformanceEvaluation.Application.DTOs.User
 {
     public class LoginResponseDto
     {

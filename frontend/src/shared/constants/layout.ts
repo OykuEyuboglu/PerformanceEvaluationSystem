@@ -1,0 +1,3 @@
+﻿export const HEADER_HEIGHT = 72
+export const SIDEBAR_EXPANDED_WIDTH = 260
+export const SIDEBAR_COLLAPSED_WIDTH = 76

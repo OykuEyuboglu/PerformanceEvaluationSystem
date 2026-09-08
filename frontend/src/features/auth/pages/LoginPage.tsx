@@ -57,6 +57,7 @@ export default function LoginPage() {
 
         try {
             const res = await login(values)
+
             setAuth(res.token, res.user)
             navigate('/dashboard')
         } catch (err: any) {
@@ -67,6 +68,32 @@ export default function LoginPage() {
         } finally {
             setLoading(false)
         }
+    }
+
+    const inputStyles = {
+        '& .MuiOutlinedInput-root': {
+            '& fieldset': {
+                borderColor: '#C8C8C8',
+            },
+            '&:hover fieldset': {
+                borderColor: '#999999',
+            },
+            '&.Mui-focused fieldset': {
+                borderColor: '#F5B301',
+            },
+        },
+
+        '& .MuiInputLabel-root': {
+            color: '#777777',
+        },
+
+        '& .MuiInputLabel-root.Mui-focused': {
+            color: '#C68E00',
+        },
+
+        '& .MuiInputBase-input': {
+            color: '#111111',
+        },
     }
 
     return (
@@ -97,7 +124,8 @@ export default function LoginPage() {
             </Snackbar>
 
             <Grid container sx={{ minHeight: '100vh' }}>
-                {/* SOL PANEL - Marka */}
+
+                {/* SOL PANEL - MARKA */}
                 <Grid
                     size={{ xs: 12, md: 6 }}
                     sx={{
@@ -107,9 +135,10 @@ export default function LoginPage() {
                         bgcolor: '#111111',
                         position: 'relative',
                         overflow: 'hidden',
-                        p: 6,
+                        p: { md: 5, lg: 6 },
                     }}
                 >
+                    {/* Üst ışık efekti */}
                     <Box
                         sx={{
                             position: 'absolute',
@@ -123,6 +152,7 @@ export default function LoginPage() {
                         }}
                     />
 
+                    {/* Alt daire */}
                     <Box
                         sx={{
                             position: 'absolute',
@@ -135,29 +165,44 @@ export default function LoginPage() {
                         }}
                     />
 
-                    <Logo variant="light" size={52} />
+                    <Logo
+                        variant="light"
+                        size={52}
+                    />
 
-                    <Box sx={{ position: 'relative', zIndex: 1 }}>
+                    {/* Marka mesajı */}
+                    <Box
+                        sx={{
+                            position: 'relative',
+                            zIndex: 1,
+                            maxWidth: 500,
+                            my: 'auto',
+                        }}
+                    >
                         <Typography
                             variant="h3"
                             sx={{
-                                color: '#fff',
+                                color: '#FFFFFF',
                                 fontWeight: 800,
-                                mb: 2,
+                                mb: 1.5,
                                 maxWidth: 480,
                             }}
                         >
                             Performansı{' '}
                             <Box
                                 component="span"
-                                sx={{ color: '#F5B301' }}
+                                sx={{
+                                    color: '#F5B301',
+                                }}
                             >
                                 ölçün
                             </Box>
                             , potansiyeli{' '}
                             <Box
                                 component="span"
-                                sx={{ color: '#F5B301' }}
+                                sx={{
+                                    color: '#F5B301',
+                                }}
                             >
                                 büyütün
                             </Box>
@@ -169,6 +214,7 @@ export default function LoginPage() {
                             sx={{
                                 color: 'rgba(255,255,255,0.6)',
                                 maxWidth: 420,
+                                lineHeight: 1.6,
                             }}
                         >
                             IT departmanı için objektif, şeffaf ve kriter
@@ -176,80 +222,111 @@ export default function LoginPage() {
                         </Typography>
                     </Box>
 
+                    {/* Footer */}
                     <Typography
                         variant="caption"
-                        sx={{ color: 'rgba(255,255,255,0.35)' }}
+                        sx={{
+                            color: 'rgba(255,255,255,0.35)',
+                        }}
                     >
                         © {new Date().getFullYear()} VakıfBank 360 · Tüm
                         hakları saklıdır
                     </Typography>
                 </Grid>
 
-                {/* SAĞ PANEL - Form */}
+                {/* SAĞ PANEL - GİRİŞ FORMU */}
                 <Grid
                     size={{ xs: 12, md: 6 }}
                     sx={{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        bgcolor: 'background.default',
-                        p: 3,
+                        bgcolor: '#FAFAF8',
+
+                        p: {
+                            xs: 3,
+                            md: 4,
+                        },
                     }}
                 >
-                    <Box sx={{ width: '100%', maxWidth: 400 }}>
+                    <Box
+                        sx={{
+                            width: '100%',
+                            maxWidth: 420,
+                        }}
+                    >
+                        {/* Mobil Logo */}
                         <Box
                             sx={{
-                                display: { xs: 'flex', md: 'none' },
-                                mb: 4,
+                                display: {
+                                    xs: 'flex',
+                                    md: 'none',
+                                },
+                                mb: 3,
                                 justifyContent: 'center',
                             }}
                         >
                             <Logo variant="dark" />
                         </Box>
 
+                        {/* Başlık */}
                         <Typography
                             variant="h5"
-                            sx={{ fontWeight: 800, mb: 0.5 }}
+                            sx={{
+                                fontWeight: 800,
+                                color: '#111111',
+                                mb: 0.5,
+                            }}
                         >
                             Hoş geldiniz
                         </Typography>
 
+                        {/* Açıklama */}
                         <Typography
                             variant="body2"
                             sx={{
-                                color: 'text.secondary',
-                                mb: 4,
+                                color: '#666666',
+                                mb: 3,
                             }}
                         >
                             Devam etmek için hesabınıza giriş yapın
                         </Typography>
 
+                        {/* Backend Hatası */}
                         {serverError && (
                             <Alert
                                 severity="error"
-                                sx={{ mb: 2, borderRadius: 2 }}
+                                sx={{
+                                    mb: 2,
+                                    borderRadius: 2,
+                                }}
                             >
                                 {serverError}
                             </Alert>
                         )}
 
+                        {/* FORM */}
                         <Box
                             component="form"
                             onSubmit={handleSubmit(onSubmit)}
                             noValidate
                         >
+                            {/* E-POSTA */}
                             <TextField
                                 label="E-posta"
                                 fullWidth
-                                margin="normal"
                                 autoComplete="email"
+                                sx={{
+                                    ...inputStyles,
+                                    mb: 2,
+                                }}
                                 slotProps={{
                                     input: {
                                         startAdornment: (
                                             <EmailOutlined
                                                 fontSize="small"
                                                 sx={{
-                                                    color: 'text.secondary',
+                                                    color: '#666666',
                                                     mr: 1,
                                                 }}
                                             />
@@ -261,23 +338,29 @@ export default function LoginPage() {
                                 helperText={errors.email?.message}
                             />
 
+                            {/* ŞİFRE */}
                             <TextField
                                 label="Şifre"
-                                type={showPassword ? 'text' : 'password'}
+                                type={
+                                    showPassword
+                                        ? 'text'
+                                        : 'password'
+                                }
                                 fullWidth
-                                margin="normal"
                                 autoComplete="current-password"
+                                sx={inputStyles}
                                 slotProps={{
                                     input: {
                                         startAdornment: (
                                             <LockOutlined
                                                 fontSize="small"
                                                 sx={{
-                                                    color: 'text.secondary',
+                                                    color: '#666666',
                                                     mr: 1,
                                                 }}
                                             />
                                         ),
+
                                         endAdornment: (
                                             <IconButton
                                                 onClick={() =>
@@ -287,6 +370,9 @@ export default function LoginPage() {
                                                 }
                                                 edge="end"
                                                 size="small"
+                                                sx={{
+                                                    color: '#666666',
+                                                }}
                                             >
                                                 {showPassword ? (
                                                     <VisibilityOff fontSize="small" />
@@ -302,6 +388,7 @@ export default function LoginPage() {
                                 helperText={errors.password?.message}
                             />
 
+                            {/* GİRİŞ BUTONU */}
                             <Button
                                 type="submit"
                                 fullWidth
@@ -310,15 +397,17 @@ export default function LoginPage() {
                                 size="large"
                                 disabled={loading}
                                 sx={{
-                                    mt: 3,
-                                    py: 1.3,
+                                    mt: 2,
+                                    py: 1.2,
                                     fontSize: 15,
                                 }}
                             >
                                 {loading ? (
                                     <CircularProgress
                                         size={24}
-                                        sx={{ color: '#111' }}
+                                        sx={{
+                                            color: '#111111',
+                                        }}
                                     />
                                 ) : (
                                     'Giriş Yap'
