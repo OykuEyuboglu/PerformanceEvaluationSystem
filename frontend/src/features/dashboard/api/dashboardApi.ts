@@ -14,7 +14,7 @@ export async function getDepartmentRanking(
     evaluationPeriodId: number
 ): Promise<EmployeeRanking[]> {
     const response = await axiosInstance.get<EmployeeRanking[]>(
-        '/Reports/department-ranking',
+        '/reports/department-ranking',
         {
             params: {
                 evaluationPeriodId,

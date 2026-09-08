@@ -1,9 +1,12 @@
 ﻿import { useState } from 'react'
 import { Box } from '@mui/material'
 import { Outlet } from 'react-router-dom'
+
 import Header from './Header'
 import Footer from './Footer'
 import Sidebar from '../shared/components/Sidebar'
+
+import { HEADER_HEIGHT } from '../shared/constants/layout'
 
 type MainLayoutProps = {
     mode: 'light' | 'dark'
@@ -14,7 +17,33 @@ export default function MainLayout({
     mode,
     setMode,
 }: MainLayoutProps) {
-    const [sidebarOpen, setSidebarOpen] = useState(false)
+    // Sidebar'ın kalıcı olarak açık olup olmadığı
+    const [sidebarPinned, setSidebarPinned] =
+        useState(false)
+
+    // Sidebar'ın sadece hover nedeniyle geçici olarak açık olup olmadığı
+    const [sidebarHovered, setSidebarHovered] =
+        useState(false)
+
+    // Gerçek görünürlük
+    const sidebarOpen =
+        sidebarPinned || sidebarHovered
+
+    const handleToggleSidebar = () => {
+        setSidebarPinned((prev) => !prev)
+
+        // Sabitleme değişirken hover durumunu temizle
+        setSidebarHovered(false)
+    }
+
+    const handleSidebarHover = (hovered: boolean) => {
+        // Sidebar sabitlenmişse hover artık state'i değiştirmez
+        if (sidebarPinned) {
+            return
+        }
+
+        setSidebarHovered(hovered)
+    }
 
     return (
         <Box
@@ -24,40 +53,33 @@ export default function MainLayout({
                 flexDirection: 'column',
             }}
         >
+            {/* Fixed Header */}
             <Header
                 mode={mode}
                 setMode={setMode}
                 sidebarOpen={sidebarOpen}
-                onToggleSidebar={() =>
-                    setSidebarOpen((p) => !p)
-                }
+                onToggleSidebar={handleToggleSidebar}
+            />
+
+            {/* Header'ın fixed olması nedeniyle üst boşluk */}
+            <Box
+                sx={{
+                    height: HEADER_HEIGHT,
+                    flexShrink: 0,
+                }}
             />
 
             <Box
                 sx={{
                     display: 'flex',
                     flex: 1,
+                    minHeight: 0,
                 }}
             >
                 <Sidebar
                     open={sidebarOpen}
-                    onHoverChange={setSidebarOpen}
+                    onHoverChange={handleSidebarHover}
                 />
-
-                {sidebarOpen && (
-                    <Box
-                        onClick={() => setSidebarOpen(false)}
-                        sx={{
-                            position: 'fixed',
-                            top: 64,
-                            left: 76,
-                            right: 0,
-                            bottom: 0,
-                            zIndex: (theme) =>
-                                theme.zIndex.drawer + 1,
-                        }}
-                    />
-                )}
 
                 <Box
                     component="main"

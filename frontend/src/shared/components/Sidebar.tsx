@@ -7,6 +7,7 @@
     Box,
     Tooltip,
 } from '@mui/material'
+
 import {
     Dashboard,
     People,
@@ -19,9 +20,20 @@ import {
     BarChart,
     TrendingUp,
 } from '@mui/icons-material'
-import { useLocation, useNavigate } from 'react-router-dom'
+
+import {
+    useLocation,
+    useNavigate,
+} from 'react-router-dom'
+
 import { navItems } from '../types/navigation'
 import { useAuthStore } from '../../store/authStore'
+
+import {
+    HEADER_HEIGHT,
+    SIDEBAR_EXPANDED_WIDTH,
+    SIDEBAR_COLLAPSED_WIDTH,
+} from '../constants/layout'
 
 const iconMap: Record<string, React.ReactElement> = {
     Dashboard: <Dashboard />,
@@ -36,9 +48,6 @@ const iconMap: Record<string, React.ReactElement> = {
     TrendingUp: <TrendingUp />,
 }
 
-const EXPANDED_WIDTH = 260
-const COLLAPSED_WIDTH = 76
-
 interface SidebarProps {
     open: boolean
     onHoverChange: (open: boolean) => void
@@ -50,85 +59,121 @@ export default function Sidebar({
 }: SidebarProps) {
     const location = useLocation()
     const navigate = useNavigate()
+
     const user = useAuthStore((s) => s.user)
 
     const visibleItems = navItems.filter(
-        (item) => user && item.roles.includes(user.role)
+        (item) =>
+            user &&
+            item.roles.includes(user.role)
     )
 
-    const width = open ? EXPANDED_WIDTH : COLLAPSED_WIDTH
+    const width = open
+        ? SIDEBAR_EXPANDED_WIDTH
+        : SIDEBAR_COLLAPSED_WIDTH
 
     return (
         <Box
-            onMouseEnter={() => onHoverChange(true)}
-            onMouseLeave={() => onHoverChange(false)}
+            onMouseEnter={() =>
+                onHoverChange(true)
+            }
+            onMouseLeave={() =>
+                onHoverChange(false)
+            }
             sx={{
-                width: COLLAPSED_WIDTH,
+                width: SIDEBAR_COLLAPSED_WIDTH,
                 flexShrink: 0,
+                minHeight: `calc(100vh - ${ HEADER_HEIGHT }px)`,
+                backgroundColor:
+                    'background.paper',
             }}
         >
             <Drawer
                 variant="permanent"
                 sx={{
-                    width: COLLAPSED_WIDTH,
+                    width: SIDEBAR_COLLAPSED_WIDTH,
                     flexShrink: 0,
-                    display: { xs: 'none', md: 'block' },
+
+                    display: {
+                        xs: 'none',
+                        md: 'block',
+                    },
 
                     '& .MuiDrawer-paper': {
                         width,
-                        top: 64,
-                        height: 'calc(100vh - 64px)',
+                        top: HEADER_HEIGHT,
+                        height: `calc(100vh - ${ HEADER_HEIGHT }px)`,
+
                         overflowX: 'hidden',
                         boxSizing: 'border-box',
+
                         borderRight: '1px solid',
                         borderColor: 'divider',
+
                         position: 'fixed',
                         left: 0,
+
                         zIndex: (theme) =>
-                            theme.zIndex.drawer + 2,
+                            theme.zIndex.appBar - 1,
 
                         transition: (theme) =>
-                            theme.transitions.create('width', {
-                                duration: 400,
-                            }),
+                            theme.transitions.create(
+                                'width',
+                                {
+                                    duration: 300,
+                                }
+                            ),
                     },
                 }}
             >
-                <Box sx={{ overflow: 'hidden', py: 1 }}>
+                <Box
+                    sx={{
+                        overflow: 'hidden',
+                        py: 1,
+                    }}
+                >
                     <List>
                         {visibleItems.map((item) => {
                             const selected =
-                                location.pathname === item.path
+                                location.pathname ===
+                                item.path
 
                             const button = (
                                 <ListItemButton
                                     key={item.path}
+                                    disableRipple
                                     selected={selected}
                                     onClick={() =>
-                                        navigate(item.path)
+                                        navigate(
+                                            item.path
+                                        )
                                     }
                                     sx={{
                                         mx: 1.5,
                                         mb: 0.5,
                                         borderRadius: 2,
+                                        minWidth: 0,
 
-                                        justifyContent: open
-                                            ? 'flex-start'
-                                            : 'center',
+                                        justifyContent:
+                                            open
+                                                ? 'flex-start'
+                                                : 'center',
 
                                         '&.Mui-selected': {
                                             bgcolor:
                                                 'primary.main',
                                             color: '#111111',
 
-                                            '& .MuiListItemIcon-root': {
-                                                color: '#111111',
-                                            },
+                                            '& .MuiListItemIcon-root':
+                                                {
+                                                    color: '#111111',
+                                                },
 
-                                            '&:hover': {
-                                                bgcolor:
-                                                    'primary.main',
-                                            },
+                                            '&:hover':
+                                                {
+                                                    bgcolor:
+                                                        'primary.main',
+                                                },
                                         },
                                     }}
                                 >
@@ -137,26 +182,34 @@ export default function Sidebar({
                                             minWidth: open
                                                 ? 40
                                                 : 0,
+
                                             justifyContent:
                                                 'center',
                                         }}
                                     >
-                                        {iconMap[item.icon]}
+                                        {
+                                            iconMap[
+                                                item.icon
+                                            ]
+                                        }
                                     </ListItemIcon>
 
                                     {open && (
                                         <ListItemText
+                                            primary={
+                                                item.label
+                                            }
                                             slotProps={{
                                                 primary: {
                                                     sx: {
                                                         fontSize: 14,
                                                         fontWeight: 600,
+                                                        whiteSpace:
+                                                            'nowrap',
                                                     },
                                                 },
                                             }}
-                                        >
-                                            {item.label}
-                                        </ListItemText>
+                                        />
                                     )}
                                 </ListItemButton>
                             )
