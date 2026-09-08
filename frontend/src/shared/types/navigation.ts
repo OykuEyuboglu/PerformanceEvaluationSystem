@@ -1,21 +1,84 @@
 ﻿import type { UserRole } from './user'
 
 export interface NavItem {
-    label: string
     path: string
-    icon: string // MUI icon adı, Sidebar'da eşleyeceğiz
+    label: string
+    icon: string
     roles: UserRole[]
 }
 
 export const navItems: NavItem[] = [
-    { label: 'Panel', path: '/dashboard', icon: 'Dashboard', roles: ['Admin', 'Evaluator', 'Employee'] },
-    { label: 'Kullanıcı Yönetimi', path: '/users', icon: 'People', roles: ['Admin'] },
-    { label: 'Kriter Yönetimi', path: '/criteria', icon: 'Rule', roles: ['Admin'] },
-    { label: 'Değerlendirme Dönemleri', path: '/evaluation-periods', icon: 'CalendarMonth', roles: ['Admin'] },
-    { label: 'Ekip Atamaları', path: '/evaluator-employees', icon: 'Groups', roles: ['Admin'] },
-    { label: 'Değerlendirmeler', path: '/evaluations', icon: 'Assignment', roles: ['Admin'] },
-    { label: 'Ekibimi Değerlendir', path: '/evaluations/new', icon: 'RateReview', roles: ['Evaluator'] },
-    { label: 'Ekip Sıralaması', path: '/reports/team-ranking', icon: 'Leaderboard', roles: ['Evaluator'] },
-    { label: 'Departman Sıralaması', path: '/reports/department-ranking', icon: 'BarChart', roles: ['Admin'] },
-    { label: 'Performansım', path: '/my-evaluations', icon: 'TrendingUp', roles: ['Employee'] },
+    {
+        path: '/dashboard',
+        label: 'dashboard',
+        icon: 'Dashboard',
+        roles: [
+            'Admin',
+            'Evaluator',
+            'Employee',
+        ],
+    },
+
+    {
+        path: '/users',
+        label: 'users',
+        icon: 'People',
+        roles: ['Admin'],
+    },
+
+    {
+        path: '/criteria',
+        label: 'criteria',
+        icon: 'Rule',
+        roles: ['Admin'],
+    },
+
+    {
+        path: '/evaluation-periods',
+        label: 'evaluationPeriods',
+        icon: 'CalendarMonth',
+        roles: ['Admin'],
+    },
+
+    {
+        path: '/evaluator-employees',
+        label: 'evaluatorEmployees',
+        icon: 'Groups',
+        roles: ['Admin'],
+    },
+
+    {
+        path: '/evaluations',
+        label: 'evaluations',
+        icon: 'Assignment',
+        roles: ['Admin'],
+    },
+
+    {
+        path: '/evaluations/new',
+        label: 'newEvaluation',
+        icon: 'RateReview',
+        roles: ['Evaluator'],
+    },
+
+    {
+        path: '/my-evaluations',
+        label: 'myEvaluations',
+        icon: 'Assignment',
+        roles: ['Employee'],
+    },
+
+    {
+        path: '/reports/team-ranking',
+        label: 'teamRanking',
+        icon: 'Leaderboard',
+        roles: ['Evaluator'],
+    },
+
+    {
+        path: '/reports/department-ranking',
+        label: 'departmentRanking',
+        icon: 'BarChart',
+        roles: ['Admin'],
+    },
 ]

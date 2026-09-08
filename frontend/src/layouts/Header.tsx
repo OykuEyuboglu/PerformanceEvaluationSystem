@@ -2,6 +2,7 @@
     AppBar,
     Toolbar,
     Box,
+    Button,
     IconButton,
     Avatar,
     Menu,
@@ -10,6 +11,7 @@
     ListItemText,
     Typography,
 } from '@mui/material'
+import { useLanguage } from '../shared/i18n/LanguageContext'
 import {
     LightMode,
     DarkMode,
@@ -19,10 +21,10 @@ import {
 } from '@mui/icons-material'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-
 import Logo from '../shared/components/logo'
 import { useAuthStore } from '../store/authStore'
 import { HEADER_HEIGHT } from '../shared/constants/layout'
+import { translations } from '../shared/i18n/translations'
 
 type HeaderProps = {
     mode: 'light' | 'dark'
@@ -38,7 +40,8 @@ export default function Header({
     onToggleSidebar,
 }: HeaderProps) {
     const isDark = mode === 'dark'
-
+    const { language, setLanguage } = useLanguage()
+    const t = translations[language]
     const navigate = useNavigate()
     const user = useAuthStore((s) => s.user)
     const logout = useAuthStore((s) => s.logout)
@@ -84,12 +87,12 @@ export default function Header({
             <Toolbar
                 sx={{
                     height: HEADER_HEIGHT,
-                    minHeight: `${ HEADER_HEIGHT } px!important`,
+                    minHeight: `${HEADER_HEIGHT}px !important`,
                     px: { xs: 2, md: 3 },
                 }}
             >
-                {/* Sidebar toggle */}
                 <IconButton
+                    id="sidebar-toggle"
                     onClick={onToggleSidebar}
                     sx={{
                         color: 'text.primary',
@@ -130,6 +133,83 @@ export default function Header({
                         gap: 0.5,
                     }}
                 >
+                    {/* Language toggle */}
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            borderRadius: 2,
+                            overflow: 'hidden',
+                            mr: 0.5,
+                        }}
+                    >
+                        <Button
+                            onClick={() => setLanguage('tr')}
+                            size="small"
+                            aria-label="Türkçe"
+                            sx={{
+                                minWidth: 38,
+                                px: 1,
+                                py: 0.5,
+                                fontSize: 11,
+                                fontWeight:
+                                    language === 'tr' ? 800 : 500,
+                                color:
+                                    language === 'tr'
+                                        ? 'text.primary'
+                                        : 'text.secondary',
+                                bgcolor:
+                                    language === 'tr'
+                                        ? 'action.selected'
+                                        : 'transparent',
+                                borderRadius: 0,
+                                '&:hover': {
+                                    bgcolor: 'action.hover',
+                                },
+                            }}
+                        >
+                            TR
+                        </Button>
+
+                        <Box
+                            sx={{
+                                width: '1px',
+                                height: 18,
+                                bgcolor: 'divider',
+                            }}
+                        />
+
+                        <Button
+                            onClick={() => setLanguage('en')}
+                            size="small"
+                            aria-label="English"
+                            sx={{
+                                minWidth: 38,
+                                px: 1,
+                                py: 0.5,
+                                fontSize: 11,
+                                fontWeight:
+                                    language === 'en' ? 800 : 500,
+                                color:
+                                    language === 'en'
+                                        ? 'text.primary'
+                                        : 'text.secondary',
+                                bgcolor:
+                                    language === 'en'
+                                        ? 'action.selected'
+                                        : 'transparent',
+                                borderRadius: 0,
+                                '&:hover': {
+                                    bgcolor: 'action.hover',
+                                },
+                            }}
+                        >
+                            EN
+                        </Button>
+                    </Box>
+
                     {/* Theme toggle */}
                     <IconButton
                         onClick={() =>
@@ -142,8 +222,11 @@ export default function Header({
                         sx={{
                             color: 'text.primary',
                         }}
-                        aria-label="Tema değiştir"
-                    >
+                        aria-label={
+                            language === 'tr'
+                                ? 'Tema değiştir'
+                                : 'Change theme'
+                        }                    >
                         {isDark ? (
                             <LightMode />
                         ) : (
@@ -154,7 +237,11 @@ export default function Header({
                     {/* User menu */}
                     <IconButton
                         onClick={handleProfileClick}
-                        aria-label="Kullanıcı menüsü"
+                        aria-label={
+                            language === 'tr'
+                                ? 'Kullanıcı menüsü'
+                                : 'User menu'
+                        }
                         aria-controls={
                             profileMenuOpen
                                 ? 'profile-menu'
@@ -243,7 +330,7 @@ export default function Header({
                             </ListItemIcon>
 
                             <ListItemText>
-                                Çıkış Yap
+                                {t.header.logout}
                             </ListItemText>
                         </MenuItem>
                     </Menu>

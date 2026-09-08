@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Box } from '@mui/material'
 import { Outlet } from 'react-router-dom'
 
@@ -17,33 +17,76 @@ export default function MainLayout({
     mode,
     setMode,
 }: MainLayoutProps) {
-    // Sidebar'ın kalıcı olarak açık olup olmadığı
     const [sidebarPinned, setSidebarPinned] =
         useState(false)
 
-    // Sidebar'ın sadece hover nedeniyle geçici olarak açık olup olmadığı
     const [sidebarHovered, setSidebarHovered] =
         useState(false)
 
-    // Gerçek görünürlük
     const sidebarOpen =
         sidebarPinned || sidebarHovered
 
     const handleToggleSidebar = () => {
         setSidebarPinned((prev) => !prev)
-
-        // Sabitleme değişirken hover durumunu temizle
         setSidebarHovered(false)
     }
 
-    const handleSidebarHover = (hovered: boolean) => {
-        // Sidebar sabitlenmişse hover artık state'i değiştirmez
+    const handleSidebarHover = (
+        hovered: boolean
+    ) => {
         if (sidebarPinned) {
             return
         }
 
         setSidebarHovered(hovered)
     }
+
+    useEffect(() => {
+        if (!sidebarPinned) {
+            return
+        }
+
+        const handleOutsideClick = (
+            event: MouseEvent
+        ) => {
+            const target = event.target as Node
+
+            const sidebar =
+                document.getElementById(
+                    'main-sidebar'
+                )
+
+            const toggleButton =
+                document.getElementById(
+                    'sidebar-toggle'
+                )
+
+            const clickedInsideSidebar =
+                sidebar?.contains(target)
+
+            const clickedToggleButton =
+                toggleButton?.contains(target)
+
+            if (
+                !clickedInsideSidebar &&
+                !clickedToggleButton
+            ) {
+                setSidebarPinned(false)
+            }
+        }
+
+        document.addEventListener(
+            'mousedown',
+            handleOutsideClick
+        )
+
+        return () => {
+            document.removeEventListener(
+                'mousedown',
+                handleOutsideClick
+            )
+        }
+    }, [sidebarPinned])
 
     return (
         <Box
@@ -53,7 +96,6 @@ export default function MainLayout({
                 flexDirection: 'column',
             }}
         >
-            {/* Fixed Header */}
             <Header
                 mode={mode}
                 setMode={setMode}
@@ -61,7 +103,6 @@ export default function MainLayout({
                 onToggleSidebar={handleToggleSidebar}
             />
 
-            {/* Header'ın fixed olması nedeniyle üst boşluk */}
             <Box
                 sx={{
                     height: HEADER_HEIGHT,

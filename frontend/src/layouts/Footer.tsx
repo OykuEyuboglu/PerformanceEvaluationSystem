@@ -1,6 +1,11 @@
 ﻿import { Box, Typography } from '@mui/material'
+import { translations } from '../shared/i18n/translations'
+import { useLanguage } from '../shared/i18n/LanguageContext'
 
 export default function Footer() {
+    const { language } = useLanguage()
+    const t = translations[language]
+
     return (
         <Box
             component="footer"
@@ -15,12 +20,18 @@ export default function Footer() {
                 alignItems: 'center',
             }}
         >
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+            <Typography
+                variant="caption"
+                sx={{ color: 'text.secondary' }}
+            >
                 © {new Date().getFullYear()} VakıfBank 360
             </Typography>
 
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                Tüm hakları saklıdır
+            <Typography
+                variant="caption"
+                sx={{ color: 'text.secondary' }}
+            >
+                {t.footer.allRightsReserved}
             </Typography>
         </Box>
     )

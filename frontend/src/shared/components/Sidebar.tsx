@@ -29,6 +29,9 @@ import {
 import { navItems } from '../types/navigation'
 import { useAuthStore } from '../../store/authStore'
 
+import { useLanguage } from '../i18n/LanguageContext'
+import { translations } from '../i18n/translations'
+
 import {
     HEADER_HEIGHT,
     SIDEBAR_EXPANDED_WIDTH,
@@ -62,6 +65,9 @@ export default function Sidebar({
 
     const user = useAuthStore((s) => s.user)
 
+    const { language } = useLanguage()
+    const t = translations[language]
+
     const visibleItems = navItems.filter(
         (item) =>
             user &&
@@ -71,6 +77,14 @@ export default function Sidebar({
     const width = open
         ? SIDEBAR_EXPANDED_WIDTH
         : SIDEBAR_COLLAPSED_WIDTH
+
+    const getLabel = (key: string) => {
+        return (
+            t.sidebar[
+            key as keyof typeof t.sidebar
+            ] ?? key
+        )
+    }
 
     return (
         <Box
@@ -83,12 +97,12 @@ export default function Sidebar({
             sx={{
                 width: SIDEBAR_COLLAPSED_WIDTH,
                 flexShrink: 0,
-                minHeight: `calc(100vh - ${ HEADER_HEIGHT }px)`,
-                backgroundColor:
-                    'background.paper',
+                minHeight: `calc(100vh - ${HEADER_HEIGHT}px)`,
+                backgroundColor: 'background.paper',
             }}
         >
             <Drawer
+                id="main-sidebar"
                 variant="permanent"
                 sx={{
                     width: SIDEBAR_COLLAPSED_WIDTH,
@@ -102,7 +116,7 @@ export default function Sidebar({
                     '& .MuiDrawer-paper': {
                         width,
                         top: HEADER_HEIGHT,
-                        height: `calc(100vh - ${ HEADER_HEIGHT }px)`,
+                        height: `calc(100vh - ${HEADER_HEIGHT}px)`,
 
                         overflowX: 'hidden',
                         boxSizing: 'border-box',
@@ -138,6 +152,9 @@ export default function Sidebar({
                                 location.pathname ===
                                 item.path
 
+                            const label =
+                                getLabel(item.label)
+
                             const button = (
                                 <ListItemButton
                                     key={item.path}
@@ -165,15 +182,14 @@ export default function Sidebar({
                                             color: '#111111',
 
                                             '& .MuiListItemIcon-root':
-                                                {
-                                                    color: '#111111',
-                                                },
+                                            {
+                                                color: '#111111',
+                                            },
 
-                                            '&:hover':
-                                                {
-                                                    bgcolor:
-                                                        'primary.main',
-                                                },
+                                            '&:hover': {
+                                                bgcolor:
+                                                    'primary.main',
+                                            },
                                         },
                                     }}
                                 >
@@ -182,23 +198,20 @@ export default function Sidebar({
                                             minWidth: open
                                                 ? 40
                                                 : 0,
-
                                             justifyContent:
                                                 'center',
                                         }}
                                     >
                                         {
                                             iconMap[
-                                                item.icon
+                                            item.icon
                                             ]
                                         }
                                     </ListItemIcon>
 
                                     {open && (
                                         <ListItemText
-                                            primary={
-                                                item.label
-                                            }
+                                            primary={label}
                                             slotProps={{
                                                 primary: {
                                                     sx: {
@@ -219,7 +232,7 @@ export default function Sidebar({
                             ) : (
                                 <Tooltip
                                     key={item.path}
-                                    title={item.label}
+                                    title={label}
                                     placement="right"
                                 >
                                     {button}
