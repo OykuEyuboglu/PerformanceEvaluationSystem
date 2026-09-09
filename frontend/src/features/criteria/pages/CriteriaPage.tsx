@@ -7,9 +7,9 @@ import { Add, Edit, Delete, ExpandMore } from '@mui/icons-material'
 import {
     getCategories, createCategory, updateCategory, deleteCategory,
     getCriteria, createCriterion, updateCriterion, deleteCriterion,
-} from '../api/criteriaApi'
+} from '../criteriaApi'
 import { getJobPositions } from '../../../shared/api/jobPositionsApi'
-import type { PerformanceCategoryDto, PerformanceCriterionDto } from '../types/criteria'
+import type { PerformanceCategoryDto, PerformanceCriterionDto } from '../types'
 import type { JobPositionDto } from '../../../shared/types/jobPosition'
 import CategoryFormDialog, { type CategoryFormValues } from '../components/CategoryFormDialog'
 import CriterionFormDialog, { type CriterionFormValues } from '../components/CriterionFormDialog'
@@ -225,7 +225,14 @@ export default function CriteriaPage() {
                                                 </Typography>
                                             </Box>
                                             <Box sx={{ display: 'flex', gap: 0.5 }}>
-                                                <IconButton size="small" onClick={() => { setCritMode('edit'); setSelectedCriterion(criterion); setCritDialogOpen(true) }}>
+                                                <IconButton size="small" onClick={() => {
+                                                    setCritMode('edit')
+                                                    setSelectedCriterion(criterion)
+                                                    setPrefillCategoryId(
+                                                        criterion.performanceCategoryId
+                                                    )
+                                                    setCritDialogOpen(true)
+                                                }}>
                                                     <Edit fontSize="small" />
                                                 </IconButton>
                                                 <IconButton size="small" onClick={() => setCritDeleteTarget(criterion)}>
@@ -256,14 +263,9 @@ export default function CriteriaPage() {
                 initialData={selectedCriterion}
                 categories={categories}
                 jobPositions={jobPositions}
+                categoryId={prefillCategoryId}
                 submitting={submitting}
-                onSubmit={(values) =>
-                    handleCriterionSubmit(
-                        critMode === 'create' && prefillCategoryId
-                            ? { ...values, performanceCategoryId: prefillCategoryId }
-                            : values
-                    )
-                }
+                onSubmit={handleCriterionSubmit}
                 onClose={() => setCritDialogOpen(false)}
             />
 

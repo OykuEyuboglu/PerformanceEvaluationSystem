@@ -1,8 +1,8 @@
-﻿import axiosInstance from '../../../api/axiosInstance'
+﻿import axiosInstance from '../../api/axiosInstance'
 import type {
     LoginRequestDto,
     LoginResponseDto,
-} from '../../../shared/types/auth'
+} from './types'
 
 export const login = async (
     data: LoginRequestDto

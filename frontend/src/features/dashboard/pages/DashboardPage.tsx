@@ -14,12 +14,12 @@ import { useAuthStore } from '../../../store/authStore'
 import {
     getEvaluationPeriods,
     type EvaluationPeriod,
-} from '../../evaluationPeriods/api/evaluationPeriodsApi'
+} from '../../evaluationPeriods/evaluationPeriodsApi'
 
 import {
     getDepartmentRanking,
     type EmployeeRanking,
-} from '../api/dashboardApi'
+} from '../dashboardApi'
 
 import { useLanguage } from '../../../shared/i18n/LanguageContext'
 import { translations } from '../../../shared/i18n/translations'

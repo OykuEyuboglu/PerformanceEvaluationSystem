@@ -1,11 +1,11 @@
 ﻿
-import axiosInstance from '../../../api/axiosInstance'
+import axiosInstance from '../../api/axiosInstance'
 import type {
     UserDto,
     CreateUserDto,
     UpdateUserDto,
     UpdatePatchUserDto,
-} from '../../../shared/types/user'
+} from './types'
 
 export async function getUsers(): Promise<UserDto[]> {
     const response = await axiosInstance.get<UserDto[]>('/user')
