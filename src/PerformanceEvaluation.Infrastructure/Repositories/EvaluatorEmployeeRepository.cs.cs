@@ -19,6 +19,7 @@ public class EvaluatorEmployeeRepository
         return await _dbSet
             .Include(x => x.Employee)
             .Include(x => x.Evaluator)
+            .ThenInclude(x => x.JobPosition)
             .Where(x => x.EvaluatorId == evaluatorId)
             .ToListAsync();
     }

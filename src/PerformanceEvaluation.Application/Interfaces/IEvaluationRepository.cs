@@ -12,4 +12,12 @@ public interface IEvaluationRepository : IRepository<Evaluation>
     Task<Evaluation?> GetByIdWithDetailsAsync(int id);
     Task<IEnumerable<Evaluation>> GetByEmployeeIdAsync(int employeeId);
     Task<IEnumerable<Evaluation>> GetAllWithDetailsAsync();
+    Task<bool> ExistsByEvaluatorEmployeePeriodAsync(
+    int evaluatorId,
+    int employeeId,
+    int evaluationPeriodId);
+
+    Task<IEnumerable<Evaluation>> GetByEvaluatorAndPeriodAsync(
+        int evaluatorId,
+        int evaluationPeriodId);
 }

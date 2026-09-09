@@ -54,5 +54,30 @@ namespace PerformanceEvaluation.Infrastructure.Repositories
                         .ThenInclude(c => c.PerformanceCategory)
                 .ToListAsync();
         }
+
+        public async Task<bool> ExistsByEvaluatorEmployeePeriodAsync(int evaluatorId, int employeeId, int evaluationPeriodId)
+        {
+            return await _dbSet.AnyAsync(e =>
+                e.EvaluatorId == evaluatorId &&
+                e.EmployeeId == employeeId &&
+                e.EvaluationPeriodId == evaluationPeriodId);
+        }
+
+        public async Task<IEnumerable<Evaluation>> GetByEvaluatorAndPeriodAsync(
+            int evaluatorId,
+            int evaluationPeriodId)
+        {
+            return await _dbSet
+                .Include(e => e.Employee)
+                .Include(e => e.Evaluator)
+                .Include(e => e.EvaluationPeriod)
+                .Include(e => e.Details)
+                    .ThenInclude(d => d.PerformanceCriterion)
+                        .ThenInclude(c => c.PerformanceCategory)
+                .Where(e =>
+                    e.EvaluatorId == evaluatorId &&
+                    e.EvaluationPeriodId == evaluationPeriodId)
+                .ToListAsync();
+        }
     }
 }

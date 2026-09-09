@@ -1,0 +1,32 @@
+﻿import axiosInstance from '../../api/axiosInstance'
+import type { EvaluationDto, CreateEvaluationDto } from './types'
+
+export async function createEvaluation(dto: CreateEvaluationDto): Promise<EvaluationDto> {
+    const res = await axiosInstance.post<EvaluationDto>('/evaluations', dto)
+    return res.data
+}
+
+export async function getAllEvaluations(): Promise<EvaluationDto[]> {
+    const res = await axiosInstance.get<EvaluationDto[]>('/evaluations')
+    return res.data
+}
+
+export async function getMyEvaluations(): Promise<EvaluationDto[]> {
+    const res = await axiosInstance.get<EvaluationDto[]>('/evaluations/my')
+    return res.data
+}
+
+export async function getEvaluationById(id: number): Promise<EvaluationDto> {
+    const res = await axiosInstance.get<EvaluationDto>(`/evaluations/${id}`)
+    return res.data
+}
+
+export async function getMyPeriodEvaluations(
+    evaluationPeriodId: number
+): Promise<EvaluationDto[]> {
+    const res = await axiosInstance.get<EvaluationDto[]>(
+        `/evaluations/my-period/${evaluationPeriodId}`
+    )
+
+    return res.data
+}

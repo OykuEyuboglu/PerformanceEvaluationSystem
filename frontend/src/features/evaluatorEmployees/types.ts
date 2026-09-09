@@ -4,6 +4,8 @@
     evaluatorName: string
     employeeId: number
     employeeName: string
+    employeeJobPositionId?: number | null
+    employeeJobPositionName?: string | null
 }
 
 export interface AssignEvaluatorEmployeeDto {
