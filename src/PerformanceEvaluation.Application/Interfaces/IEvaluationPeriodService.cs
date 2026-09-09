@@ -11,7 +11,8 @@ namespace PerformanceEvaluation.Application.Interfaces
     {
         Task<IEnumerable<EvaluationPeriodDto>> GetAllAsync();
 
-        Task<EvaluationPeriodDto> CreateAsync(
-            CreateEvaluationPeriodDto dto);
+        Task<EvaluationPeriodDto> CreateAsync(CreateEvaluationPeriodDto dto);
+        Task<EvaluationPeriodDto> UpdateAsync(int id, UpdateEvaluationPeriodDto dto);
+        Task DeleteAsync(int id);
     }
 }

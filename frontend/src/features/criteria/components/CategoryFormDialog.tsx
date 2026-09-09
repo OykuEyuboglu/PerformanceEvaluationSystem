@@ -6,7 +6,7 @@ import {
     Dialog, DialogTitle, DialogContent, DialogActions,
     Button, TextField, Stack, FormControlLabel, Switch, Box, InputAdornment,
 } from '@mui/material'
-import type { PerformanceCategoryDto } from '../types/criteria'
+import type { PerformanceCategoryDto } from '../types'
 
 const schema = z.object({
     name: z

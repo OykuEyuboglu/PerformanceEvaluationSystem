@@ -37,12 +37,12 @@ import {
     updateUser,
     patchUser,
     deleteUser,
-} from '../api/usersApi'
+} from '../usersApi'
 
 import { getDepartments } from '../../../shared/api/departmentsApi'
 import { getJobPositions } from '../../../shared/api/jobPositionsApi'
 import { useLanguage } from '../../../shared/i18n/LanguageContext'
-import type { UserDto } from '../types/user'
+import type { UserDto } from '../types'
 import type { DepartmentDto } from '../../../shared/types/department'
 import type { JobPositionDto } from '../../../shared/types/jobPosition'
 
@@ -392,7 +392,6 @@ export default function UsersPage() {
 
             sortable: true,
             filterable: false,
-            hideable: false,
 
             valueGetter: (_, row) =>
                 `${row.firstName} ${row.lastName}`,
@@ -408,7 +407,6 @@ export default function UsersPage() {
 
             sortable: true,
             filterable: false,
-            hideable: false,
         },
 
         {
@@ -421,7 +419,6 @@ export default function UsersPage() {
 
             sortable: true,
             filterable: false,
-            hideable: false,
 
             renderCell: (params) => (
                 <Chip
@@ -452,7 +449,6 @@ export default function UsersPage() {
 
             sortable: true,
             filterable: false,
-            hideable: false,
         },
 
         {
@@ -465,7 +461,6 @@ export default function UsersPage() {
 
             sortable: true,
             filterable: false,
-            hideable: false,
         },
 
         {
@@ -478,7 +473,6 @@ export default function UsersPage() {
 
             sortable: true,
             filterable: false,
-            hideable: false,
 
             renderCell: (params) => (
                 <Switch
@@ -500,7 +494,6 @@ export default function UsersPage() {
 
             sortable: false,
             filterable: false,
-            hideable: false,
 
             renderCell: (params) => (
                 <Box>

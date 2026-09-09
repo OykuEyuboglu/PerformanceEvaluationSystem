@@ -21,7 +21,7 @@ import {
     EmailOutlined,
     LockOutlined,
 } from '@mui/icons-material'
-import { login } from '../api/authApi'
+import { login } from '../authApi'
 import { useAuthStore } from '../../../store/authStore'
 import Logo from '../../../shared/components/logo'
 

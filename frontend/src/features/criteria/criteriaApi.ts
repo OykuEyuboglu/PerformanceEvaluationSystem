@@ -1,4 +1,4 @@
-﻿import axiosInstance from '../../../api/axiosInstance'
+﻿import axiosInstance from '../../api/axiosInstance'
 import type {
     PerformanceCategoryDto,
     CreatePerformanceCategoryDto,
@@ -6,7 +6,7 @@ import type {
     PerformanceCriterionDto,
     CreatePerformanceCriterionDto,
     UpdatePerformanceCriterionDto,
-} from '../types/criteria'
+} from './types'
 
 // Kategoriler
 export async function getCategories(): Promise<PerformanceCategoryDto[]> {

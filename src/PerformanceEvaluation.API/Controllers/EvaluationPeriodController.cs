@@ -39,4 +39,22 @@ public class EvaluationPeriodsController(
             new { id = result.Id },
             result);
     }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPut("{id}")]
+    [SwaggerOperation(Summary = "Değerlendirme dönemini güncelle")]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateEvaluationPeriodDto dto)
+    {
+        var result = await evaluationPeriodService.UpdateAsync(id, dto);
+        return Ok(result);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpDelete("{id}")]
+    [SwaggerOperation(Summary = "Değerlendirme dönemini sil")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        await evaluationPeriodService.DeleteAsync(id);
+        return NoContent();
+    }
 }

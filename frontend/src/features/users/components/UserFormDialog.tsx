@@ -17,7 +17,7 @@ import {
     Switch,
 } from '@mui/material'
 
-import type { UserDto } from '../../../shared/types/user'
+import type { UserDto } from '../types'
 import type { DepartmentDto } from '../../../shared/types/department'
 import type { JobPositionDto } from '../../../shared/types/jobPosition'
 
@@ -122,7 +122,7 @@ export default function UserFormDialog({
             email: '',
             password: '',
             role: 'Employee',
-            departmentId: undefined,
+            departmentId: 0,
             jobPositionId: null,
             isActive: true,
         },
@@ -145,7 +145,7 @@ export default function UserFormDialog({
                         (department) =>
                             department.name ===
                             initialData.departmentName
-                    )?.id,
+                    )?.id ?? 0,
 
                 jobPositionId:
                     jobPositions.find(
@@ -163,7 +163,7 @@ export default function UserFormDialog({
                 email: '',
                 password: '',
                 role: 'Employee',
-                departmentId: undefined,
+                departmentId: 0,
                 jobPositionId: null,
                 isActive: true,
             })
@@ -328,10 +328,10 @@ export default function UserFormDialog({
                                     <TextField
                                         {...field}
                                         select
-                                        label={
-                                            t.userForm.role
-                                        }
+                                        label={t.userForm.role}
                                         fullWidth
+                                        error={!!errors.role}
+                                        helperText={errors.role?.message}
                                     >
                                         {roleOptions.map(
                                             (option) => (

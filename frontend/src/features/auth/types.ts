@@ -1,4 +1,4 @@
-﻿import type { UserDto } from '../../users/types/user'
+﻿import type { UserDto } from '../users/types'
 
 export interface LoginRequestDto {
     email: string
