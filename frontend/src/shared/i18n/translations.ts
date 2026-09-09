@@ -30,13 +30,13 @@ export const translations = {
         },
 
         sidebar: {
-            dashboard: 'Dashboard',
-            users: 'Kullanıcılar',
-            criteria: 'Kriterler',
+            dashboard: 'Kontrol Paneli',
+            users: 'Kullanıcı Yönetimi',
+            criteria: 'Kriter Yönetimi',
             evaluationPeriods:
                 'Değerlendirme Dönemleri',
             evaluatorEmployees:
-                'Değerlendirici - Çalışan',
+                'Ekip Atamaları',
             evaluations: 'Değerlendirmeler',
             newEvaluation: 'Yeni Değerlendirme',
             myEvaluations: 'Değerlendirmelerim',
