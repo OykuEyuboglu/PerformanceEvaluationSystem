@@ -56,7 +56,6 @@ public class EvaluationService : IEvaluationService
             throw new UnauthorizedAccessException(
                 "Bu kullanıcı değerlendirme yapma yetkisine sahip değil.");
 
-        // FR-06: Evaluator sadece bağlı olduğu çalışanları değerlendirebilir
         var managedEmployees =
             await _userRepository.GetEmployeesByEvaluatorIdAsync(evaluatorId);
 
@@ -79,6 +78,18 @@ public class EvaluationService : IEvaluationService
             throw new KeyNotFoundException(
                 "Değerlendirme dönemi bulunamadı.");
 
+        var alreadyEvaluated =
+    await _evaluationRepository.ExistsByEvaluatorEmployeePeriodAsync(
+        evaluatorId,
+        dto.EmployeeId,
+        dto.EvaluationPeriodId);
+
+        if (alreadyEvaluated)
+        {
+            throw new InvalidOperationException(
+                "Bu çalışan için seçilen değerlendirme döneminde zaten bir değerlendirme bulunmaktadır.");
+        }
+
         if (DateTime.Now.Date < evaluationPeriod.StartDate.Date ||
             DateTime.Now.Date > evaluationPeriod.EndDate.Date)
         {
@@ -92,7 +103,6 @@ public class EvaluationService : IEvaluationService
             .Where(c => c.PerformanceCategory.IsActive)
             .ToList();
 
-        // Aktif kategorilerin toplam ağırlığı kontrol edilir.
         var activeCategories = criteria
             .Select(c => c.PerformanceCategory)
             .DistinctBy(c => c.Id)
@@ -226,6 +236,36 @@ public class EvaluationService : IEvaluationService
     {
         var evaluations =
             await _evaluationRepository.GetAllWithDetailsAsync();
+
+        return _mapper.Map<IEnumerable<EvaluationDto>>(evaluations);
+    }
+
+    public async Task<IEnumerable<EvaluationDto>> GetByEvaluatorAndPeriodAsync(
+    int evaluatorId,
+    int evaluationPeriodId,
+    ClaimsPrincipal evaluatorClaims)
+    {
+        var userId = int.Parse(
+            evaluatorClaims.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? evaluatorClaims.FindFirst("sub")?.Value
+            ?? throw new UnauthorizedAccessException(
+                "Kullanıcı kimliği bulunamadı."));
+
+        var role =
+            evaluatorClaims.FindFirst(ClaimTypes.Role)?.Value;
+
+        if (role != "Evaluator")
+            throw new UnauthorizedAccessException(
+                "Bu bilgileri görüntüleme yetkiniz yok.");
+
+        if (userId != evaluatorId)
+            throw new UnauthorizedAccessException(
+                "Başka bir Evaluator'ın değerlendirmelerini görüntüleme yetkiniz yok.");
+
+        var evaluations =
+            await _evaluationRepository.GetByEvaluatorAndPeriodAsync(
+                evaluatorId,
+                evaluationPeriodId);
 
         return _mapper.Map<IEnumerable<EvaluationDto>>(evaluations);
     }

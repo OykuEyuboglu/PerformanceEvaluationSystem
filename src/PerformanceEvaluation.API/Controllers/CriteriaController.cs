@@ -8,9 +8,9 @@ namespace PerformanceEvaluation.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Admin")]
 public class CriteriaController(ICriteriaService criteriaService) : ControllerBase
 {
+    [Authorize(Roles = "Admin,Evaluator")]
     [HttpGet("categories")]
     [SwaggerOperation(Summary = "Tüm performans kategorilerini getir")]
     public async Task<IActionResult> GetCategories()
@@ -19,6 +19,7 @@ public class CriteriaController(ICriteriaService criteriaService) : ControllerBa
         return Ok(categories);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost("categories")]
     [SwaggerOperation(Summary = "Yeni performans kategorisi oluştur")]
     public async Task<IActionResult> CreateCategory([FromBody] CreatePerformanceCategoryDto dto)
@@ -27,6 +28,7 @@ public class CriteriaController(ICriteriaService criteriaService) : ControllerBa
         return CreatedAtAction(nameof(GetCategories), new { }, category);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("categories/{id}")]
     [SwaggerOperation(Summary = "Performans kategorisini güncelle")]
     public async Task<IActionResult> UpdateCategory(
@@ -37,6 +39,17 @@ public class CriteriaController(ICriteriaService criteriaService) : ControllerBa
         return Ok(category);
     }
 
+    [Authorize(Roles = "Admin")]
+    [HttpDelete("categories/{id}")]
+    [SwaggerOperation(
+   Summary = "Performans kategorisini sil")]
+    public async Task<IActionResult> DeleteCategory(int id)
+    {
+        await criteriaService.DeleteCategoryAsync(id);
+        return NoContent();
+    }
+
+    [Authorize(Roles = "Admin,Evaluator")]
     [HttpGet("criteria")]
     [SwaggerOperation(Summary = "Tüm performans kriterlerini getir")]
     public async Task<IActionResult> GetCriteria()
@@ -45,6 +58,7 @@ public class CriteriaController(ICriteriaService criteriaService) : ControllerBa
         return Ok(criteria);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost("criteria")]
     [SwaggerOperation(Summary = "Yeni performans kriteri oluştur")]
     public async Task<IActionResult> CreateCriterion(
@@ -54,6 +68,7 @@ public class CriteriaController(ICriteriaService criteriaService) : ControllerBa
         return CreatedAtAction(nameof(GetCriteria), new { }, criterion);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("criteria/{id}")]
     [SwaggerOperation(Summary = "Performans kriterini güncelle")]
     public async Task<IActionResult> UpdateCriterion(
@@ -64,15 +79,7 @@ public class CriteriaController(ICriteriaService criteriaService) : ControllerBa
         return Ok(criterion);
     }
 
-    [HttpDelete("categories/{id}")]
-    [SwaggerOperation(
-    Summary = "Performans kategorisini sil")]
-    public async Task<IActionResult> DeleteCategory(int id)
-    {
-        await criteriaService.DeleteCategoryAsync(id);
-        return NoContent();
-    }
-
+    [Authorize(Roles = "Admin")]
     [HttpDelete("criteria/{id}")]
     [SwaggerOperation(
         Summary = "Performans kriterini sil")]

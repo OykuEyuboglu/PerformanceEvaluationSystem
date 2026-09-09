@@ -11,4 +11,8 @@ public interface IEvaluationService
     Task<EvaluationDto> GetByIdAsync(
         int id,
         ClaimsPrincipal userClaims);
+    Task<IEnumerable<EvaluationDto>> GetByEvaluatorAndPeriodAsync(
+    int evaluatorId,
+    int evaluationPeriodId,
+    ClaimsPrincipal evaluatorClaims);
 }

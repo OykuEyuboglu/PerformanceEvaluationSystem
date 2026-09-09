@@ -73,6 +73,8 @@ public class EvaluatorEmployeeService : IEvaluatorEmployeeService
             Id = assignment.Id,
             EvaluatorId = evaluator.Id,
             EvaluatorName = $"{evaluator.FirstName} {evaluator.LastName}",
+            EmployeeJobPositionId = employee.JobPositionId,
+            EmployeeJobPositionName = employee.JobPosition.Name,
             EmployeeId = employee.Id,
             EmployeeName = $"{employee.FirstName} {employee.LastName}"
         };
@@ -117,6 +119,8 @@ public class EvaluatorEmployeeService : IEvaluatorEmployeeService
             EvaluatorId = x.EvaluatorId,
             EvaluatorName =
                 $"{x.Evaluator.FirstName} {x.Evaluator.LastName}",
+            EmployeeJobPositionId = x.Employee.JobPositionId,
+            EmployeeJobPositionName = x.Employee.JobPosition?.Name,
             EmployeeId = x.EmployeeId,
             EmployeeName =
                 $"{x.Employee.FirstName} {x.Employee.LastName}"

@@ -12,6 +12,8 @@ namespace PerformanceEvaluation.Application.DTOs.EvaluatorEmployee
 
         public int EvaluatorId { get; set; }
         public string EvaluatorName { get; set; } = string.Empty;
+        public int? EmployeeJobPositionId { get; set; }
+        public string? EmployeeJobPositionName { get; set; }
 
         public int EmployeeId { get; set; }
         public string EmployeeName { get; set; } = string.Empty;

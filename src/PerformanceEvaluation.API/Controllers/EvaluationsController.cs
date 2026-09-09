@@ -51,4 +51,26 @@ public class EvaluationsController(
         var result = await evaluationService.GetByIdAsync(id, User);
         return Ok(result);
     }
+
+    [Authorize(Roles = "Evaluator")]
+    [HttpGet("my-period/{evaluationPeriodId}")]
+    [SwaggerOperation(
+    Summary = "Evaluator'ın seçilen dönemdeki değerlendirmelerini getir")]
+    public async Task<IActionResult> GetMyPeriodEvaluations(
+    int evaluationPeriodId)
+    {
+        var evaluatorId = int.Parse(
+            User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst("sub")?.Value
+            ?? throw new UnauthorizedAccessException(
+                "Kullanıcı kimliği bulunamadı."));
+
+        var result =
+            await evaluationService.GetByEvaluatorAndPeriodAsync(
+                evaluatorId,
+                evaluationPeriodId,
+                User);
+
+        return Ok(result);
+    }
 }
