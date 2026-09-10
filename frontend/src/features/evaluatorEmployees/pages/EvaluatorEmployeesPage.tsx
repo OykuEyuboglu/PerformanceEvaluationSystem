@@ -198,7 +198,7 @@ export default function EvaluatorEmployeesPage() {
 
     const [removing, setRemoving] = useState(false)
 
-    const [leftPanelWidth, setLeftPanelWidth] = useState(350)
+    const [leftPanelWidth, setLeftPanelWidth] = useState(400)
     const [isResizing, setIsResizing] = useState(false)
 
     const layoutRef = useRef<HTMLDivElement | null>(null)

@@ -75,10 +75,4 @@ export const navItems: NavItem[] = [
         roles: ['Evaluator'],
     },
 
-    {
-        path: '/reports/department-ranking',
-        label: 'departmentRanking',
-        icon: 'BarChart',
-        roles: ['Admin'],
-    },
 ]
