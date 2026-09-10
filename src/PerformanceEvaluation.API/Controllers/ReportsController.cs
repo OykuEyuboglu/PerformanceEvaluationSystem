@@ -53,11 +53,25 @@ public class ReportsController(
                 evaluationPeriodId);
 
         var fileName =
-            $"Departman_Siralamasi_{evaluationPeriodId}_{DateTime.Now:yyyyMMdd}.xlsx";
+            $"Degerlendirme_Siralamasi_{evaluationPeriodId}_{DateTime.Now:yyyyMMdd}.xlsx";
 
         return File(
-      fileBytes,
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      $"Departman_Siralamasi_{evaluationPeriodId}_{DateTime.Now:yyyyMMdd}.xlsx");
+    fileBytes,
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    fileName);
+    }
+
+    [Authorize(Roles = "Evaluator")]
+    [HttpGet("team-ranking/export")]
+    [SwaggerOperation(Summary = "Ekip performans sıralamasını Excel olarak dışa aktar")]
+    public async Task<IActionResult> ExportTeamRanking([FromQuery] int evaluationPeriodId)
+    {
+        var fileBytes = await exportService.ExportTeamRankingToExcelAsync(User, evaluationPeriodId);
+        var fileName = $"Ekip_Siralamasi_{evaluationPeriodId}_{DateTime.Now:yyyyMMdd}.xlsx";
+
+        return File(
+            fileBytes,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            fileName);
     }
 }

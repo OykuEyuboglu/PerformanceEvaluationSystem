@@ -10,7 +10,9 @@ import { HEADER_HEIGHT } from '../shared/constants/layout'
 
 type MainLayoutProps = {
     mode: 'light' | 'dark'
-    setMode: React.Dispatch<React.SetStateAction<'light' | 'dark'>>
+    setMode: React.Dispatch<
+        React.SetStateAction<'light' | 'dark'>
+    >
 }
 
 export default function MainLayout({
@@ -21,6 +23,9 @@ export default function MainLayout({
         useState(false)
 
     const [sidebarHovered, setSidebarHovered] =
+        useState(false)
+
+    const [mobileOpen, setMobileOpen] =
         useState(false)
 
     const sidebarOpen =
@@ -49,7 +54,8 @@ export default function MainLayout({
         const handleOutsideClick = (
             event: MouseEvent
         ) => {
-            const target = event.target as Node
+            const target =
+                event.target as Node
 
             const sidebar =
                 document.getElementById(
@@ -92,6 +98,11 @@ export default function MainLayout({
         <Box
             sx={{
                 minHeight: '100vh',
+                width: '100%',
+                maxWidth: '100%',
+
+                overflowX: 'hidden',
+
                 display: 'flex',
                 flexDirection: 'column',
             }}
@@ -100,7 +111,12 @@ export default function MainLayout({
                 mode={mode}
                 setMode={setMode}
                 sidebarOpen={sidebarOpen}
-                onToggleSidebar={handleToggleSidebar}
+                onToggleSidebar={
+                    handleToggleSidebar
+                }
+                onOpenMobileSidebar={() =>
+                    setMobileOpen(true)
+                }
             />
 
             <Box
@@ -115,26 +131,52 @@ export default function MainLayout({
                     display: 'flex',
                     flex: 1,
                     minHeight: 0,
+                    minWidth: 0,
+
+                    width: '100%',
+                    maxWidth: '100%',
                 }}
             >
                 <Sidebar
                     open={sidebarOpen}
-                    onHoverChange={handleSidebarHover}
+                    mobileOpen={mobileOpen}
+                    onHoverChange={
+                        handleSidebarHover
+                    }
+                    onCloseMobile={() =>
+                        setMobileOpen(false)
+                    }
                 />
 
                 <Box
                     component="main"
                     sx={{
                         flex: 1,
+
+                        minWidth: 0,
+                        width: '100%',
+                        maxWidth: '100%',
+
                         display: 'flex',
                         flexDirection: 'column',
-                        minWidth: 0,
+
+                        overflowX: 'hidden',
                     }}
                 >
                     <Box
                         sx={{
                             flex: 1,
-                            p: { xs: 2, md: 4 },
+
+                            minWidth: 0,
+                            width: '100%',
+
+                            boxSizing: 'border-box',
+
+                            p: {
+                                xs: 1.5,
+                                sm: 2,
+                                md: 4,
+                            },
                         }}
                     >
                         <Outlet />

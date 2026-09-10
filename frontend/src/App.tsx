@@ -89,13 +89,6 @@ function AppContent({
                             path="/evaluations"
                             element={<EvaluationsPage />}
                         />
-
-                        <Route
-                            path="/reports/department-ranking"
-                            element={
-                                <DepartmentRankingPage />
-                            }
-                        />
                     </Route>
 
                     {/* Evaluator */}
