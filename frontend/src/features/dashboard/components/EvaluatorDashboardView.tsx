@@ -9,41 +9,30 @@ import {
     LinearProgress,
     MenuItem,
     TextField,
-    Popover,
     Avatar,
     Divider,
-    Tooltip,
 } from '@mui/material'
-
 import {
     EmojiEvents,
     ArrowForward,
-    AssignmentTurnedIn,
-    TrendingUp,
     RateReview,
     Groups,
-    KeyboardArrowRight,
+    AssignmentTurnedIn,
+    TrendingUp,
+    TrendingDown,
+    Remove,
+    Insights,
+    Schedule,
 } from '@mui/icons-material'
-
+import { SparkLineChart } from '@mui/x-charts/SparkLineChart'
 import { Link as RouterLink } from 'react-router-dom'
-
 import { useAuthStore } from '../../../store/authStore'
-
 import { getEvaluationPeriods } from '../../evaluationPeriods/evaluationPeriodsApi'
-
 import { getTeamByEvaluator } from '../../evaluatorEmployees/evaluatorEmployeesApi'
-
-import {
-    getTeamRanking,
-    type EmployeeRanking,
-} from '../dashboardApi'
-
+import { getTeamRanking, type EmployeeRanking } from '../dashboardApi'
 import { getDefaultPeriod } from '../../../shared/utils/period'
-
 import type { EvaluationPeriod } from '../../evaluationPeriods/types'
-
 import type { EvaluatorEmployeeDto } from '../../evaluatorEmployees/types'
-
 
 const RANK_COLORS: Record<number, string> = {
     1: '#F5B301',
@@ -51,2140 +40,505 @@ const RANK_COLORS: Record<number, string> = {
     3: '#B87333',
 }
 
+const clamp = (value: number, min: number, max: number) =>
+    Math.min(Math.max(value, min), max)
+
+const periodState = (period: EvaluationPeriod) => {
+    const today = new Date()
+    const start = new Date(period.startDate)
+    const end = new Date(period.endDate)
+    today.setHours(0, 0, 0, 0)
+    start.setHours(0, 0, 0, 0)
+    end.setHours(0, 0, 0, 0)
+    if (today < start) return 'Başlamadı'
+    if (today > end) return 'Tamamlandı'
+    return 'Aktif'
+}
 
 type EvaluatorDashboardViewProps = {
     firstName?: string
 }
 
+export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboardViewProps) {
+    const currentUser = useAuthStore((s) => s.user)
 
-export default function EvaluatorDashboardView({
-    firstName,
-}: EvaluatorDashboardViewProps) {
-
-    const currentUser = useAuthStore(
-        (s) => s.user
-    )
-
-
-    const [periods, setPeriods] =
-        useState<EvaluationPeriod[]>([])
-
-    const [selectedPeriodId, setSelectedPeriodId] =
-        useState<number | ''>('')
-
-    const [team, setTeam] =
-        useState<EvaluatorEmployeeDto[]>([])
-
-    const [ranking, setRanking] =
-        useState<EmployeeRanking[]>([])
-
-
-    const [loading, setLoading] =
-        useState(true)
-
-    const [loadingRanking, setLoadingRanking] =
-        useState(false)
-
-    const pendingCount = Math.max(
-        0,
-        team.length - ranking.length
-    )
-
-    const [animatedCount, setAnimatedCount] = useState(0)
-    const [animatedProgress, setAnimatedProgress] = useState(0)
-    const [animatedPending, setAnimatedPending] = useState(0)
-    const [animatedAverage, setAnimatedAverage] = useState(0)
-
-    const [teamAnchorEl, setTeamAnchorEl] =
-        useState<HTMLElement | null>(null)
+    const [periods, setPeriods] = useState<EvaluationPeriod[]>([])
+    const [selectedPeriodId, setSelectedPeriodId] = useState<number | ''>('')
+    const [team, setTeam] = useState<EvaluatorEmployeeDto[]>([])
+    const [ranking, setRanking] = useState<EmployeeRanking[]>([])
+    const [loading, setLoading] = useState(true)
+    const [loadingRanking, setLoadingRanking] = useState(false)
 
     useEffect(() => {
-
         if (!currentUser) return
 
-
-        const loadInitial = async () => {
-
+        const load = async () => {
             try {
-
-                const [
-                    periodsData,
-                    teamData,
-                ] = await Promise.all([
+                const [periodsData, teamData] = await Promise.all([
                     getEvaluationPeriods(),
                     getTeamByEvaluator(currentUser.id),
                 ])
 
+                const sorted = [...periodsData].sort(
+                    (a, b) => Number(periodState(b) === 'Aktif') - Number(periodState(a) === 'Aktif')
+                )
 
-                setPeriods(periodsData)
-
+                setPeriods(sorted)
                 setTeam(teamData)
 
-
-                /*
-                 * Öncelik:
-                 * 1. Aktif dönem
-                 * 2. Son tamamlanan dönem
-                 */
-                const defaultPeriod =
-                    getDefaultPeriod(periodsData)
-
-
-                if (defaultPeriod) {
-                    setSelectedPeriodId(
-                        defaultPeriod.id
-                    )
-                }
-
+                const defaultPeriod = getDefaultPeriod(sorted)
+                if (defaultPeriod) setSelectedPeriodId(defaultPeriod.id)
             } catch {
-
                 setPeriods([])
-
                 setTeam([])
-
             } finally {
-
                 setLoading(false)
-
             }
         }
 
-
-        loadInitial()
-
+        load()
     }, [currentUser])
 
-
-    /*
-     * Seçilen döneme ait takım sıralaması
-     */
     useEffect(() => {
-
         if (selectedPeriodId === '') return
 
-
         const loadRanking = async () => {
-
             setLoadingRanking(true)
-
-
             try {
-
-                const data =
-                    await getTeamRanking(
-                        selectedPeriodId
-                    )
-
-                setRanking(data)
-
+                setRanking(await getTeamRanking(selectedPeriodId))
             } catch {
-
                 setRanking([])
-
             } finally {
-
                 setLoadingRanking(false)
-
             }
         }
-
 
         loadRanking()
-
     }, [selectedPeriodId])
 
-
-    /*
-     * Seçili dönem
-     */
     const selectedPeriod = useMemo(
-        () =>
-            periods.find(
-                (period) =>
-                    period.id ===
-                    selectedPeriodId
-            ),
-        [
-            periods,
-            selectedPeriodId,
-        ]
+        () => periods.find((p) => p.id === selectedPeriodId),
+        [periods, selectedPeriodId]
     )
 
-    const teamAverage = useMemo(() => {
+    const stats = useMemo(() => {
+        const evaluated = ranking.length
+        const total = team.length
+        const pending = Math.max(total - evaluated, 0)
+        const completion = total ? clamp((evaluated / total) * 100, 0, 100) : 0
+        const average = evaluated
+            ? ranking.reduce((sum, item) => sum + item.averageScore, 0) / evaluated
+            : 0
 
-        if (ranking.length === 0) {
-            return 0
+        const sorted = [...ranking].sort((a, b) => b.averageScore - a.averageScore)
+        const highest = sorted[0]?.averageScore ?? 0
+        const lowest = sorted[sorted.length - 1]?.averageScore ?? 0
+        const gap = evaluated > 1 ? highest - lowest : 0
+
+        const distribution = [
+            { label: '4.0 – 5.0', count: ranking.filter((x) => x.averageScore >= 4).length },
+            { label: '3.0 – 3.9', count: ranking.filter((x) => x.averageScore >= 3 && x.averageScore < 4).length },
+            { label: '2.0 – 2.9', count: ranking.filter((x) => x.averageScore >= 2 && x.averageScore < 3).length },
+            { label: '0 – 1.9', count: ranking.filter((x) => x.averageScore < 2).length },
+        ]
+
+        const top = sorted.slice(0, 5)
+        const bottom = [...sorted].reverse().slice(0, 3)
+
+        return { evaluated, total, pending, completion, average, highest, lowest, gap, distribution, top, bottom }
+    }, [ranking, team.length])
+
+    const [animated, setAnimated] = useState({ count: 0, progress: 0, average: 0, pending: 0 })
+
+    useEffect(() => {
+        const duration = 700
+        const started = performance.now()
+        let frame = 0
+
+        const animate = (now: number) => {
+            const progress = clamp((now - started) / duration, 0, 1)
+            const eased = 1 - Math.pow(1 - progress, 3)
+
+            setAnimated({
+                count: Math.round(stats.evaluated * eased),
+                progress: stats.completion * eased,
+                average: stats.average * eased,
+                pending: Math.round(stats.pending * eased),
+            })
+
+            if (progress < 1) frame = requestAnimationFrame(animate)
         }
 
+        frame = requestAnimationFrame(animate)
+        return () => cancelAnimationFrame(frame)
+    }, [stats.evaluated, stats.completion, stats.average, stats.pending])
 
-        return (
-            ranking.reduce(
-                (sum, item) =>
-                    sum + item.averageScore,
-                0
-            ) / ranking.length
-        )
+    const trend = useMemo(() => {
+        const values = ranking
+            .slice()
+            .sort((a, b) => a.rank - b.rank)
+            .map((x) => x.averageScore)
 
+        if (values.length < 2) return { values, direction: 'stable' as const }
+        const first = values[0]
+        const last = values[values.length - 1]
+        return {
+            values,
+            direction: last > first + 0.05 ? 'up' as const : last < first - 0.05 ? 'down' as const : 'stable' as const,
+        }
     }, [ranking])
 
-    /*
-     * Tamamlanma oranı
-     */
-    const completionPercentage = useMemo(() => {
+    const status = selectedPeriod ? periodState(selectedPeriod) : null
 
-        if (team.length === 0) {
-            return 0
-        }
-
-
-        return Math.min(
-            (ranking.length / team.length) * 100,
-            100
+    if (loading) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 12 }}>
+                <CircularProgress />
+            </Box>
         )
-
-    }, [
-        ranking.length,
-        team.length,
-    ])
-
-    useEffect(() => {
-        const target = ranking.length
-
-        if (target === 0) {
-            setAnimatedCount(0)
-            setAnimatedProgress(0)
-            return
-        }
-
-        const duration = 650
-        const startTime = performance.now()
-
-        let animationFrame: number
-
-        const animate = (currentTime: number) => {
-            const elapsed = currentTime - startTime
-            const progress = Math.min(elapsed / duration, 1)
-
-            const easedProgress =
-                1 - Math.pow(1 - progress, 3)
-
-            const currentCount = Math.round(
-                target * easedProgress
-            )
-
-            const currentPercentage =
-                team.length > 0
-                    ? (currentCount / team.length) * 100
-                    : 0
-
-            setAnimatedCount(currentCount)
-            setAnimatedProgress(currentPercentage)
-
-            if (progress < 1) {
-                animationFrame =
-                    requestAnimationFrame(animate)
-            }
-        }
-
-        animationFrame =
-            requestAnimationFrame(animate)
-
-        return () => {
-            cancelAnimationFrame(animationFrame)
-        }
-    }, [ranking.length, team.length])
-
-    useEffect(() => {
-        const duration = 650
-        const startTime = performance.now()
-
-        const targetPending = pendingCount
-        const targetAverage = teamAverage
-
-        let animationFrame: number
-
-        const animate = (currentTime: number) => {
-            const elapsed = currentTime - startTime
-            const progress = Math.min(elapsed / duration, 1)
-
-            const easedProgress =
-                1 - Math.pow(1 - progress, 3)
-
-            setAnimatedPending(
-                Math.min(
-                    targetPending,
-                    Math.max(
-                        0,
-                        Math.round(targetPending * easedProgress)
-                    )
-                )
-            )
-
-            setAnimatedAverage(
-                targetAverage * easedProgress
-            )
-
-            if (progress < 1) {
-                animationFrame =
-                    requestAnimationFrame(animate)
-            }
-        }
-
-        animationFrame =
-            requestAnimationFrame(animate)
-
-        return () => {
-            cancelAnimationFrame(animationFrame)
-        }
-    }, [
-        ranking.length,
-        pendingCount,
-        teamAverage,
-    ])
-
-    const topPerformers = useMemo(
-        () =>
-            [...ranking]
-                .sort(
-                    (a, b) =>
-                        a.rank - b.rank
-                )
-                .slice(0, 3),
-        [ranking]
-    )
-
-    const periodStatus = useMemo(() => {
-
-        if (!selectedPeriod) {
-            return null
-        }
-
-
-        const today = new Date()
-
-        const start =
-            new Date(
-                selectedPeriod.startDate
-            )
-
-        const end =
-            new Date(
-                selectedPeriod.endDate
-            )
-
-
-        today.setHours(0, 0, 0, 0)
-
-        start.setHours(0, 0, 0, 0)
-
-        end.setHours(0, 0, 0, 0)
-
-
-        if (today < start) {
-
-            return {
-                label: 'Başlamadı',
-                color: 'default' as const,
-            }
-
-        }
-
-
-        if (today > end) {
-
-            return {
-                label: 'Tamamlandı',
-                color: 'default' as const,
-            }
-
-        }
-
-
-        return {
-            label: 'Aktif',
-            color: 'success' as const,
-        }
-
-    }, [selectedPeriod])
-
-
-    const handleTeamMouseLeave = () => {
-
-        setTeamAnchorEl(null)
-
     }
 
-
-    const teamPopoverOpen =
-        Boolean(teamAnchorEl)
-
+    if (!currentUser) return null
 
     return (
-        <Box
-            sx={{
-                width: '100%',
-                minWidth: 0,
-            }}
-        >
-
-            {/* =====================================================
-                PAGE HEADER
-            ===================================================== */}
-
+        <Box sx={{ width: '100%', minWidth: 0 }}>
             <Box
                 sx={{
                     display: 'flex',
-                    justifyContent:
-                        'space-between',
+                    justifyContent: 'space-between',
                     alignItems: 'flex-end',
-                    gap: 3,
-                    mb: 3.5,
+                    gap: 2,
+                    mb: 3,
                     flexWrap: 'wrap',
-                    minWidth: 0,
                 }}
             >
-
-                <Box sx={{ minWidth: 0 }}>
-
-                    <Typography
-                        variant="h5"
-                        sx={{
-                            fontWeight: 800,
-                            letterSpacing:
-                                '-0.3px',
-                        }}
-                    >
-                        Hoş geldin,{' '}
-                        {firstName ||
-                            'Değerlendirici'}{' '}
-                        👋
+                <Box>
+                    <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: '-0.3px' }}>
+                        Hoş geldin, {firstName || 'Değerlendirici'} 👋
                     </Typography>
-
-
-                    <Typography
-                        color="text.secondary"
-                        sx={{
-                            mt: 0.6,
-                            fontSize: 14.5,
-                        }}
-                    >
-                        Ekibinin performansını
-                        takip et ve
-                        değerlendirmelerini
-                        yönet.
+                    <Typography color="text.secondary" sx={{ mt: 0.5, fontSize: 14 }}>
+                        Ekibinin performansını tek ekrandan analiz et ve değerlendirme sürecini yönet.
                     </Typography>
-
                 </Box>
 
-
-                {!loading &&
-                    periods.length > 0 && (
-
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                alignItems:
-                                    'flex-end',
-                                gap: 1,
-                                flexShrink: 0,
-                            }}
+                {periods.length > 0 && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <TextField
+                            select
+                            size="small"
+                            label="Değerlendirme Dönemi"
+                            value={selectedPeriodId}
+                            onChange={(e) => setSelectedPeriodId(Number(e.target.value))}
+                            sx={{ width: { xs: 220, sm: 450 } }}
+                            slotProps={{ inputLabel: { shrink: true } }}
                         >
-
-                            <Box>
-
-                                <Typography
-                                    sx={{
-                                        fontSize: 11,
-                                        fontWeight: 700,
-                                        color:
-                                            'text.secondary',
-                                        mb: 0.5,
-                                        letterSpacing:
-                                            0.4,
-                                    }}
-                                >
-                                    DEĞERLENDİRME DÖNEMİ
-                                </Typography>
-
-
-                                <TextField
-                                    select
-                                    size="small"
-                                    value={
-                                        selectedPeriodId
-                                    }
-                                    onChange={(e) =>
-                                        setSelectedPeriodId(
-                                            Number(
-                                                e.target.value
-                                            )
-                                        )
-                                    }
-                                    sx={{
-                                        width: {
-                                            xs: 210,
-                                            sm: 250,
-                                        },
-                                    }}
-                                >
-
-                                    {periods.map(
-                                        (period) => (
-
-                                            <MenuItem
-                                                key={
-                                                    period.id
-                                                }
-                                                value={
-                                                    period.id
-                                                }
-                                            >
-                                                {
-                                                    period.name
-                                                }
-                                            </MenuItem>
-
-                                        )
-                                    )}
-
-                                </TextField>
-
-                            </Box>
-
-
-                            {periodStatus?.label ===
-                                'Aktif' && (
-
-                                    <Chip
-                                        label="Aktif"
-                                        size="small"
-                                        sx={{
-                                            mb: 0.4,
-                                            height: 28,
-                                            fontWeight: 700,
-                                            fontSize: 11,
-                                            bgcolor:
-                                                'rgba(46,125,50,0.10)',
-                                            color:
-                                                'success.main',
-                                            border:
-                                                '1px solid',
-                                            borderColor:
-                                                'rgba(46,125,50,0.20)',
-                                        }}
-                                    />
-
-                                )}
-
-                        </Box>
-
-                    )}
-
+                            {periods.map((period) => (
+                                <MenuItem key={period.id} value={period.id}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        {period.name}
+                                        {periodState(period) === 'Aktif' && (
+                                            <Chip label="Aktif" size="small" color="success" />
+                                        )}
+                                    </Box>
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </Box>
+                )}
             </Box>
 
-
-            {/* =====================================================
-                LOADING
-            ===================================================== */}
-
-            {loading ? (
-
-                <Box
-                    sx={{
-                        display: 'flex',
-                        justifyContent:
-                            'center',
-                        py: 10,
-                    }}
-                >
-                    <CircularProgress />
-                </Box>
-
-            ) : periods.length === 0 ? (
-
+            {periods.length === 0 ? (
                 <Paper
                     elevation={0}
-                    sx={{
-                        border: '1px solid',
-                        borderColor:
-                            'divider',
-                        borderRadius: 3,
-                        p: 5,
-                        textAlign: 'center',
-                    }}
+                    sx={{ p: 6, textAlign: 'center', border: '1px solid', borderColor: 'divider', borderRadius: 3 }}
                 >
-
-                    <Typography
-                        sx={{
-                            fontWeight: 700,
-                            mb: 0.5,
-                        }}
-                    >
-                        Henüz değerlendirme
-                        dönemi bulunmuyor.
+                    <Typography sx={{ fontWeight: 800 }}>Henüz değerlendirme dönemi bulunmuyor.</Typography>
+                    <Typography color="text.secondary" sx={{ mt: 0.5, fontSize: 14 }}>
+                        Bir dönem oluşturulduğunda ekip analizleri burada görünecek.
                     </Typography>
-
-
-                    <Typography
-                        color="text.secondary"
-                        sx={{
-                            fontSize: 14,
-                        }}
-                    >
-                        Değerlendirme dönemi
-                        oluşturulduğunda ekip
-                        performansını buradan
-                        takip edebilirsin.
-                    </Typography>
-
                 </Paper>
-
             ) : (
-
                 <>
-
-                    {/* =================================================
-                        KPI CARDS
-                    ================================================= */}
-
                     <Box
                         sx={{
                             display: 'grid',
-                            gridTemplateColumns: {
-                                xs: 'minmax(0, 1fr)',
-                                sm:
-                                    'repeat(2, minmax(0, 1fr))',
-                                lg:
-                                    'repeat(3, minmax(0, 1fr))',
-                            },
+                            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' },
                             gap: 2,
-                            mb: 2.5,
-                            width: '100%',
-                            minWidth: 0,
+                            mb: 2,
                         }}
                     >
-
-                        {/* -------------------------------------------------
-                            DEĞERLENDİRME İLERLEMESİ
-                        ------------------------------------------------- */}
-
-                        <Paper
-                            elevation={0}
-                            sx={{
-                                minWidth: 0,
-                                width: '100%',
-                                boxSizing:
-                                    'border-box',
-                                border: '1px solid',
-                                borderColor:
-                                    'divider',
-                                borderRadius: 3,
-                                p: 2.5,
-                            }}
-                        >
-
-                            <Box
+                        {[
+                            {
+                                title: 'Değerlendirme İlerlemesi',
+                                value: `${animated.count} / ${stats.total}`,
+                                subtitle: `%${Math.round(animated.progress)} tamamlandı`,
+                                icon: <AssignmentTurnedIn />,
+                            },
+                            {
+                                title: 'Ekip Ortalaması',
+                                value: stats.average ? `${animated.average.toFixed(2)} / 5` : '—',
+                                subtitle: 'Değerlendirilen çalışanlar',
+                                icon: <Insights />,
+                            },
+                            {
+                                title: 'Bekleyen',
+                                value: animated.pending,
+                                subtitle: 'Değerlendirme bekleyen çalışan',
+                                icon: <Schedule />,
+                            },
+                            {
+                                title: 'Performans Aralığı',
+                                value: stats.evaluated ? `${stats.lowest.toFixed(2)} – ${stats.highest.toFixed(2)}` : '—',
+                                subtitle: stats.evaluated > 1 ? `Fark: ${stats.gap.toFixed(2)} puan` : 'Yeterli veri yok',
+                                icon: <TrendingUp />,
+                            },
+                        ].map((item) => (
+                            <Paper
+                                key={item.title}
+                                elevation={0}
                                 sx={{
-                                    display:
-                                        'flex',
-                                    justifyContent:
-                                        'space-between',
-                                    alignItems:
-                                        'flex-start',
-                                    gap: 2,
-                                }}
-                            >
-
-                                <Box
-                                    sx={{
-                                        minWidth: 0,
-                                    }}
-                                >
-
-                                    <Typography
-                                        sx={{
-                                            fontSize: 11,
-                                            fontWeight: 700,
-                                            color:
-                                                'text.secondary',
-                                            letterSpacing:
-                                                0.5,
-                                        }}
-                                    >
-                                        DEĞERLENDİRME
-                                        İLERLEMESİ
-                                    </Typography>
-
-
-                                    <Typography
-                                        sx={{
-                                            fontSize: 28,
-                                            fontWeight: 800,
-                                            mt: 0.5,
-                                            lineHeight: 1.1,
-                                        }}
-                                    >
-                                                {animatedCount}
-
-                                        <Typography
-                                            component="span"
-                                            color="text.secondary"
-                                            sx={{
-                                                fontSize: 14,
-                                                fontWeight: 600,
-                                                ml: 0.5,
-                                            }}
-                                        >
-                                            / {team.length}
-                                        </Typography>
-                                    </Typography>
-
-                                </Box>
-
-
-                                <AssignmentTurnedIn
-                                    sx={{
-                                        color:
-                                            'primary.main',
-                                        fontSize: 27,
-                                        flexShrink: 0,
-                                    }}
-                                />
-
-                            </Box>
-
-
-                            <LinearProgress
-                                variant="determinate"
-                                value={
-                                    completionPercentage
-                                }
-                                sx={{
-                                    mt: 1.5,
-                                    height: 6,
+                                    p: 2.4,
+                                    border: '1px solid',
+                                    borderColor: 'divider',
                                     borderRadius: 3,
-                                    bgcolor:
-                                        'action.hover',
-                                    '& .MuiLinearProgress-bar':
-                                    {
-                                        borderRadius: 3,
+                                    transition: 'transform .2s ease, box-shadow .2s ease, border-color .2s ease',
+                                    '&:hover': {
+                                        transform: 'translateY(-2px)',
+                                        borderColor: 'primary.main',
+                                        boxShadow: '0 10px 28px rgba(0,0,0,.07)',
                                     },
                                 }}
-                            />
-
-
-                            <Typography
-                                color="text.secondary"
-                                sx={{
-                                    fontSize: 12,
-                                    mt: 1,
-                                }}
                             >
-                                %{Math.round(
-                                    completionPercentage
-                                )}{' '}
-                                tamamlandı
-                            </Typography>
-
-                        </Paper>
-
-
-                        {/* -------------------------------------------------
-                            EKİP ORTALAMASI
-                        ------------------------------------------------- */}
-
-                        <Paper
-                            elevation={0}
-                            sx={{
-                                minWidth: 0,
-                                width: '100%',
-                                boxSizing:
-                                    'border-box',
-                                border: '1px solid',
-                                borderColor:
-                                    'divider',
-                                borderRadius: 3,
-                                p: 2.5,
-                            }}
-                        >
-
-                            <Box
-                                sx={{
-                                    display:
-                                        'flex',
-                                    justifyContent:
-                                        'space-between',
-                                    alignItems:
-                                        'flex-start',
-                                    gap: 2,
-                                }}
-                            >
-
-                                <Box
-                                    sx={{
-                                        minWidth: 0,
-                                    }}
-                                >
-
-                                    <Typography
-                                        sx={{
-                                            fontSize: 11,
-                                            fontWeight: 700,
-                                            color:
-                                                'text.secondary',
-                                            letterSpacing:
-                                                0.5,
-                                        }}
-                                    >
-                                        EKİP ORTALAMASI
-                                    </Typography>
-
-
-                                    <Typography
-                                        sx={{
-                                            fontSize: 28,
-                                            fontWeight: 800,
-                                            mt: 0.5,
-                                            lineHeight: 1.1,
-                                        }}
-                                    >
-                                                {teamAverage > 0
-                                                    ? animatedAverage.toFixed(2)
-                                                    : '—'}
-
-                                        {teamAverage >
-                                            0 && (
-
-                                                <Typography
-                                                    component="span"
-                                                    color="text.secondary"
-                                                    sx={{
-                                                        fontSize: 14,
-                                                        fontWeight: 600,
-                                                        ml: 0.5,
-                                                    }}
-                                                >
-                                                    / 5
-                                                </Typography>
-
-                                            )}
-
-                                    </Typography>
-
-
-                                    <Typography
-                                        color="text.secondary"
-                                        sx={{
-                                            fontSize: 12.5,
-                                            mt: 0.2,
-                                        }}
-                                    >
-                                        Değerlendirilen
-                                        çalışanlar
-                                    </Typography>
-
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                    <Box>
+                                        <Typography sx={{ fontSize: 10.5, fontWeight: 800, color: 'text.secondary', letterSpacing: '.5px' }}>
+                                            {item.title.toUpperCase()}
+                                        </Typography>
+                                        <Typography sx={{ fontSize: 27, fontWeight: 800, mt: .7 }}>
+                                            {item.value}
+                                        </Typography>
+                                    </Box>
+                                    <Box sx={{ width: 40, height: 40, borderRadius: 2, display: 'grid', placeItems: 'center', bgcolor: 'rgba(245,179,1,.12)', color: 'primary.main' }}>
+                                        {item.icon}
+                                    </Box>
                                 </Box>
-
-
-                                <TrendingUp
-                                    sx={{
-                                        color:
-                                            'primary.main',
-                                        fontSize: 27,
-                                        flexShrink: 0,
-                                    }}
-                                />
-
-                            </Box>
-
-                        </Paper>
-
-
-                        {/* -------------------------------------------------
-                            BEKLEYEN DEĞERLENDİRMELER
-                        ------------------------------------------------- */}
-
-                        <Paper
-                            elevation={0}
-                            sx={{
-                                minWidth: 0,
-                                width: '100%',
-                                boxSizing:
-                                    'border-box',
-                                border: '1px solid',
-                                borderColor:
-                                    'divider',
-                                borderRadius: 3,
-                                p: 2.5,
-                            }}
-                        >
-
-                            <Box
-                                sx={{
-                                    display:
-                                        'flex',
-                                    justifyContent:
-                                        'space-between',
-                                    alignItems:
-                                        'flex-start',
-                                    gap: 2,
-                                }}
-                            >
-
-                                <Box
-                                    sx={{
-                                        minWidth: 0,
-                                    }}
-                                >
-
-                                    <Typography
-                                        sx={{
-                                            fontSize: 11,
-                                            fontWeight: 700,
-                                            color:
-                                                'text.secondary',
-                                            letterSpacing:
-                                                0.5,
-                                        }}
-                                    >
-                                        BEKLEYEN
-                                        DEĞERLENDİRMELER
-                                    </Typography>
-
-
-                                    <Typography
-                                        sx={{
-                                            fontSize: 28,
-                                            fontWeight: 800,
-                                            mt: 0.5,
-                                            lineHeight: 1.1,
-                                        }}
-                                    >
-                                                {animatedPending}
-                                            </Typography>
-
-
-                                    <Typography
-                                        color="text.secondary"
-                                        sx={{
-                                            fontSize: 12.5,
-                                            mt: 0.2,
-                                        }}
-                                    >
-                                        Çalışan değerlendirme
-                                        bekliyor
-                                    </Typography>
-
-                                </Box>
-
-
-                                <RateReview
-                                    sx={{
-                                        color:
-                                            'primary.main',
-                                        fontSize: 27,
-                                        flexShrink: 0,
-                                    }}
-                                />
-
-                            </Box>
-
-                        </Paper>
-
+                                <Typography color="text.secondary" sx={{ fontSize: 11.5, mt: 1 }}>
+                                    {item.subtitle}
+                                </Typography>
+                                {item.title === 'Değerlendirme İlerlemesi' && (
+                                    <LinearProgress variant="determinate" value={animated.progress} sx={{ mt: 1.5, height: 5, borderRadius: 5 }} />
+                                )}
+                            </Paper>
+                        ))}
                     </Box>
-
-
-                    {/* =================================================
-                        STATUS + QUICK ACTIONS
-                    ================================================= */}
 
                     <Box
                         sx={{
                             display: 'grid',
-                            gridTemplateColumns: {
-                                xs:
-                                    'minmax(0, 1fr)',
-                                md:
-                                    'minmax(0, 1.6fr) minmax(0, 1fr)',
-                            },
+                            gridTemplateColumns: { xs: '1fr', lg: '1.45fr .9fr' },
                             gap: 2,
-                            mb: 2.5,
-                            width: '100%',
-                            minWidth: 0,
+                            mb: 2,
                         }}
                     >
+                        <Paper elevation={0} sx={{ p: { xs: 2, md: 3 }, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, alignItems: 'flex-start', mb: 2 }}>
+                                <Box>
+                                    <Typography sx={{ fontWeight: 800, fontSize: 16 }}>Performans Analizi</Typography>
+                                    <Typography color="text.secondary" sx={{ fontSize: 12.5, mt: .3 }}>
+                                        Seçilen dönemdeki çalışan skorlarının dağılımı.
+                                    </Typography>
+                                </Box>
+                                <Chip label={`${stats.evaluated} sonuç`} size="small" variant="outlined" />
+                            </Box>
 
-                        {/* =================================================
-                            DEĞERLENDİRME DURUMU
-                        ================================================= */}
-
-                        <Paper
-                            elevation={0}
-                            sx={{
-                                minWidth: 0,
-                                width: '100%',
-                                boxSizing: 'border-box',
-                                border: '1px solid',
-                                borderColor: 'divider',
-                                borderRadius: 3,
-                                p: { xs: 2, sm: 2.5, md: 3 },
-                                overflow: 'hidden',
-                            }}
-                        >
-                            {/* HEADER */}
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'flex-start',
-                                    gap: 2,
-                                }}
-                            >
+                            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1.25fr .8fr' }, gap: 3, alignItems: 'center' }}>
                                 <Box sx={{ minWidth: 0 }}>
-                                    <Typography
-                                        sx={{
-                                            fontWeight: 800,
-                                            fontSize: 15,
-                                            lineHeight: 1.2,
-                                        }}
-                                    >
-                                        Değerlendirme Durumu
-                                    </Typography>
-
-                                    <Typography
-                                        color="text.secondary"
-                                        sx={{
-                                            fontSize: 12,
-                                            mt: 0.4,
-                                            lineHeight: 1.4,
-                                        }}
-                                    >
-                                        Bu dönemdeki değerlendirme sürecinin durumu.
-                                    </Typography>
-                                </Box>
-
-                                <Box
-                                    sx={{
-                                        width: 32,
-                                        height: 32,
-                                        borderRadius: 1.5,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexShrink: 0,
-                                        bgcolor: 'rgba(245,179,1,0.12)',
-                                        color: 'primary.main',
-                                    }}
-                                >
-                                    <AssignmentTurnedIn
-                                        sx={{
-                                            fontSize: 18,
-                                        }}
-                                    />
-                                </Box>
-                            </Box>
-
-                            {/* MAIN CONTENT */}
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: { xs: 2, sm: 3 },
-                                    mt: 2,
-                                    minWidth: 0,
-                                }}
-                            >
-                                        <Box
-                                            sx={{
-                                                position: 'relative',
-                                                width: { xs: 150, sm: 170 },
-                                                height: { xs: 150, sm: 170 },
-                                                flexShrink: 0,
-                                            }}
-                                        >
-                                            <Box
-                                                component="svg"
-                                                viewBox="0 0 120 120"
-                                                sx={{
-                                                    width: '100%',
-                                                    height: '100%',
-                                                    transform: 'rotate(-90deg)',
-                                                }}
-                                            >
-                                                {/* ARKA PLAN HALKASI */}
-                                                <Box
-                                                    component="circle"
-                                                    cx="60"
-                                                    cy="60"
-                                                    r="50"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeWidth="7"
-                                                    sx={{
-                                                        color: 'action.hover',
-                                                    }}
-                                                />
-
-                                                {/* SARI İLERLEME HALKASI */}
-                                                <Box
-                                                    component="circle"
-                                                    cx="60"
-                                                    cy="60"
-                                                    r="50"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeWidth="7"
-                                                    strokeLinecap="round"
-                                                    strokeDasharray={314.16}
-                                                    strokeDashoffset={
-                                                        314.16 -
-                                                        (314.16 * animatedProgress) / 100
-                                                    }
-                                                    sx={{
-                                                        color: 'primary.main',
-                                                        transition:
-                                                            'stroke-dashoffset 0.65s ease-out',
-                                                    }}
-                                                />
+                                    {stats.distribution.map((item) => {
+                                        const percentage = stats.evaluated ? (item.count / stats.evaluated) * 100 : 0
+                                        return (
+                                            <Box key={item.label} sx={{ mb: 1.8 }}>
+                                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: .55 }}>
+                                                    <Typography sx={{ fontSize: 12.5, fontWeight: 700 }}>{item.label}</Typography>
+                                                    <Typography color="text.secondary" sx={{ fontSize: 11.5 }}>{item.count} kişi</Typography>
+                                                </Box>
+                                                <LinearProgress variant="determinate" value={percentage} sx={{ height: 7, borderRadius: 7 }} />
                                             </Box>
-
-                                            {/* MERKEZ */}
-                                            <Box
-                                                sx={{
-                                                    position: 'absolute',
-                                                    inset: 0,
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                }}
-                                            >
-                                                <Typography
-                                                    sx={{
-                                                        fontSize: 19,
-                                                        fontWeight: 800,
-                                                        lineHeight: 1,
-                                                    }}
-                                                >
-                                                    {animatedCount} / {team.length}
-                                                </Typography>
-
-                                                <Typography
-                                                    color="text.secondary"
-                                                    sx={{
-                                                        fontSize: 10,
-                                                        fontWeight: 600,
-                                                        mt: 0.7,
-                                                    }}
-                                                >
-                                                    %{Math.round(animatedProgress)}
-                                                </Typography>
-                                            </Box>
-                                        </Box>
-
-                                {/* STATUS DETAILS */}
-                                <Box
-                                    sx={{
-                                        flex: 1,
-                                        minWidth: 0,
-                                    }}
-                                >
-                                    {/* COMPLETED */}
-                                    <Box
-                                        sx={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 1,
-                                            mb: 1,
-                                        }}
-                                    >
-                                        <Box
-                                            sx={{
-                                                width: 9,
-                                                height: 9,
-                                                borderRadius: '50%',
-                                                bgcolor: 'primary.main',
-                                                flexShrink: 0,
-                                            }}
-                                        />
-
-                                        <Typography
-                                            sx={{
-                                                fontSize: 13,
-                                                fontWeight: 600,
-                                                lineHeight: 1.3,
-                                            }}
-                                        >
-                                                    {animatedCount} çalışan değerlendirildi
-                                                </Typography>
-                                    </Box>
-
-                                    {/* PENDING */}
-                                    <Box
-                                        sx={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 1,
-                                            mb: 1.25,
-                                        }}
-                                    >
-                                        <Box
-                                            sx={{
-                                                width: 9,
-                                                height: 9,
-                                                borderRadius: '50%',
-                                                bgcolor: 'action.disabled',
-                                                flexShrink: 0,
-                                            }}
-                                        />
-
-                                        <Typography
-                                            sx={{
-                                                fontSize: 13,
-                                                color: 'text.secondary',
-                                                lineHeight: 1.3,
-                                            }}
-                                        >
-                                            {pendingCount} çalışan değerlendirme bekliyor
-                                        </Typography>
-                                    </Box>
-
-                                    <Divider sx={{ mb: 1 }} />
-
-                                    {/* TOTAL */}
-                                    <Box
-                                        sx={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 1,
-                                        }}
-                                    >
-                                        <Groups
-                                            sx={{
-                                                fontSize: 15,
-                                                color: 'text.secondary',
-                                            }}
-                                        />
-
-                                        <Typography
-                                            sx={{
-                                                fontSize: 12,
-                                                color: 'text.secondary',
-                                                fontWeight: 600,
-                                            }}
-                                        >
-                                            Toplam {team.length} çalışan
-                                        </Typography>
-                                    </Box>
-                                </Box>
-                            </Box>
-
-                            {/* BOTTOM INFO */}
-                            <Box
-                                sx={{
-                                    mt: 2,
-                                    px: 1.5,
-                                    py: 1,
-                                    borderRadius: 1.5,
-                                    bgcolor: 'rgba(245,179,1,0.08)',
-                                    border: '1px solid',
-                                    borderColor: 'rgba(245,179,1,0.16)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 1,
-                                    minWidth: 0,
-                                }}
-                            >
-                                <Box
-                                    sx={{
-                                        width: 16,
-                                        height: 16,
-                                        borderRadius: '50%',
-                                        bgcolor: 'primary.main',
-                                        color: '#111',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexShrink: 0,
-                                        fontSize: 10,
-                                        fontWeight: 900,
-                                    }}
-                                >
-                                    !
+                                        )
+                                    })}
                                 </Box>
 
-                                <Typography
-                                    color="text.secondary"
-                                    sx={{
-                                        fontSize: 11,
-                                        lineHeight: 1.35,
-                                        minWidth: 0,
-                                    }}
-                                >
-                                    {pendingCount > 0
-                                        ? 'Tüm ekip değerlendirmelerini tamamlamak için devam edebilirsin.'
-                                        : 'Tüm ekip değerlendirmeleri tamamlandı.'}
-                                </Typography>
+                                <Box sx={{ textAlign: 'center', p: 2, borderRadius: 3, bgcolor: 'action.hover' }}>
+                                    <Typography color="text.secondary" sx={{ fontSize: 11, fontWeight: 800 }}>EKİP SKORU</Typography>
+                                    <Typography sx={{ fontSize: 38, fontWeight: 900, lineHeight: 1.1, mt: .5 }}>
+                                        {stats.average ? stats.average.toFixed(2) : '—'}
+                                    </Typography>
+                                    <Typography color="text.secondary" sx={{ fontSize: 12 }}>/ 5</Typography>
+                                    <Box sx={{ mt: 1.5, display: 'flex', justifyContent: 'center' }}>
+                                        <SparkLineChart
+                                            data={trend.values.length ? trend.values : [0]}
+                                            height={42}
+                                            width={150}
+                                            color="#F5B301"
+                                            showTooltip
+                                            showHighlight
+                                            curve="monotoneX"
+                                        />
+                                    </Box>
+                                </Box>
                             </Box>
                         </Paper>
 
-                        {/* -------------------------------------------------
-                            HIZLI İŞLEMLER
-                        ------------------------------------------------- */}
+                        <Paper elevation={0} sx={{ p: { xs: 2, md: 3 }, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
+                            <Typography sx={{ fontWeight: 800, fontSize: 16 }}>Süreç Sağlığı</Typography>
+                            <Typography color="text.secondary" sx={{ fontSize: 12.5, mt: .3 }}>
+                                Değerlendirme sürecinin genel görünümü.
+                            </Typography>
 
-                                <Paper
-                                    elevation={0}
-                                    sx={{
-                                        minWidth: 0,
-                                        width: '100%',
-                                        height: '100%',
-                                        boxSizing: 'border-box',
-                                        border: '1px solid',
-                                        borderColor: 'divider',
-                                        borderRadius: 3,
-                                        p: 3,
-
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        justifyContent: 'center',
-
-                                        transition: 'all 0.2s ease',
-
-                                        '&:hover': {
-                                            borderColor: 'primary.main',
-                                            boxShadow: '0 6px 20px rgba(0,0,0,0.06)',
-                                        },
-                                    }}
-                                >
-                                    {/* ICON + TITLE */}
+                            <Box sx={{ display: 'grid', placeItems: 'center', my: 2.5 }}>
+                                <Box sx={{ position: 'relative', width: 155, height: 155 }}>
                                     <Box
-                                        sx={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 1.5,
-                                            mb: 0.8,
-                                        }}
+                                        component="svg"
+                                        viewBox="0 0 120 120"
+                                        sx={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}
                                     >
-                                        <Box
-                                            sx={{
-                                                width: 42,
-                                                height: 42,
-                                                borderRadius: 2,
-                                                bgcolor: 'rgba(245,179,1,0.12)',
-                                                color: 'primary.main',
-
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-
-                                                flexShrink: 0,
-                                            }}
-                                        >
-                                            <RateReview sx={{ fontSize: 21 }} />
-                                        </Box>
-
-                                        <Box>
-                                            <Typography
-                                                sx={{
-                                                    fontWeight: 800,
-                                                    fontSize: 16,
-                                                    lineHeight: 1.2,
-                                                }}
-                                            >
-                                                Hızlı İşlemler
-                                            </Typography>
-
-                                            <Typography
-                                                color="text.secondary"
-                                                sx={{
-                                                    fontSize: 12,
-                                                    mt: 0.4,
-                                                }}
-                                            >
-                                                Ekip değerlendirmelerini yönet.
-                                            </Typography>
+                                        <circle cx="60" cy="60" r="50" fill="none" stroke="currentColor" strokeWidth="8" style={{ color: 'rgba(127,127,127,.14)' }} />
+                                        <circle
+                                            cx="60" cy="60" r="50" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round"
+                                            strokeDasharray={314.16}
+                                            strokeDashoffset={314.16 - (314.16 * animated.progress) / 100}
+                                            style={{ color: 'var(--mui-palette-primary-main)', transition: 'stroke-dashoffset .2s ease' }}
+                                        />
+                                    </Box>
+                                    <Box sx={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center' }}>
+                                        <Box sx={{ textAlign: 'center' }}>
+                                            <Typography sx={{ fontSize: 26, fontWeight: 900 }}>{Math.round(animated.progress)}%</Typography>
+                                            <Typography color="text.secondary" sx={{ fontSize: 10 }}>TAMAMLANDI</Typography>
                                         </Box>
                                     </Box>
+                                </Box>
+                            </Box>
 
-                                    {/* ACTIONS */}
-                                    <Box sx={{ mt: 2.5 }}>
-                                        <Button
-                                            component={RouterLink}
-                                            to="/evaluations/new"
-                                            variant="contained"
-                                            fullWidth
-                                            startIcon={<RateReview />}
-                                            sx={{
-                                                minHeight: 44,
-                                                borderRadius: 2,
-                                                fontWeight: 700,
-
-                                                boxShadow: 'none',
-
-                                                '&:hover': {
-                                                    boxShadow: 'none',
-                                                },
-                                            }}
-                                        >
-                                            Değerlendirme Yap
-                                        </Button>
-
-                                        <Button
-                                            component={RouterLink}
-                                            to="/reports/team-ranking"
-                                            variant="outlined"
-                                            fullWidth
-                                            endIcon={<ArrowForward />}
-                                            sx={{
-                                                mt: 1,
-                                                minHeight: 40,
-                                                borderRadius: 2,
-                                                fontWeight: 700,
-                                            }}
-                                        >
-                                            Ekip Sıralamasını Gör
-                                        </Button>
-                                    </Box>
-                                </Paper>
-
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', px: .5 }}>
+                                <Box>
+                                    <Typography color="text.secondary" sx={{ fontSize: 10 }}>DURUM</Typography>
+                                    <Typography sx={{ fontSize: 13, fontWeight: 800 }}>{status}</Typography>
+                                </Box>
+                                <Box sx={{ textAlign: 'right' }}>
+                                    <Typography color="text.secondary" sx={{ fontSize: 10 }}>BEKLEYEN</Typography>
+                                    <Typography sx={{ fontSize: 13, fontWeight: 800 }}>{stats.pending}</Typography>
+                                </Box>
+                            </Box>
+                        </Paper>
                     </Box>
 
-
-                    {/* =================================================
-                        TOP PERFORMERS
-                    ================================================= */}
-
-                    <Paper
-                        elevation={0}
+                    <Box
                         sx={{
-                            width: '100%',
-                            minWidth: 0,
-                            boxSizing:
-                                'border-box',
-                            border: '1px solid',
-                            borderColor:
-                                'divider',
-                            borderRadius: 3,
-                            overflow: 'hidden',
+                            display: 'grid',
+                            gridTemplateColumns: { xs: '1fr', lg: '1.35fr .9fr' },
+                            gap: 2,
+                            mb: 2,
                         }}
                     >
-
-                        {/* HEADER */}
-
-                        <Box
-                            sx={{
-                                px: {
-                                    xs: 2,
-                                    md: 3,
-                                },
-                                py: 2.25,
-                                display:
-                                    'flex',
-                                justifyContent:
-                                    'space-between',
-                                alignItems:
-                                    'center',
-                                gap: 2,
-                                borderBottom:
-                                    '1px solid',
-                                borderColor:
-                                    'divider',
-                                minWidth: 0,
-                            }}
-                        >
-
-                            <Box
-                                sx={{
-                                    minWidth: 0,
-                                }}
-                            >
-
-                                <Typography
-                                    sx={{
-                                        fontWeight: 800,
-                                        fontSize: 16,
-                                    }}
-                                >
-                                    En Yüksek
-                                    Performanslar
-                                </Typography>
-
-
-                                <Typography
-                                    color="text.secondary"
-                                    sx={{
-                                        fontSize: 13,
-                                        mt: 0.35,
-                                    }}
-                                >
-                                    Seçilen dönemde
-                                    en yüksek
-                                    performans
-                                    skorlarına sahip
-                                    çalışanlar.
-                                </Typography>
-
+                        <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 3, overflow: 'hidden' }}>
+                            <Box sx={{ p: { xs: 2, md: 2.5 }, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+                                <Box>
+                                    <Typography sx={{ fontWeight: 800, fontSize: 16 }}>En Yüksek Performanslar</Typography>
+                                    <Typography color="text.secondary" sx={{ fontSize: 12.5, mt: .3 }}>Ekibin öne çıkan çalışanları.</Typography>
+                                </Box>
+                                <Button component={RouterLink} to="/reports/team-ranking" size="small" endIcon={<ArrowForward />}>
+                                    Tümünü Gör
+                                </Button>
                             </Box>
 
-
-                            <Button
-                                component={
-                                    RouterLink
-                                }
-                                to="/reports/team-ranking"
-                                size="small"
-                                endIcon={
-                                    <ArrowForward />
-                                }
-                                sx={{
-                                    flexShrink: 0,
-                                }}
-                            >
-                                Tümünü Gör
-                            </Button>
-
-                        </Box>
-
-
-                        {/* CONTENT */}
-
-                        {loadingRanking ? (
-
-                            <Box
-                                sx={{
-                                    display:
-                                        'flex',
-                                    justifyContent:
-                                        'center',
-                                    py: 5,
-                                }}
-                            >
-                                <CircularProgress
-                                    size={26}
-                                />
-                            </Box>
-
-                        ) : topPerformers.length ===
-                            0 ? (
-
-                            <Box sx={{ p: 4 }}>
-
-                                <Typography
-                                    color="text.secondary"
-                                    sx={{
-                                        fontSize: 14,
-                                    }}
-                                >
-                                    Bu dönem için
-                                    henüz
-                                    değerlendirme
-                                    sonucu
-                                    bulunmuyor.
-                                </Typography>
-
-                            </Box>
-
-                        ) : (
-
-                            topPerformers.map(
-                                (item) => (
-
-                                    <Tooltip
-                                        key={
-                                            item.employeeId
-                                        }
-                                        arrow
-                                        placement="left"
-                                        enterDelay={300}
-                                        title={
-                                            <Box
-                                                sx={{
-                                                    py: 0.5,
-                                                    minWidth: 210,
-                                                    maxWidth: 260,
-                                                }}
-                                            >
-
-                                                <Box
-                                                    sx={{
-                                                        display:
-                                                            'flex',
-                                                        alignItems:
-                                                            'center',
-                                                        gap: 1.25,
-                                                    }}
-                                                >
-
-                                                    <Avatar
-                                                        sx={{
-                                                            width: 34,
-                                                            height: 34,
-                                                            fontSize: 13,
-                                                            fontWeight: 700,
-                                                            bgcolor:
-                                                                'primary.main',
-                                                            color:
-                                                                '#111',
-                                                        }}
-                                                    >
-                                                        {item.employeeName
-                                                            .charAt(
-                                                                0
-                                                            )
-                                                            .toUpperCase()}
-                                                    </Avatar>
-
-
-                                                    <Box
-                                                        sx={{
-                                                            minWidth: 0,
-                                                        }}
-                                                    >
-
-                                                        <Typography
-                                                            sx={{
-                                                                fontSize: 13,
-                                                                fontWeight: 700,
-                                                                color: '#fff',
-                                                            }}
-                                                        >
-                                                            {
-                                                                item.employeeName
-                                                            }
-                                                        </Typography>
-
-
-                                                        {item.jobPositionName && (
-
-                                                            <Typography
-                                                                sx={{
-                                                                    fontSize: 11.5,
-                                                                    color: 'rgba(255,255,255,0.70)',
-                                                                    mt: 0.15,
-                                                                }}
-                                                            >
-                                                                {
-                                                                    item.jobPositionName
-                                                                }
-                                                            </Typography>
-
-                                                        )}
-
-                                                    </Box>
-
-                                                </Box>
-
-
-                                                <Divider
-                                                    sx={{
-                                                        my: 1,
-                                                        borderColor:
-                                                            'rgba(255,255,255,0.15)',
-                                                    }}
-                                                />
-
-
-                                                {item.departmentName && (
-
-                                                    <Box
-                                                        sx={{
-                                                            mb: 0.5,
-                                                        }}
-                                                    >
-
-                                                        <Typography
-                                                            sx={{
-                                                                fontSize: 10,
-                                                                fontWeight: 700,
-                                                                color: 'rgba(255,255,255,0.55)',
-                                                                textTransform: 'uppercase',
-                                                            }}
-                                                        >
-                                                            Departman
-                                                        </Typography>
-
-
-                                                        <Typography
-                                                            sx={{
-                                                                fontSize: 12,
-                                                                color: 'rgba(255,255,255,0.90)',
-                                                            }}
-                                                        >
-                                                            {
-                                                                item.departmentName
-                                                            }
-                                                        </Typography>
-
-                                                    </Box>
-
-                                                )}
-
-
-                                                <Box
-                                                    sx={{
-                                                        display:
-                                                            'flex',
-                                                        justifyContent:
-                                                            'space-between',
-                                                        gap: 2,
-                                                        mt: 0.75,
-                                                    }}
-                                                >
-
-                                                    <Box>
-
-                                                        <Typography
-                                                            sx={{
-                                                                fontSize: 10,
-                                                                fontWeight: 700,
-                                                                color: 'rgba(255,255,255,0.55)',
-                                                                textTransform: 'uppercase',
-                                                            }}
-                                                        >
-                                                            Ortalama
-                                                        </Typography>
-
-
-                                                        <Typography
-                                                            sx={{
-                                                                fontSize: 12,
-                                                                color: 'rgba(255,255,255,0.90)',
-                                                            }}
-                                                        >
-                                                            {item.averageScore.toFixed(
-                                                                2
-                                                            )}{' '}
-                                                            / 5
-                                                        </Typography>
-
-                                                    </Box>
-
-
-                                                    <Box>
-
-                                                        <Typography
-                                                            sx={{
-                                                                fontSize: 10,
-                                                                fontWeight: 700,
-                                                                color: 'rgba(255,255,255,0.55)',
-                                                                textTransform: 'uppercase',
-                                                            }}
-                                                        >
-                                                            Değerlendirme
-                                                        </Typography>
-
-
-                                                        <Typography
-                                                            sx={{
-                                                                fontSize: 12,
-                                                                color: 'rgba(255,255,255,0.90)',
-                                                            }}
-                                                        >
-                                                            {
-                                                                item.evaluationCount
-                                                            }
-                                                        </Typography>
-
-                                                    </Box>
-
-                                                </Box>
-
-                                            </Box>
-                                        }
-                                    >
-
-                                        <Box
-                                            sx={{
-                                                display:
-                                                    'flex',
-                                                alignItems:
-                                                    'center',
-                                                gap: 2,
-                                                px: {
-                                                    xs: 2,
-                                                    md: 3,
-                                                },
-                                                py: 2,
-                                                borderBottom:
-                                                    '1px solid',
-                                                borderColor:
-                                                    'divider',
-                                                cursor:
-                                                    'default',
-                                                minWidth: 0,
-                                                transition:
-                                                    'background-color 0.15s ease',
-                                                '&:hover':
-                                                {
-                                                    bgcolor:
-                                                        'action.hover',
-                                                },
-                                                '&:last-child':
-                                                {
-                                                    borderBottom:
-                                                        'none',
-                                                },
-                                            }}
-                                        >
-
-                                            {/* RANK */}
-
-                                            <Box
-                                                sx={{
-                                                    width: 34,
-                                                    flexShrink: 0,
-                                                    display:
-                                                        'flex',
-                                                    alignItems:
-                                                        'center',
-                                                    justifyContent:
-                                                        'center',
-                                                }}
-                                            >
-
-                                                {item.rank <=
-                                                    3 ? (
-
-                                                    <EmojiEvents
-                                                        sx={{
-                                                            fontSize: 21,
-                                                            color:
-                                                                RANK_COLORS[
-                                                                item.rank
-                                                                ],
-                                                        }}
-                                                    />
-
-                                                ) : (
-
-                                                    <Typography
-                                                        sx={{
-                                                            fontWeight: 800,
-                                                            color:
-                                                                'text.secondary',
-                                                        }}
-                                                    >
-                                                        #
-                                                        {
-                                                            item.rank
-                                                        }
-                                                    </Typography>
-
-                                                )}
-
-                                            </Box>
-
-
-                                            {/* AVATAR */}
-
-                                            <Avatar
-                                                sx={{
-                                                    width: 34,
-                                                    height: 34,
-                                                    flexShrink: 0,
-                                                    fontSize: 13,
-                                                    fontWeight: 700,
-                                                    bgcolor:
-                                                        'secondary.main',
-                                                    color:
-                                                        '#fff',
-                                                }}
-                                            >
-                                                {item.employeeName
-                                                    .charAt(
-                                                        0
-                                                    )
-                                                    .toUpperCase()}
-                                            </Avatar>
-
-
-                                            {/* EMPLOYEE */}
-
-                                            <Box
-                                                sx={{
-                                                    flex: 1,
-                                                    minWidth: 0,
-                                                }}
-                                            >
-
-                                                <Typography
-                                                    sx={{
-                                                        fontWeight: 700,
-                                                        fontSize: 14,
-                                                        overflow:
-                                                            'hidden',
-                                                        textOverflow:
-                                                            'ellipsis',
-                                                        whiteSpace:
-                                                            'nowrap',
-                                                    }}
-                                                >
-                                                    {
-                                                        item.employeeName
-                                                    }
-                                                </Typography>
-
-
-                                                {item.jobPositionName && (
-
-                                                    <Typography
-                                                        color="text.secondary"
-                                                        sx={{
-                                                            fontSize: 12.5,
-                                                            mt: 0.2,
-                                                            overflow:
-                                                                'hidden',
-                                                            textOverflow:
-                                                                'ellipsis',
-                                                            whiteSpace:
-                                                                'nowrap',
-                                                        }}
-                                                    >
-                                                        {
-                                                            item.jobPositionName
-                                                        }
-                                                    </Typography>
-
-                                                )}
-
-                                            </Box>
-
-
-                                            {/* SCORE */}
-
-                                            <Chip
-                                                size="small"
-                                                label={`${item.averageScore.toFixed(
-                                                    2
-                                                )} / 5`}
-                                                sx={{
-                                                    fontWeight: 700,
-                                                    borderRadius: 1.5,
-                                                    flexShrink: 0,
-                                                }}
-                                            />
-
-                                        </Box>
-
-                                    </Tooltip>
-
-                                )
-                            )
-
-                        )}
-
-                    </Paper>
-
-
-                    {/* =================================================
-                        TEAM POPOVER
-                    ================================================= */}
-
-                    <Popover
-                        open={
-                            teamPopoverOpen
-                        }
-                        anchorEl={
-                            teamAnchorEl
-                        }
-                        onClose={
-                            handleTeamMouseLeave
-                        }
-                        disableRestoreFocus
-                        disableScrollLock
-                        anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'left',
-                        }}
-                        transformOrigin={{
-                            vertical: 'top',
-                            horizontal: 'left',
-                        }}
-                        slotProps={{
-                            paper: {
-                                onMouseEnter:
-                                    () =>
-                                        teamAnchorEl &&
-                                        setTeamAnchorEl(
-                                            teamAnchorEl
-                                        ),
-                                onMouseLeave:
-                                    handleTeamMouseLeave,
-                                sx: {
-                                    mt: 1,
-                                    width: 280,
-                                    maxWidth:
-                                        'calc(100vw - 32px)',
-                                    borderRadius: 2.5,
-                                    border:
-                                        '1px solid',
-                                    borderColor:
-                                        'divider',
-                                    boxShadow:
-                                        '0 8px 30px rgba(0,0,0,0.12)',
-                                },
-                            },
-                        }}
-                    >
-
-                        <Box
-                            sx={{
-                                px: 2,
-                                py: 1.5,
-                            }}
-                        >
-
-                            <Typography
-                                sx={{
-                                    fontWeight: 800,
-                                    fontSize: 14,
-                                }}
-                            >
-                                Ekip Üyeleri
-                            </Typography>
-
-
-                            <Typography
-                                color="text.secondary"
-                                sx={{
-                                    fontSize: 11.5,
-                                    mt: 0.25,
-                                }}
-                            >
-                                {team.length} atanmış
-                                çalışan
-                            </Typography>
-
-                        </Box>
-
-
-                        <Divider />
-
-
-                        <Box
-                            sx={{
-                                maxHeight: 300,
-                                overflowY: 'auto',
-                            }}
-                        >
-
-                            {team.map(
-                                (member) => (
-
+                            {loadingRanking ? (
+                                <Box sx={{ display: 'grid', placeItems: 'center', py: 5 }}><CircularProgress size={26} /></Box>
+                            ) : stats.top.length === 0 ? (
+                                <Box sx={{ p: 4 }}><Typography color="text.secondary" sx={{ fontSize: 14 }}>Bu dönem için henüz sonuç bulunmuyor.</Typography></Box>
+                            ) : (
+                                stats.top.map((item) => (
                                     <Box
-                                        key={
-                                            member.id
-                                        }
+                                        key={item.employeeId}
                                         sx={{
-                                            display:
-                                                'flex',
-                                            alignItems:
-                                                'center',
-                                            gap: 1.25,
-                                            px: 2,
-                                            py: 1,
-                                            transition:
-                                                'background-color 0.15s ease',
-                                            '&:hover':
-                                            {
-                                                bgcolor:
-                                                    'action.hover',
-                                            },
+                                            display: 'flex', alignItems: 'center', gap: 1.5, px: { xs: 2, md: 2.5 }, py: 1.55,
+                                            borderBottom: '1px solid', borderColor: 'divider',
+                                            '&:last-child': { borderBottom: 0 },
                                         }}
                                     >
-
-                                        <Avatar
-                                            sx={{
-                                                width: 30,
-                                                height: 30,
-                                                fontSize: 12,
-                                                fontWeight: 700,
-                                                bgcolor:
-                                                    'secondary.main',
-                                                color:
-                                                    '#fff',
-                                            }}
-                                        >
-                                            {member.employeeName
-                                                .charAt(
-                                                    0
-                                                )
-                                                .toUpperCase()}
-                                        </Avatar>
-
-
-                                        <Box
-                                            sx={{
-                                                minWidth: 0,
-                                                flex: 1,
-                                            }}
-                                        >
-
-                                            <Typography
-                                                sx={{
-                                                    fontSize: 13,
-                                                    fontWeight: 700,
-                                                    overflow:
-                                                        'hidden',
-                                                    textOverflow:
-                                                        'ellipsis',
-                                                    whiteSpace:
-                                                        'nowrap',
-                                                }}
-                                            >
-                                                {
-                                                    member.employeeName
-                                                }
-                                            </Typography>
-
-
-                                            {member.employeeJobPositionName && (
-
-                                                <Typography
-                                                    color="text.secondary"
-                                                    sx={{
-                                                        fontSize: 11.5,
-                                                        mt: 0.1,
-                                                        overflow:
-                                                            'hidden',
-                                                        textOverflow:
-                                                            'ellipsis',
-                                                        whiteSpace:
-                                                            'nowrap',
-                                                    }}
-                                                >
-                                                    {
-                                                        member.employeeJobPositionName
-                                                    }
-                                                </Typography>
-
-                                            )}
-
+                                        <Box sx={{ width: 25, textAlign: 'center', flexShrink: 0 }}>
+                                            {item.rank <= 3 ? <EmojiEvents sx={{ fontSize: 19, color: RANK_COLORS[item.rank] }} /> : <Typography sx={{ fontSize: 12, fontWeight: 800 }}>#{item.rank}</Typography>}
                                         </Box>
-
-
-                                        <KeyboardArrowRight
-                                            sx={{
-                                                fontSize: 18,
-                                                color:
-                                                    'text.disabled',
-                                                flexShrink: 0,
-                                            }}
-                                        />
-
+                                        <Avatar sx={{ width: 34, height: 34, bgcolor: 'secondary.main', fontSize: 12, fontWeight: 800 }}>
+                                            {item.employeeName.charAt(0).toUpperCase()}
+                                        </Avatar>
+                                        <Box sx={{ minWidth: 0, flex: 1 }}>
+                                            <Typography sx={{ fontSize: 13.5, fontWeight: 750, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                {item.employeeName}
+                                            </Typography>
+                                            {item.jobPositionName && (
+                                                <Typography color="text.secondary" sx={{ fontSize: 11.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                    {item.jobPositionName}
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                        <Chip label={`${item.averageScore.toFixed(2)} / 5`} size="small" sx={{ fontWeight: 800 }} />
                                     </Box>
-
-                                )
+                                ))
                             )}
+                        </Paper>
 
+                        <Paper elevation={0} sx={{ p: { xs: 2, md: 2.5 }, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
+                            <Typography sx={{ fontWeight: 800, fontSize: 16 }}>Analist Özeti</Typography>
+                            <Typography color="text.secondary" sx={{ fontSize: 12.5, mt: .3 }}>Bu dönem için dikkat çeken göstergeler.</Typography>
+
+                            <Box sx={{ mt: 2 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, py: 1.3 }}>
+                                    {trend.direction === 'up' ? <TrendingUp color="success" /> : trend.direction === 'down' ? <TrendingDown color="error" /> : <Remove color="disabled" />}
+                                    <Box>
+                                        <Typography sx={{ fontSize: 12, fontWeight: 800 }}>Sıralama görünümü</Typography>
+                                        <Typography color="text.secondary" sx={{ fontSize: 11.5 }}>
+                                            {trend.direction === 'up' ? 'Üst sıralardaki skorlar güçlü görünüyor.' : trend.direction === 'down' ? 'Skorlar arasında belirgin bir düşüş aralığı var.' : 'Skorlar birbirine yakın seyrediyor.'}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                                <Divider />
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, py: 1.3 }}>
+                                    <Groups sx={{ color: 'primary.main' }} />
+                                    <Box>
+                                        <Typography sx={{ fontSize: 12, fontWeight: 800 }}>Ekip büyüklüğü</Typography>
+                                        <Typography color="text.secondary" sx={{ fontSize: 11.5 }}>{stats.total} atanmış çalışan bulunuyor.</Typography>
+                                    </Box>
+                                </Box>
+                                <Divider />
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, py: 1.3 }}>
+                                    <Schedule sx={{ color: 'primary.main' }} />
+                                    <Box>
+                                        <Typography sx={{ fontSize: 12, fontWeight: 800 }}>Öncelik</Typography>
+                                        <Typography color="text.secondary" sx={{ fontSize: 11.5 }}>
+                                            {stats.pending > 0 ? `${stats.pending} değerlendirme tamamlanmayı bekliyor.` : 'Tüm değerlendirmeler tamamlandı.'}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            </Box>
+
+                            <Button component={RouterLink} to="/evaluations/new" variant="contained" fullWidth startIcon={<RateReview />} sx={{ mt: 1.5, minHeight: 44, borderRadius: 2, fontWeight: 800, boxShadow: 'none' }}>
+                                Değerlendirme Yap
+                            </Button>
+                        </Paper>
+                    </Box>
+
+                    <Paper elevation={0} sx={{ p: { xs: 2, md: 2.5 }, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                            <Box>
+                                <Typography sx={{ fontWeight: 800, fontSize: 16 }}>Dönem Bilgisi</Typography>
+                                <Typography color="text.secondary" sx={{ fontSize: 12.5, mt: .3 }}>
+                                    {selectedPeriod?.name} · {selectedPeriod ? `${new Date(selectedPeriod.startDate).toLocaleDateString('tr-TR')} – ${new Date(selectedPeriod.endDate).toLocaleDateString('tr-TR')}` : ''}
+                                </Typography>
+                            </Box>
+                            <Chip label={status || '—'} color={status === 'Aktif' ? 'success' : 'default'} size="small" sx={{ fontWeight: 800 }} />
                         </Box>
-
-                    </Popover>
-
+                    </Paper>
                 </>
-
             )}
-
         </Box>
     )
 }
