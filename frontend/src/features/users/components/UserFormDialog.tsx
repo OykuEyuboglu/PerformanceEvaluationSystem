@@ -1,4 +1,4 @@
-﻿import { useEffect } from 'react'
+﻿import { useEffect, useState, type ReactNode} from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -15,7 +15,20 @@ import {
     Stack,
     FormControlLabel,
     Switch,
+    Typography,
+    Divider,
+    InputAdornment,
+    IconButton,
 } from '@mui/material'
+
+import {
+    PersonOutlined,
+    BadgeOutlined,
+    BusinessOutlined,
+    LockOutlined,
+    Visibility,
+    VisibilityOff,
+} from '@mui/icons-material'
 
 import type { UserDto } from '../types'
 import type { DepartmentDto } from '../../../shared/types/department'
@@ -59,6 +72,9 @@ export default function UserFormDialog({
     const { language } = useLanguage()
     const t = translations[language]
 
+    const [showPassword, setShowPassword] =
+        useState(false)
+
     const baseSchema = {
         firstName: z
             .string()
@@ -76,7 +92,10 @@ export default function UserFormDialog({
 
         departmentId: z
             .number()
-            .min(1, t.userForm.selectDepartmentError),
+            .min(
+                1,
+                t.userForm.selectDepartmentError
+            ),
 
         jobPositionId: z
             .number()
@@ -131,6 +150,8 @@ export default function UserFormDialog({
     useEffect(() => {
         if (!open) return
 
+        setShowPassword(false)
+
         if (mode === 'edit' && initialData) {
             reset({
                 firstName: initialData.firstName,
@@ -139,21 +160,18 @@ export default function UserFormDialog({
                 password: '',
                 role:
                     initialData.role as UserFormValues['role'],
-
                 departmentId:
                     departments.find(
                         (department) =>
                             department.name ===
                             initialData.departmentName
                     )?.id ?? 0,
-
                 jobPositionId:
                     jobPositions.find(
                         (position) =>
                             position.name ===
                             initialData.jobPositionName
                     )?.id ?? null,
-
                 isActive: initialData.isActive,
             })
         } else {
@@ -198,29 +216,130 @@ export default function UserFormDialog({
             onClose={onClose}
             maxWidth="sm"
             fullWidth
+            slotProps={{
+                paper: {
+                    sx: {
+                        borderRadius: 3,
+                        overflow: 'hidden',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        boxShadow:
+                            '0 24px 70px rgba(0,0,0,0.16)',
+                        animation:
+                            'dialogEnter 260ms ease-out',
+                        '@keyframes dialogEnter': {
+                            from: {
+                                opacity: 0,
+                                transform:
+                                    'translateY(8px) scale(0.985)',
+                            },
+                            to: {
+                                opacity: 1,
+                                transform:
+                                    'translateY(0) scale(1)',
+                            },
+                        },
+                    },
+                }
+            }}
         >
-            <DialogTitle sx={{ fontWeight: 700 }}>
-                {mode === 'create'
-                    ? t.userForm.createTitle
-                    : t.userForm.editTitle}
+            {/* HEADER */}
+            <DialogTitle
+                sx={{
+                    px: { xs: 2.5, sm: 3 },
+                    py: 2.25,
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                }}
+            >
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1.5,
+                    }}
+                >
+                    <Box
+                        sx={{
+                            width: 42,
+                            height: 42,
+                            borderRadius: 2,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor:
+                                'rgba(245,179,1,0.12)',
+                            color: '#C68E00',
+                            flexShrink: 0,
+                        }}
+                    >
+                        {mode === 'create' ? (
+                            <PersonOutlined />
+                        ) : (
+                            <BadgeOutlined />
+                        )}
+                    </Box>
+
+                    <Box>
+                        <Typography
+                            sx={{
+                                fontWeight: 850,
+                                fontSize: 18,
+                                letterSpacing:
+                                    '-0.2px',
+                            }}
+                        >
+                            {mode === 'create'
+                                ? t.userForm.createTitle
+                                : t.userForm.editTitle}
+                        </Typography>
+
+                        <Typography
+                            color="text.secondary"
+                            sx={{
+                                fontSize: 11.5,
+                                mt: 0.25,
+                            }}
+                        >
+                            {mode === 'create'
+                                ? language === 'tr'
+                                    ? 'Yeni bir sistem kullanıcısı oluşturun.'
+                                    : 'Create a new system user.'
+                                : language === 'tr'
+                                    ? 'Kullanıcı bilgilerini ve erişim durumunu güncelleyin.'
+                                    : 'Update user information and access status.'}
+                        </Typography>
+                    </Box>
+                </Box>
             </DialogTitle>
 
             <Box
                 component="form"
                 onSubmit={handleSubmit(onSubmit)}
             >
-                <DialogContent>
-                    <Stack
-                        spacing={2.5}
-                        sx={{ mt: 0.5 }}
-                    >
-                        {/* Ad - Soyad */}
+                <DialogContent
+                    sx={{
+                        px: { xs: 2.5, sm: 3 },
+                        py: 2.5,
+                    }}
+                >
+                    <Stack spacing={2.25}>
+                        {/* PERSONAL INFORMATION */}
+                        <SectionTitle
+                            icon={<PersonOutlined />}
+                            title={
+                                language === 'tr'
+                                    ? 'Kişisel Bilgiler'
+                                    : 'Personal Information'
+                            }
+                        />
+
                         <Stack
                             direction={{
                                 xs: 'column',
                                 sm: 'row',
                             }}
-                            spacing={2}
+                            spacing={1.5}
                         >
                             <Controller
                                 name="firstName"
@@ -239,6 +358,8 @@ export default function UserFormDialog({
                                             errors.firstName
                                                 ?.message
                                         }
+                                        size="small"
+                                        sx={fieldSx}
                                     />
                                 )}
                             />
@@ -260,24 +381,38 @@ export default function UserFormDialog({
                                             errors.lastName
                                                 ?.message
                                         }
+                                        size="small"
+                                        sx={fieldSx}
                                     />
                                 )}
                             />
                         </Stack>
 
-                        {/* E-posta - Şifre */}
-                        {mode === 'create' && (
+                        {/* ACCOUNT */}
+                        <SectionTitle
+                            icon={<LockOutlined />}
+                            title={
+                                language === 'tr'
+                                    ? 'Hesap Bilgileri'
+                                    : 'Account Information'
+                            }
+                        />
+
+                        {mode === 'create' ? (
                             <>
                                 <Controller
                                     name="email"
                                     control={control}
-                                    render={({ field }) => (
+                                    render={({
+                                        field,
+                                    }) => (
                                         <TextField
                                             {...field}
                                             label={
                                                 t.userForm.email
                                             }
                                             fullWidth
+                                            size="small"
                                             error={
                                                 !!errors.email
                                             }
@@ -285,6 +420,23 @@ export default function UserFormDialog({
                                                 errors.email
                                                     ?.message
                                             }
+                                            sx={fieldSx}
+                                            slotProps={{
+                                                input: {
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <Typography
+                                                                sx={{
+                                                                    fontSize: 12,
+                                                                    color: 'text.secondary',
+                                                                }}
+                                                            >
+                                                                @
+                                                            </Typography>
+                                                        </InputAdornment>
+                                                    ),
+                                                },
+                                            }}
                                         />
                                     )}
                                 />
@@ -292,14 +444,21 @@ export default function UserFormDialog({
                                 <Controller
                                     name="password"
                                     control={control}
-                                    render={({ field }) => (
+                                    render={({
+                                        field,
+                                    }) => (
                                         <TextField
                                             {...field}
                                             label={
                                                 t.userForm.password
                                             }
-                                            type="password"
+                                            type={
+                                                showPassword
+                                                    ? 'text'
+                                                    : 'password'
+                                            }
                                             fullWidth
+                                            size="small"
                                             error={
                                                 !!errors.password
                                             }
@@ -307,34 +466,134 @@ export default function UserFormDialog({
                                                 errors.password
                                                     ?.message
                                             }
+                                            sx={fieldSx}
+                                            slotProps={{
+                                                input: {
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <LockOutlined
+                                                                sx={{
+                                                                    fontSize: 18,
+                                                                    color: 'text.secondary',
+                                                                }}
+                                                            />
+                                                        </InputAdornment>
+                                                    ),
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={() =>
+                                                                    setShowPassword((value) => !value)
+                                                                }
+                                                                edge="end"
+                                                            >
+                                                                {showPassword ? (
+                                                                    <VisibilityOff fontSize="small" />
+                                                                ) : (
+                                                                    <Visibility fontSize="small" />
+                                                                )}
+                                                            </IconButton>
+                                                        </InputAdornment>
+                                                    ),
+                                                },
+                                            }}
                                         />
                                     )}
                                 />
                             </>
+                        ) : (
+                            <Box
+                                sx={{
+                                    px: 1.5,
+                                    py: 1.25,
+                                    borderRadius: 2,
+                                    bgcolor:
+                                        'action.hover',
+                                    border: '1px solid',
+                                    borderColor:
+                                        'divider',
+                                }}
+                            >
+                                <Typography
+                                    sx={{
+                                        fontSize: 10.5,
+                                        color: 'text.secondary',
+                                        fontWeight: 700,
+                                        mb: 0.3,
+                                    }}
+                                >
+                                    {language === 'tr'
+                                        ? 'E-posta'
+                                        : 'Email'}
+                                </Typography>
+
+                                <Controller
+                                    name="email"
+                                    control={control}
+                                    render={({
+                                        field,
+                                    }) => (
+                                        <Typography
+                                            sx={{
+                                                fontSize: 13,
+                                                fontWeight: 700,
+                                            }}
+                                        >
+                                            {field.value ||
+                                                '-'}
+                                        </Typography>
+                                    )}
+                                />
+                            </Box>
                         )}
 
-                        {/* Rol - Departman */}
+                        {/* ORGANIZATION */}
+                        <SectionTitle
+                            icon={
+                                <BusinessOutlined />
+                            }
+                            title={
+                                language === 'tr'
+                                    ? 'Organizasyon ve Rol'
+                                    : 'Organization & Role'
+                            }
+                        />
+
                         <Stack
                             direction={{
                                 xs: 'column',
                                 sm: 'row',
                             }}
-                            spacing={2}
+                            spacing={1.5}
                         >
                             <Controller
                                 name="role"
                                 control={control}
-                                render={({ field }) => (
+                                render={({
+                                    field,
+                                }) => (
                                     <TextField
                                         {...field}
                                         select
-                                        label={t.userForm.role}
+                                        label={
+                                            t.userForm.role
+                                        }
                                         fullWidth
-                                        error={!!errors.role}
-                                        helperText={errors.role?.message}
+                                        size="small"
+                                        error={
+                                            !!errors.role
+                                        }
+                                        helperText={
+                                            errors.role
+                                                ?.message
+                                        }
+                                        sx={fieldSx}
                                     >
                                         {roleOptions.map(
-                                            (option) => (
+                                            (
+                                                option
+                                            ) => (
                                                 <MenuItem
                                                     key={
                                                         option.value
@@ -356,40 +615,54 @@ export default function UserFormDialog({
                             <Controller
                                 name="departmentId"
                                 control={control}
-                                render={({ field }) => (
+                                render={({
+                                    field,
+                                }) => (
                                     <TextField
                                         {...field}
                                         value={
-                                            field.value ?? ''
+                                            field.value ??
+                                            ''
                                         }
-                                        onChange={(event) =>
+                                        onChange={(
+                                            event
+                                        ) =>
                                             field.onChange(
                                                 Number(
-                                                    event.target.value
+                                                    event
+                                                        .target
+                                                        .value
                                                 )
                                             )
                                         }
                                         select
                                         label={
-                                            t.userForm.department
+                                            t.userForm
+                                                .department
                                         }
                                         fullWidth
+                                        size="small"
                                         error={
                                             !!errors.departmentId
                                         }
                                         helperText={
-                                            errors.departmentId
+                                            errors
+                                                .departmentId
                                                 ?.message
                                         }
+                                        sx={fieldSx}
                                     >
                                         <MenuItem value="">
                                             {
-                                                t.userForm.selectDepartment
+                                                t.userForm
+                                                    .selectDepartment
                                             }
                                         </MenuItem>
 
                                         {departments.map(
-                                            (department) => (
+                                            (
+                                                department
+                                            ) => (
                                                 <MenuItem
                                                     key={
                                                         department.id
@@ -409,7 +682,6 @@ export default function UserFormDialog({
                             />
                         </Stack>
 
-                        {/* İş Pozisyonu */}
                         <Controller
                             name="jobPositionId"
                             control={control}
@@ -417,29 +689,49 @@ export default function UserFormDialog({
                                 <TextField
                                     {...field}
                                     value={
-                                        field.value ?? ''
+                                        field.value ??
+                                        ''
                                     }
-                                    onChange={(event) =>
+                                    onChange={(
+                                        event
+                                    ) =>
                                         field.onChange(
-                                            event.target.value === ''
+                                            event.target
+                                                .value ===
+                                                ''
                                                 ? null
                                                 : Number(
-                                                    event.target.value
+                                                    event
+                                                        .target
+                                                        .value
                                                 )
                                         )
                                     }
                                     select
                                     label={
-                                        t.userForm.position
+                                        t.userForm
+                                            .position
                                     }
                                     fullWidth
+                                    size="small"
+                                    sx={fieldSx}
+                                    slotProps={{
+                                        inputLabel: {
+                                            shrink: true,
+                                        },
+                                    }}
                                 >
                                     <MenuItem value="">
-                                        {t.userForm.notSelected}
+                                        {
+                                            t.userForm
+                                                .notSelected
+                                        }
                                     </MenuItem>
 
                                     {jobPositions.map(
-                                        (position) => (
+                                        (
+                                            position
+                                        ) => (
                                             <MenuItem
                                                 key={
                                                     position.id
@@ -448,7 +740,9 @@ export default function UserFormDialog({
                                                     position.id
                                                 }
                                             >
-                                                {position.name}
+                                                {
+                                                    position.name
+                                                }
                                             </MenuItem>
                                         )
                                     )}
@@ -456,42 +750,114 @@ export default function UserFormDialog({
                             )}
                         />
 
-                        {/* Aktif kullanıcı */}
+                        {/* STATUS */}
                         {mode === 'edit' && (
-                            <Controller
-                                name="isActive"
-                                control={control}
-                                render={({ field }) => (
-                                    <FormControlLabel
+                            <>
+                                <Divider />
+
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems:
+                                            'center',
+                                        justifyContent:
+                                            'space-between',
+                                        gap: 2,
+                                        p: 1.5,
+                                        borderRadius: 2,
+                                        bgcolor:
+                                            'rgba(245,179,1,0.055)',
+                                        border: '1px solid',
+                                        borderColor:
+                                            'rgba(245,179,1,0.16)',
+                                    }}
+                                >
+                                    <Box>
+                                        <Typography
+                                            sx={{
+                                                fontSize: 13,
+                                                fontWeight: 750,
+                                            }}
+                                        >
+                                            {language ===
+                                                'tr'
+                                                ? 'Kullanıcı Durumu'
+                                                : 'User Status'}
+                                        </Typography>
+
+                                        <Typography
+                                            color="text.secondary"
+                                            sx={{
+                                                fontSize: 11,
+                                                mt: 0.25,
+                                            }}
+                                        >
+                                            {language ===
+                                                'tr'
+                                                ? 'Kullanıcının sisteme erişimini yönetin.'
+                                                : 'Manage the user’s system access.'}
+                                        </Typography>
+                                    </Box>
+
+                                    <Controller
+                                        name="isActive"
                                         control={
-                                            <Switch
-                                                checked={
-                                                    field.value
+                                            control
+                                        }
+                                        render={({
+                                            field,
+                                        }) => (
+                                            <FormControlLabel
+                                                sx={{
+                                                    m: 0,
+                                                }}
+                                                control={
+                                                    <Switch
+                                                        checked={
+                                                            field.value
+                                                        }
+                                                        onChange={
+                                                            field.onChange
+                                                        }
+                                                        size="small"
+                                                    />
                                                 }
-                                                onChange={
-                                                    field.onChange
+                                                label={
+                                                    field.value
+                                                        ? language ===
+                                                            'tr'
+                                                            ? 'Aktif'
+                                                            : 'Active'
+                                                        : language ===
+                                                            'tr'
+                                                            ? 'Pasif'
+                                                            : 'Inactive'
                                                 }
                                             />
-                                        }
-                                        label={
-                                            t.userForm.activeUser
-                                        }
+                                        )}
                                     />
-                                )}
-                            />
+                                </Box>
+                            </>
                         )}
                     </Stack>
                 </DialogContent>
 
                 <DialogActions
                     sx={{
-                        px: 3,
-                        pb: 2.5,
+                        px: { xs: 2.5, sm: 3 },
+                        py: 2,
+                        borderTop: '1px solid',
+                        borderColor: 'divider',
+                        gap: 1,
                     }}
                 >
                     <Button
                         onClick={onClose}
                         color="inherit"
+                        sx={{
+                            borderRadius: 2,
+                            fontWeight: 700,
+                        }}
                     >
                         {t.userForm.cancel}
                     </Button>
@@ -500,13 +866,81 @@ export default function UserFormDialog({
                         type="submit"
                         variant="contained"
                         disabled={submitting}
+                        sx={{
+                            minWidth: 120,
+                            minHeight: 40,
+                            borderRadius: 2,
+                            bgcolor: '#F5B301',
+                            color: '#111111',
+                            fontWeight: 800,
+                            boxShadow: 'none',
+                            '&:hover': {
+                                bgcolor: '#E0A300',
+                                boxShadow:
+                                    '0 6px 18px rgba(245,179,1,0.18)',
+                            },
+                        }}
                     >
-                        {mode === 'create'
-                            ? t.userForm.create
-                            : t.userForm.update}
+                        {submitting
+                            ? language === 'tr'
+                                ? 'Kaydediliyor...'
+                                : 'Saving...'
+                            : mode === 'create'
+                                ? t.userForm.create
+                                : t.userForm.update}
                     </Button>
                 </DialogActions>
             </Box>
         </Dialog>
     )
+}
+
+function SectionTitle({
+    icon,
+    title,
+}: {
+    icon: ReactNode
+    title: string
+}) {
+    return (
+        <Box
+            sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.8,
+                pt: 0.25,
+            }}
+        >
+            <Box
+                sx={{
+                    color: '#C68E00',
+                    display: 'flex',
+                    alignItems: 'center',
+                }}
+            >
+                {icon}
+            </Box>
+
+            <Typography
+                sx={{
+                    fontSize: 12,
+                    fontWeight: 800,
+                    letterSpacing: 0.3,
+                    textTransform: 'uppercase',
+                }}
+            >
+                {title}
+            </Typography>
+        </Box>
+    )
+}
+
+const fieldSx = {
+    '& .MuiOutlinedInput-root': {
+        borderRadius: 2,
+        fontSize: 13,
+    },
+    '& .MuiInputLabel-root': {
+        fontSize: 13,
+    },
 }
