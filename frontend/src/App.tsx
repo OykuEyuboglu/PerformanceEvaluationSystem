@@ -13,7 +13,6 @@ import EvaluatorEmployeesPage from './features/evaluatorEmployees/pages/Evaluato
 import EvaluationsPage from './features/evaluations/pages/EvaluationsPage'
 import NewEvaluationPage from './features/evaluations/pages/NewEvaluationPage'
 import TeamRankingPage from './features/reports/pages/TeamRankingPage'
-import DepartmentRankingPage from './features/reports/pages/DepartmentRankingPage'
 import MyEvaluationsPage from './features/evaluations/pages/MyEvaluationsPage'
 
 import { LanguageProvider } from './shared/i18n/LanguageContext'

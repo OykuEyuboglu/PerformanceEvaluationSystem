@@ -5,7 +5,7 @@ import { Outlet } from 'react-router-dom'
 import Header from './Header'
 import Footer from './Footer'
 import Sidebar from '../shared/components/Sidebar'
-
+import { useLocation } from 'react-router-dom'
 import { HEADER_HEIGHT } from '../shared/constants/layout'
 
 type MainLayoutProps = {
@@ -35,6 +35,8 @@ export default function MainLayout({
         setSidebarPinned((prev) => !prev)
         setSidebarHovered(false)
     }
+
+    const location = useLocation()
 
     const handleSidebarHover = (
         hovered: boolean
@@ -164,18 +166,25 @@ export default function MainLayout({
                     }}
                 >
                     <Box
+                        key={location.pathname}
                         sx={{
                             flex: 1,
-
                             minWidth: 0,
                             width: '100%',
-
                             boxSizing: 'border-box',
+                            p: { xs: 1.5, sm: 2, md: 4 },
 
-                            p: {
-                                xs: 1.5,
-                                sm: 2,
-                                md: 4,
+                            animation: 'pageEnter 260ms ease-out',
+
+                            '@keyframes pageEnter': {
+                                from: {
+                                    opacity: 0,
+                                    transform: 'translateY(6px)',
+                                },
+                                to: {
+                                    opacity: 1,
+                                    transform: 'translateY(0)',
+                                },
                             },
                         }}
                     >
