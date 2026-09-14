@@ -15,4 +15,6 @@ public interface IEvaluationService
     int evaluatorId,
     int evaluationPeriodId,
     ClaimsPrincipal evaluatorClaims);
+    Task<EvaluationDto> ApproveAsync(int id);
+
 }

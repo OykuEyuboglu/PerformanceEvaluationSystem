@@ -268,8 +268,8 @@ export default function UsersPage() {
                 open: true,
                 message:
                     language === 'tr'
-                        ? 'Kullanıcı pasifleştirildi.'
-                        : 'User deactivated successfully.',
+                        ? 'Kullanıcı silindi.'
+                        : 'User deleted successfully.',
                 severity: 'success',
             })
 
@@ -281,8 +281,8 @@ export default function UsersPage() {
                 message:
                     err?.response?.data?.message ??
                     (language === 'tr'
-                        ? 'Kullanıcı pasifleştirilemedi.'
-                        : 'User could not be deactivated.'),
+                        ? 'Kullanıcı silinemedi.'
+                        : 'User could not be deleted.'),
                 severity: 'error',
             })
         } finally {
@@ -561,8 +561,8 @@ export default function UsersPage() {
                     <Tooltip
                         title={
                             language === 'tr'
-                                ? 'Pasifleştir'
-                                : 'Deactivate'
+                                ? 'Sil'
+                                : 'Delete'
                         }
                     >
                         <IconButton
@@ -1160,13 +1160,13 @@ export default function UsersPage() {
                 open={!!deleteTarget}
                 title={
                     language === 'tr'
-                        ? 'Kullanıcıyı Pasifleştir'
-                        : 'Deactivate User'
+                        ? 'Kullanıcıyı Sil'
+                        : 'Delete User'
                 }
                 description={
                     language === 'tr'
-                        ? `"${deleteTarget?.firstName} ${deleteTarget?.lastName}" adlı kullanıcıyı pasifleştirmek istediğine emin misin? Kullanıcı sistemden silinmez, yalnızca pasif duruma alınır.`
-                        : `Are you sure you want to deactivate "${deleteTarget?.firstName} ${deleteTarget?.lastName}"? The user will be deactivated rather than permanently deleted.`
+                        ? `"${deleteTarget?.firstName} ${deleteTarget?.lastName}" adlı kullanıcıyı silmek istediğine emin misin? Kullanıcı sistemden silinmez, yalnızca tablolardan gizlenir.`
+                        : `Are you sure you want to deactivate "${deleteTarget?.firstName} ${deleteTarget?.lastName}"? The user will be deleted rather than permanently deleted.`
                 }
                 loading={deleting}
                 onConfirm={handleDelete}

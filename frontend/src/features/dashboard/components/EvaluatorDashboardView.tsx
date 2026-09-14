@@ -214,7 +214,7 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
             >
                 <Box>
                     <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: '-0.3px' }}>
-                        Hoş geldin, {firstName || 'Değerlendirici'} 👋
+                        Hoş geldin, {firstName || 'Değerlendirici'}
                     </Typography>
                     <Typography color="text.secondary" sx={{ mt: 0.5, fontSize: 14 }}>
                         Ekibinin performansını tek ekrandan analiz et ve değerlendirme sürecini yönet.

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using PerformanceEvaluation.Domain.Enums;
+
 namespace PerformanceEvaluation.Domain.Common;
 
 public abstract class AuditableEntity : BaseEntity

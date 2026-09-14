@@ -19,16 +19,14 @@ import {
 } from '@mui/icons-material'
 
 const STATUS_LABELS: Record<string, string> = {
-    Draft: 'Taslak',
     Submitted: 'Gönderildi',
     Approved: 'Onaylandı',
 }
 
 const STATUS_COLORS: Record<
     string,
-    'default' | 'info' | 'success'
+    'info' | 'success'
 > = {
-    Draft: 'default',
     Submitted: 'info',
     Approved: 'success',
 }

@@ -338,4 +338,23 @@ public class EvaluationService : IEvaluationService
         throw new UnauthorizedAccessException(
             "Bu değerlendirmeyi görüntüleme yetkiniz yok.");
     }
+
+    public async Task<EvaluationDto> ApproveAsync(int id)
+    {
+        var evaluation = await _evaluationRepository.GetByIdAsync(id)
+            ?? throw new KeyNotFoundException("Değerlendirme bulunamadı.");
+
+        if (evaluation.Status != EvaluationStatus.Submitted)
+            throw new InvalidOperationException(
+                "Sadece 'Gönderildi' durumundaki değerlendirmeler onaylanabilir.");
+
+        evaluation.Status = EvaluationStatus.Approved;
+        evaluation.UpdatedAt = DateTime.Now;
+
+        _evaluationRepository.Update(evaluation);
+        await _evaluationRepository.SaveChangesAsync();
+
+        var updated = await _evaluationRepository.GetByIdWithDetailsAsync(id);
+        return _mapper.Map<EvaluationDto>(updated);
+    }
 }

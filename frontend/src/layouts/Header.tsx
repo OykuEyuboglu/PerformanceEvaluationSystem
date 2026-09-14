@@ -34,9 +34,7 @@ import { HEADER_HEIGHT } from '../shared/constants/layout'
 
 type HeaderProps = {
     mode: 'light' | 'dark'
-    setMode: React.Dispatch<
-        React.SetStateAction<'light' | 'dark'>
-    >
+    onToggleTheme: () => void
     sidebarOpen: boolean
     onToggleSidebar: () => void
     onOpenMobileSidebar: () => void
@@ -44,7 +42,7 @@ type HeaderProps = {
 
 export default function Header({
     mode,
-    setMode,
+    onToggleTheme,
     sidebarOpen,
     onToggleSidebar,
     onOpenMobileSidebar,
@@ -382,16 +380,9 @@ export default function Header({
 
                     {/* THEME TOGGLE */}
                     <IconButton
-                        onClick={() =>
-                            setMode(
-                                isDark
-                                    ? 'light'
-                                    : 'dark'
-                            )
-                        }
+                        onClick={onToggleTheme}
                         sx={{
                             color: 'text.primary',
-
                             p: {
                                 xs: 0.5,
                                 sm: 0.75,

@@ -1,17 +1,16 @@
 ﻿import {
     Dialog, DialogTitle, DialogContent, DialogActions, Button,
-    Box, Typography, Chip, Divider,
+    Box, Typography, Chip, Divider, CircularProgress,
 } from '@mui/material'
+import { CheckCircle } from '@mui/icons-material'
 import type { EvaluationDto } from '../types'
 
 const STATUS_LABELS: Record<string, string> = {
-    Draft: 'Taslak',
     Submitted: 'Gönderildi',
     Approved: 'Onaylandı',
 }
 
-const STATUS_COLORS: Record<string, 'default' | 'info' | 'success'> = {
-    Draft: 'default',
+const STATUS_COLORS: Record<string, 'info' | 'success'> = {
     Submitted: 'info',
     Approved: 'success',
 }
@@ -20,9 +19,19 @@ interface EvaluationDetailDialogProps {
     open: boolean
     evaluation: EvaluationDto | null
     onClose: () => void
+    canApprove?: boolean
+    onApprove?: (id: number) => void
+    approving?: boolean
 }
 
-export default function EvaluationDetailDialog({ open, evaluation, onClose }: EvaluationDetailDialogProps) {
+export default function EvaluationDetailDialog({
+    open,
+    evaluation,
+    onClose,
+    canApprove = false,
+    onApprove,
+    approving = false,
+}: EvaluationDetailDialogProps) {
     if (!evaluation) return null
 
     const grouped = evaluation.details.reduce<Record<string, typeof evaluation.details>>((acc, d) => {
@@ -30,6 +39,8 @@ export default function EvaluationDetailDialog({ open, evaluation, onClose }: Ev
         acc[d.categoryName].push(d)
         return acc
     }, {})
+
+    const showApproveButton = canApprove && evaluation.status === 'Submitted'
 
     return (
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -82,7 +93,18 @@ export default function EvaluationDetailDialog({ open, evaluation, onClose }: Ev
                 )}
             </DialogContent>
             <DialogActions sx={{ px: 3, pb: 2.5 }}>
-                <Button onClick={onClose}>Kapat</Button>
+                <Button onClick={onClose} color="inherit">Kapat</Button>
+                {showApproveButton && (
+                    <Button
+                        variant="contained"
+                        color="success"
+                        startIcon={approving ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : <CheckCircle />}
+                        disabled={approving}
+                        onClick={() => onApprove?.(evaluation.id)}
+                    >
+                        {approving ? 'Onaylanıyor...' : 'Onayla'}
+                    </Button>
+                )}
             </DialogActions>
         </Dialog>
     )

@@ -1,4 +1,10 @@
-﻿import { useEffect, useState, useCallback, useMemo, type ReactNode } from 'react'
+﻿import {
+    useEffect,
+    useState,
+    useCallback,
+    useMemo,
+    type ReactNode,
+} from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 import {
@@ -13,33 +19,42 @@ import {
     IconButton,
     Tooltip,
 } from '@mui/material'
+
 import {
     Search,
     AssessmentOutlined,
     CheckCircleOutlined,
-    PendingActionsOutlined,
     TrendingUpOutlined,
     VisibilityOutlined,
 } from '@mui/icons-material'
+
 import {
     DataGrid,
     type GridColDef,
     type GridRenderCellParams,
 } from '@mui/x-data-grid'
-import { getAllEvaluations } from '../evaluationsApi'
+
+import {
+    getAllEvaluations,
+    approveEvaluation,
+} from '../evaluationsApi'
+
 import { getEvaluationPeriods } from '../../evaluationPeriods/evaluationPeriodsApi'
+
 import type { EvaluationDto } from '../types'
 import type { EvaluationPeriod } from '../../evaluationPeriods/types'
+
 import EvaluationDetailDialog from '../components/EvaluationDetailDialog'
 
 const STATUS_LABELS: Record<string, string> = {
-    Draft: 'Taslak',
     Submitted: 'Gönderildi',
     Approved: 'Onaylandı',
 }
 
-const STATUS_COLORS: Record<string, 'default' | 'info' | 'success'> = {
-    Draft: 'default',
+const STATUS_COLORS: Record<
+    string,
+    'info' | 'success'
+> = {
     Submitted: 'info',
     Approved: 'success',
 }
@@ -49,7 +64,9 @@ function getInitials(name: string) {
         .split(' ')
         .filter(Boolean)
         .slice(0, 2)
-        .map((part) => part.charAt(0).toUpperCase())
+        .map((part) =>
+            part.charAt(0).toUpperCase()
+        )
         .join('')
 }
 
@@ -87,8 +104,10 @@ function KpiCard({
                     'transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease',
                 '&:hover': {
                     transform: 'translateY(-2px)',
-                    boxShadow: '0 10px 26px rgba(0,0,0,0.06)',
-                    borderColor: 'rgba(245,179,1,0.45)',
+                    boxShadow:
+                        '0 10px 26px rgba(0,0,0,0.06)',
+                    borderColor:
+                        'rgba(245,179,1,0.45)',
                 },
             }}
         >
@@ -114,7 +133,10 @@ function KpiCard({
 
                     <Typography
                         sx={{
-                            fontSize: { xs: 24, sm: 27 },
+                            fontSize: {
+                                xs: 24,
+                                sm: 27,
+                            },
                             lineHeight: 1,
                             fontWeight: 800,
                             letterSpacing: -0.5,
@@ -142,7 +164,8 @@ function KpiCard({
                         borderRadius: 2,
                         display: 'grid',
                         placeItems: 'center',
-                        bgcolor: 'rgba(245,179,1,0.13)',
+                        bgcolor:
+                            'rgba(245,179,1,0.13)',
                         color: 'primary.main',
                     }}
                 >
@@ -154,59 +177,112 @@ function KpiCard({
 }
 
 export default function EvaluationsPage() {
-
     const [searchParams] = useSearchParams()
-    const [evaluations, setEvaluations] = useState<EvaluationDto[]>([])
-    const [periods, setPeriods] = useState<EvaluationPeriod[]>([])
-    const [periodFilter, setPeriodFilter] = useState('all')
+
+    const [evaluations, setEvaluations] =
+        useState<EvaluationDto[]>([])
+
+    const [periods, setPeriods] =
+        useState<EvaluationPeriod[]>([])
+
+    const [periodFilter, setPeriodFilter] =
+        useState('all')
+
     const [search, setSearch] = useState('')
-    const [loading, setLoading] = useState(true)
+
+    const [loading, setLoading] =
+        useState(true)
+
     const [selected, setSelected] =
         useState<EvaluationDto | null>(null)
+
+    const [approving, setApproving] =
+        useState(false)
 
     const loadData = useCallback(async () => {
         setLoading(true)
 
         try {
-            const [evalData, periodData] = await Promise.all([
+            const [
+                evalData,
+                periodData,
+            ] = await Promise.all([
                 getAllEvaluations(),
                 getEvaluationPeriods(),
             ])
 
             setEvaluations(evalData)
             setPeriods(periodData)
+        } catch (error) {
+            console.error(
+                'Değerlendirmeler yüklenemedi:',
+                error
+            )
         } finally {
             setLoading(false)
         }
     }, [])
 
     useEffect(() => {
+        loadData()
+    }, [loadData])
+
+    useEffect(() => {
         if (!periods.length) return
 
-        const periodId = searchParams.get('periodId')
+        const periodId =
+            searchParams.get('periodId')
 
         if (!periodId) return
 
         const selectedPeriod = periods.find(
-            (period) => period.id === Number(periodId)
+            (period) =>
+                period.id === Number(periodId)
         )
 
         if (selectedPeriod) {
-            setPeriodFilter(selectedPeriod.name)
+            setPeriodFilter(
+                selectedPeriod.name
+            )
         }
     }, [periods, searchParams])
 
-    useEffect(() => {
-        loadData()
-    }, [loadData])
+    const handleApprove = async (id: number) => {
+        setApproving(true)
+
+        try {
+            const updated =
+                await approveEvaluation(id)
+
+            setEvaluations((prev) =>
+                prev.map((evaluation) =>
+                    evaluation.id === id
+                        ? updated
+                        : evaluation
+                )
+            )
+
+            setSelected(updated)
+        } catch (error) {
+            console.error(
+                'Değerlendirme onaylanamadı:',
+                error
+            )
+        } finally {
+            setApproving(false)
+        }
+    }
 
     const filtered = useMemo(() => {
-        const q = search.trim().toLowerCase()
+        const q = search
+            .trim()
+            .toLowerCase()
 
         return evaluations.filter((e) => {
             if (
                 periodFilter !== 'all' &&
-                e.evaluationPeriodName !== periodFilter
+                e.evaluationPeriodName !==
+                periodFilter
             ) {
                 return false
             }
@@ -214,45 +290,57 @@ export default function EvaluationsPage() {
             if (!q) return true
 
             return (
-                e.employeeName.toLowerCase().includes(q) ||
-                e.evaluatorName.toLowerCase().includes(q) ||
-                e.evaluationPeriodName.toLowerCase().includes(q)
+                e.employeeName
+                    .toLowerCase()
+                    .includes(q) ||
+                e.evaluatorName
+                    .toLowerCase()
+                    .includes(q) ||
+                e.evaluationPeriodName
+                    .toLowerCase()
+                    .includes(q)
             )
         })
-    }, [evaluations, periodFilter, search])
+    }, [
+        evaluations,
+        periodFilter,
+        search,
+    ])
 
     const stats = useMemo(() => {
         const total = filtered.length
 
         const average = total
             ? filtered.reduce(
-                (sum, e) => sum + e.totalScore,
+                (sum, e) =>
+                    sum + e.totalScore,
                 0
             ) / total
             : 0
 
-        const approved = filtered.filter(
-            (e) => e.status === 'Approved'
-        ).length
+        const approved =
+            filtered.filter(
+                (e) =>
+                    e.status === 'Approved'
+            ).length
 
-        const submitted = filtered.filter(
-            (e) => e.status === 'Submitted'
-        ).length
-
-        const draft = filtered.filter(
-            (e) => e.status === 'Draft'
-        ).length
+        const submitted =
+            filtered.filter(
+                (e) =>
+                    e.status === 'Submitted'
+            ).length
 
         return {
             total,
             average,
             approved,
             submitted,
-            draft,
         }
     }, [filtered])
 
-    const columns = useMemo<GridColDef<EvaluationDto>[]>(
+    const columns = useMemo<
+        GridColDef<EvaluationDto>[]
+    >(
         () => [
             {
                 field: 'employeeName',
@@ -284,14 +372,11 @@ export default function EvaluationsPage() {
                                     'rgba(245,179,1,0.16)',
                                 color: 'text.primary',
                                 flexShrink: 0,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                lineHeight: 1,
-                                textAlign: 'center',
                             }}
                         >
-                            {getInitials(params.value ?? '')}
+                            {getInitials(
+                                params.value ?? ''
+                            )}
                         </Avatar>
 
                         <Typography
@@ -300,7 +385,8 @@ export default function EvaluationsPage() {
                                 fontWeight: 650,
                                 whiteSpace: 'nowrap',
                                 overflow: 'hidden',
-                                textOverflow: 'ellipsis',
+                                textOverflow:
+                                    'ellipsis',
                             }}
                         >
                             {params.value}
@@ -338,45 +424,54 @@ export default function EvaluationsPage() {
                 headerName: 'Toplam Skor',
                 flex: 0.8,
                 minWidth: 125,
-                renderCell: (params) => (
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 0.8,
-                        }}
-                    >
+                renderCell: (params) => {
+                    const score =
+                        Number(params.value)
+
+                    return (
                         <Box
                             sx={{
-                                width: 7,
-                                height: 7,
-                                borderRadius: '50%',
-                                bgcolor: getScoreTone(
-                                    Number(params.value)
-                                ),
-                                flexShrink: 0,
-                            }}
-                        />
-
-                        <Typography
-                            sx={{
-                                fontWeight: 800,
-                                fontSize: 13.5,
+                                display: 'flex',
+                                alignItems:
+                                    'center',
+                                gap: 0.8,
                             }}
                         >
-                            {Number(params.value).toFixed(2)}
-                        </Typography>
+                            <Box
+                                sx={{
+                                    width: 7,
+                                    height: 7,
+                                    borderRadius:
+                                        '50%',
+                                    bgcolor:
+                                        getScoreTone(
+                                            score
+                                        ),
+                                    flexShrink: 0,
+                                }}
+                            />
 
-                        <Typography
-                            sx={{
-                                fontSize: 11.5,
-                                color: 'text.secondary',
-                            }}
-                        >
-                            / 5
-                        </Typography>
-                    </Box>
-                ),
+                            <Typography
+                                sx={{
+                                    fontWeight: 800,
+                                    fontSize: 13.5,
+                                }}
+                            >
+                                {score.toFixed(2)}
+                            </Typography>
+
+                            <Typography
+                                sx={{
+                                    fontSize: 11.5,
+                                    color:
+                                        'text.secondary',
+                                }}
+                            >
+                                / 5
+                            </Typography>
+                        </Box>
+                    )
+                },
             },
 
             {
@@ -388,15 +483,19 @@ export default function EvaluationsPage() {
                     <Chip
                         size="small"
                         label={
-                            STATUS_LABELS[params.value] ??
+                            STATUS_LABELS[
+                            params.value
+                            ] ??
                             params.value
                         }
                         color={
-                            STATUS_COLORS[params.value] ??
-                            'default'
+                            STATUS_COLORS[
+                            params.value
+                            ] ?? 'default'
                         }
                         variant={
-                            params.value === 'Approved'
+                            params.value ===
+                                'Approved'
                                 ? 'filled'
                                 : 'outlined'
                         }
@@ -415,9 +514,13 @@ export default function EvaluationsPage() {
                 flex: 0.85,
                 minWidth: 115,
                 valueFormatter: (value) =>
-                    new Date(value).toLocaleDateString(
-                        'tr-TR'
-                    ),
+                    value
+                        ? new Date(
+                            value
+                        ).toLocaleDateString(
+                            'tr-TR'
+                        )
+                        : '-',
             },
 
             {
@@ -433,12 +536,16 @@ export default function EvaluationsPage() {
                             size="small"
                             onClick={(event) => {
                                 event.stopPropagation()
-                                setSelected(params.row)
+                                setSelected(
+                                    params.row
+                                )
                             }}
                             sx={{
-                                color: 'text.secondary',
+                                color:
+                                    'text.secondary',
                                 '&:hover': {
-                                    color: 'primary.main',
+                                    color:
+                                        'primary.main',
                                     bgcolor:
                                         'rgba(245,179,1,0.10)',
                                 },
@@ -461,11 +568,13 @@ export default function EvaluationsPage() {
                 '@keyframes evaluationsEnter': {
                     from: {
                         opacity: 0,
-                        transform: 'translateY(6px)',
+                        transform:
+                            'translateY(6px)',
                     },
                     to: {
                         opacity: 1,
-                        transform: 'translateY(0)',
+                        transform:
+                            'translateY(0)',
                     },
                 },
             }}
@@ -473,7 +582,8 @@ export default function EvaluationsPage() {
             <Box
                 sx={{
                     display: 'flex',
-                    justifyContent: 'space-between',
+                    justifyContent:
+                        'space-between',
                     alignItems: {
                         xs: 'flex-start',
                         md: 'center',
@@ -487,7 +597,8 @@ export default function EvaluationsPage() {
                     <Box
                         sx={{
                             display: 'flex',
-                            alignItems: 'center',
+                            alignItems:
+                                'center',
                             gap: 1.25,
                         }}
                     >
@@ -498,8 +609,10 @@ export default function EvaluationsPage() {
                                 borderRadius: 2.25,
                                 display: 'grid',
                                 placeItems: 'center',
-                                bgcolor: 'primary.main',
-                                color: 'primary.contrastText',
+                                bgcolor:
+                                    'primary.main',
+                                color:
+                                    'primary.contrastText',
                                 boxShadow:
                                     '0 8px 20px rgba(245,179,1,0.20)',
                             }}
@@ -512,7 +625,8 @@ export default function EvaluationsPage() {
                                 variant="h5"
                                 sx={{
                                     fontWeight: 800,
-                                    letterSpacing: -0.35,
+                                    letterSpacing:
+                                        -0.35,
                                 }}
                             >
                                 Değerlendirmeler
@@ -526,8 +640,8 @@ export default function EvaluationsPage() {
                                 }}
                             >
                                 Sistemdeki performans
-                                değerlendirmelerini görüntüle
-                                ve incele.
+                                değerlendirmelerini
+                                görüntüle ve incele.
                             </Typography>
                         </Box>
                     </Box>
@@ -539,14 +653,17 @@ export default function EvaluationsPage() {
                     label="Değerlendirme Dönemi"
                     value={periodFilter}
                     onChange={(e) =>
-                        setPeriodFilter(e.target.value)
+                        setPeriodFilter(
+                            e.target.value
+                        )
                     }
                     sx={{
                         minWidth: {
                             xs: '100%',
                             sm: 230,
                         },
-                        '& .MuiOutlinedInput-root': {
+                        '& .MuiOutlinedInput-root':
+                        {
                             borderRadius: 2,
                         },
                     }}
@@ -555,12 +672,12 @@ export default function EvaluationsPage() {
                         Tüm Dönemler
                     </MenuItem>
 
-                    {periods.map((p) => (
+                    {periods.map((period) => (
                         <MenuItem
-                            key={p.id}
-                            value={p.name}
+                            key={period.id}
+                            value={period.name}
                         >
-                            {p.name}
+                            {period.name}
                         </MenuItem>
                     ))}
                 </TextField>
@@ -589,7 +706,9 @@ export default function EvaluationsPage() {
 
                 <KpiCard
                     label="Ortalama Skor"
-                    value={`${stats.average.toFixed(2)} / 5`}
+                    value={`${stats.average.toFixed(
+                        2
+                    )} / 5`}
                     caption="Değerlendirmelerin genel ortalaması"
                     icon={
                         <TrendingUpOutlined fontSize="small" />
@@ -610,18 +729,7 @@ export default function EvaluationsPage() {
                     icon={
                         <CheckCircleOutlined fontSize="small" />
                     }
-                />
-
-                <KpiCard
-                    label="Bekleyen"
-                    value={
-                        stats.submitted + stats.draft
-                    }
-                    caption={`${stats.submitted} gönderildi · ${stats.draft} taslak`}
-                    icon={
-                        <PendingActionsOutlined fontSize="small" />
-                    }
-                />
+                />                       
             </Box>
 
             <Paper
@@ -643,8 +751,10 @@ export default function EvaluationsPage() {
                         borderBottom: '1px solid',
                         borderColor: 'divider',
                         display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
+                        alignItems:
+                            'center',
+                        justifyContent:
+                            'space-between',
                         gap: 2,
                         flexWrap: 'wrap',
                     }}
@@ -666,7 +776,8 @@ export default function EvaluationsPage() {
                                 mt: 0.25,
                             }}
                         >
-                            {filtered.length} kayıt listeleniyor
+                            {filtered.length}{' '}
+                            kayıt listeleniyor
                         </Typography>
                     </Box>
 
@@ -674,7 +785,9 @@ export default function EvaluationsPage() {
                         size="small"
                         value={search}
                         onChange={(e) =>
-                            setSearch(e.target.value)
+                            setSearch(
+                                e.target.value
+                            )
                         }
                         placeholder="Çalışan, değerlendirici veya dönem ara..."
                         sx={{
@@ -682,7 +795,8 @@ export default function EvaluationsPage() {
                                 xs: '100%',
                                 sm: 330,
                             },
-                            '& .MuiOutlinedInput-root': {
+                            '& .MuiOutlinedInput-root':
+                            {
                                 borderRadius: 2,
                                 fontSize: 13,
                             },
@@ -694,7 +808,8 @@ export default function EvaluationsPage() {
                                         <Search
                                             fontSize="small"
                                             sx={{
-                                                color: 'text.secondary',
+                                                color:
+                                                    'text.secondary',
                                             }}
                                         />
                                     </InputAdornment>
@@ -712,9 +827,15 @@ export default function EvaluationsPage() {
                     autoHeight
                     disableRowSelectionOnClick
                     onRowClick={(params) =>
-                        setSelected(params.row)
+                        setSelected(
+                            params.row
+                        )
                     }
-                    pageSizeOptions={[10, 25, 50]}
+                    pageSizeOptions={[
+                        10,
+                        25,
+                        50,
+                    ]}
                     initialState={{
                         pagination: {
                             paginationModel: {
@@ -731,102 +852,167 @@ export default function EvaluationsPage() {
                         },
                     }}
                     localeText={{
-                        noRowsLabel: 'Gösterilecek değerlendirme bulunamadı.',
-                        noResultsOverlayLabel: 'Sonuç bulunamadı.',
+                        noRowsLabel:
+                            'Gösterilecek değerlendirme bulunamadı.',
+                        noResultsOverlayLabel:
+                            'Sonuç bulunamadı.',
 
-                        footerRowSelected: (count) =>
-                            count !== 1
-                                ? `${count.toLocaleString()} satır seçildi`
-                                : `${count.toLocaleString()} satır seçildi`,
-                        footerTotalRows: 'Toplam satır:',
-                        footerTotalVisibleRows: (visibleCount, totalCount) =>
-                            `${visibleCount.toLocaleString()} / ${totalCount.toLocaleString()}`,
-                      
+                        footerRowSelected:
+                            (count) =>
+                                `${count.toLocaleString()} satır seçildi`,
 
-                        columnMenuLabel: 'Sütun menüsü',
-                        columnMenuShowColumns: 'Sütunları göster',
-                        columnMenuManageColumns: 'Sütunları yönet',
-                        columnMenuFilter: 'Filtrele',
-                        columnMenuHideColumn: 'Sütunu gizle',
-                        columnMenuUnsort: 'Sıralamayı kaldır',
-                        columnMenuSortAsc: 'Artan sırala',
-                        columnMenuSortDesc: 'Azalan sırala',
+                        footerTotalRows:
+                            'Toplam satır:',
 
-                        filterPanelAddFilter: 'Filtre ekle',
-                        filterPanelDeleteIconLabel: 'Sil',
-                        filterPanelColumn: 'Sütun',
-                        filterPanelInputLabel: 'Değer',
-                        filterPanelInputPlaceholder: 'Filtre değeri',
-                        filterOperatorContains: 'içeriyor',
-                        filterOperatorEquals: 'eşittir',
-                        filterOperatorStartsWith: 'ile başlar',
-                        filterOperatorEndsWith: 'ile biter',
-                        filterOperatorIs: 'eşittir',
-                        filterOperatorNot: 'eşit değildir',
-                        filterOperatorAfter: 'sonra',
-                        filterOperatorOnOrAfter: 'sonra veya eşit',
-                        filterOperatorBefore: 'önce',
-                        filterOperatorOnOrBefore: 'önce veya eşit',
-                        filterOperatorIsEmpty: 'boş',
-                        filterOperatorIsNotEmpty: 'boş değil',
-                        filterOperatorIsAnyOf: 'şunlardan biri',
+                        footerTotalVisibleRows:
+                            (
+                                visibleCount,
+                                totalCount
+                            ) =>
+                                `${visibleCount.toLocaleString()} / ${totalCount.toLocaleString()}`,
 
-                        columnHeaderSortIconLabel: 'Sıralamak için tıklayın',
+                        columnMenuLabel:
+                            'Sütun menüsü',
+                        columnMenuShowColumns:
+                            'Sütunları göster',
+                        columnMenuManageColumns:
+                            'Sütunları yönet',
+                        columnMenuFilter:
+                            'Filtrele',
+                        columnMenuHideColumn:
+                            'Sütunu gizle',
+                        columnMenuUnsort:
+                            'Sıralamayı kaldır',
+                        columnMenuSortAsc:
+                            'Artan sırala',
+                        columnMenuSortDesc:
+                            'Azalan sırala',
 
-                        checkboxSelectionHeaderName: 'Seç',
-                        checkboxSelectionSelectAllRows: 'Tüm satırları seç',
-                        checkboxSelectionUnselectAllRows: 'Tüm satırların seçimini kaldır',
+                        filterPanelAddFilter:
+                            'Filtre ekle',
+                        filterPanelDeleteIconLabel:
+                            'Sil',
+                        filterPanelColumn:
+                            'Sütun',
+                        filterPanelInputLabel:
+                            'Değer',
+                        filterPanelInputPlaceholder:
+                            'Filtre değeri',
 
-                        toolbarExport: 'Dışa aktar',
-                        toolbarExportCSV: 'CSV olarak dışa aktar',
-                        toolbarExportPrint: 'Yazdır',
+                        filterOperatorContains:
+                            'içeriyor',
+                        filterOperatorEquals:
+                            'eşittir',
+                        filterOperatorStartsWith:
+                            'ile başlar',
+                        filterOperatorEndsWith:
+                            'ile biter',
+                        filterOperatorIs:
+                            'eşittir',
+                        filterOperatorNot:
+                            'eşit değildir',
+                        filterOperatorAfter:
+                            'sonra',
+                        filterOperatorOnOrAfter:
+                            'sonra veya eşit',
+                        filterOperatorBefore:
+                            'önce',
+                        filterOperatorOnOrBefore:
+                            'önce veya eşit',
+                        filterOperatorIsEmpty:
+                            'boş',
+                        filterOperatorIsNotEmpty:
+                            'boş değil',
+                        filterOperatorIsAnyOf:
+                            'şunlardan biri',
 
-                        toolbarColumns: 'Sütunlar',
-                        toolbarFilters: 'Filtreler',
-                        toolbarDensity: 'Satır yoğunluğu',
-                        toolbarDensityLabel: 'Satır yoğunluğu',
-                        toolbarDensityCompact: 'Sıkışık',
-                        toolbarDensityStandard: 'Standart',
-                        toolbarDensityComfortable: 'Rahat',
+                        columnHeaderSortIconLabel:
+                            'Sıralamak için tıklayın',
 
-                        filterPanelOperator: 'Operatör',
-                        filterPanelLogicOperator: 'Mantıksal operatör',
-                        filterPanelOperatorAnd: 'Ve',
-                        filterPanelOperatorOr: 'Veya',
-                    }}                    sx={{
+                        checkboxSelectionHeaderName:
+                            'Seç',
+                        checkboxSelectionSelectAllRows:
+                            'Tüm satırları seç',
+                        checkboxSelectionUnselectAllRows:
+                            'Tüm satırların seçimini kaldır',
+
+                        toolbarExport:
+                            'Dışa aktar',
+                        toolbarExportCSV:
+                            'CSV olarak dışa aktar',
+                        toolbarExportPrint:
+                            'Yazdır',
+                        toolbarColumns:
+                            'Sütunlar',
+                        toolbarFilters:
+                            'Filtreler',
+                        toolbarDensity:
+                            'Satır yoğunluğu',
+                        toolbarDensityLabel:
+                            'Satır yoğunluğu',
+                        toolbarDensityCompact:
+                            'Sıkışık',
+                        toolbarDensityStandard:
+                            'Standart',
+                        toolbarDensityComfortable:
+                            'Rahat',
+
+                        filterPanelOperator:
+                            'Operatör',
+                        filterPanelLogicOperator:
+                            'Mantıksal operatör',
+                        filterPanelOperatorAnd:
+                            'Ve',
+                        filterPanelOperatorOr:
+                            'Veya',
+                    }}
+                    sx={{
                         border: 'none',
 
-                        '& .MuiDataGrid-columnHeaders': {
-                            bgcolor: 'background.default',
-                            borderBottom: '1px solid',
-                            borderColor: 'divider',
+                        '& .MuiDataGrid-columnHeaders':
+                        {
+                            bgcolor:
+                                'background.default',
+                            borderBottom:
+                                '1px solid',
+                            borderColor:
+                                'divider',
                         },
 
-                        '& .MuiDataGrid-columnHeaderTitle': {
+                        '& .MuiDataGrid-columnHeaderTitle':
+                        {
                             fontWeight: 750,
                             fontSize: 12,
                         },
 
-                        '& .MuiDataGrid-cell': {
-                            borderColor: 'divider',
+                        '& .MuiDataGrid-cell':
+                        {
+                            borderColor:
+                                'divider',
                             display: 'flex',
-                            alignItems: 'center',
+                            alignItems:
+                                'center',
                         },
 
-                        '& .MuiDataGrid-row': {
+                        '& .MuiDataGrid-row':
+                        {
                             transition:
                                 'background-color 140ms ease',
                             cursor: 'pointer',
                         },
 
-                        '& .MuiDataGrid-row:hover': {
+                        '& .MuiDataGrid-row:hover':
+                        {
                             bgcolor:
                                 'rgba(245,179,1,0.045)',
                         },
 
-                        '& .MuiDataGrid-footerContainer': {
-                            borderTop: '1px solid',
-                            borderColor: 'divider',
+                        '& .MuiDataGrid-footerContainer':
+                        {
+                            borderTop:
+                                '1px solid',
+                            borderColor:
+                                'divider',
                         },
                     }}
                 />
@@ -835,7 +1021,12 @@ export default function EvaluationsPage() {
             <EvaluationDetailDialog
                 open={!!selected}
                 evaluation={selected}
-                onClose={() => setSelected(null)}
+                onClose={() =>
+                    setSelected(null)
+                }
+                canApprove
+                onApprove={handleApprove}
+                approving={approving}
             />
         </Box>
     )

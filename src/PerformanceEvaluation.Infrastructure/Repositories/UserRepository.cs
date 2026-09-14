@@ -19,7 +19,7 @@ public class UserRepository : Repository<User>, IUserRepository
         return await _context.Users
             .Include(u => u.Department)
             .Include(u => u.JobPosition)
-            .FirstOrDefaultAsync(u => u.Id == id);
+            .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
     }
 
     public new async Task<IEnumerable<User>> GetAllAsync()
@@ -27,6 +27,7 @@ public class UserRepository : Repository<User>, IUserRepository
         return await _context.Users
             .Include(u => u.Department)
             .Include(u => u.JobPosition)
+            .Where(u => !u.IsDeleted)
             .ToListAsync();
     }
 
