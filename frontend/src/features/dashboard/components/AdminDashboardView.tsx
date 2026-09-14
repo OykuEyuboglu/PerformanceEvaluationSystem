@@ -777,7 +777,7 @@ export default function AdminDashboardView() {
 
                         <Button
                             component={RouterLink}
-                            to="/reports/department-ranking"
+                            to={`/evaluations?periodId=${selectedPeriodId}`}
                             endIcon={
                                 <ArrowForward />
                             }
@@ -1352,7 +1352,7 @@ export default function AdminDashboardView() {
                                 component={
                                     RouterLink
                                 }
-                                to="/reports/department-ranking"
+                                to={`/evaluations?periodId=${selectedPeriodId}`}
                                 fullWidth
                                 variant="outlined"
                                 endIcon={

@@ -1,19 +1,59 @@
-﻿import { useEffect, useState, useCallback } from 'react'
-import { Box, Typography, Button, IconButton, Chip, Snackbar, Alert, LinearProgress } from '@mui/material'
-import { Add, Edit, Delete } from '@mui/icons-material'
+﻿import { useEffect, useState, useCallback, useMemo } from 'react'
 import {
-    getEvaluationPeriods, createEvaluationPeriod, updateEvaluationPeriod, deleteEvaluationPeriod,
+    Box,
+    Typography,
+    Button,
+    IconButton,
+    Chip,
+    Snackbar,
+    Alert,
+    LinearProgress,
+    Tooltip,
+    Stack,
+} from '@mui/material'
+import {
+    Add,
+    Edit,
+    Delete,
+    CalendarMonthOutlined,
+    EventAvailableOutlined,
+    EventOutlined,
+    HistoryOutlined,
+} from '@mui/icons-material'
+import {
+    getEvaluationPeriods,
+    createEvaluationPeriod,
+    updateEvaluationPeriod,
+    deleteEvaluationPeriod,
 } from '../evaluationPeriodsApi'
 import type { EvaluationPeriod } from '../types'
-import EvaluationPeriodFormDialog, { type EvaluationPeriodFormValues } from '../components/EvaluationPeriodFormDialog'
+import EvaluationPeriodFormDialog, {
+    type EvaluationPeriodFormValues,
+} from '../components/EvaluationPeriodFormDialog'
 import ConfirmDialog from '../../../shared/components/ConfirmDialog'
 
 const formatDate = (date: string) =>
-    new Date(date).toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' })
+    new Date(date).toLocaleDateString('tr-TR', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+    })
 
 const isCurrentPeriod = (period: EvaluationPeriod) => {
     const now = new Date()
-    return new Date(period.startDate) <= now && now <= new Date(period.endDate)
+    const start = new Date(period.startDate)
+    const end = new Date(period.endDate)
+    return start <= now && now <= end
+}
+
+const getPeriodStatus = (period: EvaluationPeriod) => {
+    const now = new Date()
+    const start = new Date(period.startDate)
+    const end = new Date(period.endDate)
+
+    if (start > now) return 'upcoming'
+    if (end < now) return 'completed'
+    return 'active'
 }
 
 export default function EvaluationPeriodsPage() {
@@ -25,11 +65,18 @@ export default function EvaluationPeriodsPage() {
     const [selected, setSelected] = useState<EvaluationPeriod | null>(null)
     const [submitting, setSubmitting] = useState(false)
 
-    const [deleteTarget, setDeleteTarget] = useState<EvaluationPeriod | null>(null)
+    const [deleteTarget, setDeleteTarget] =
+        useState<EvaluationPeriod | null>(null)
     const [deleting, setDeleting] = useState(false)
 
-    const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
-        open: false, message: '', severity: 'success',
+    const [snackbar, setSnackbar] = useState<{
+        open: boolean
+        message: string
+        severity: 'success' | 'error'
+    }>({
+        open: false,
+        message: '',
+        severity: 'success',
     })
 
     const loadData = useCallback(async () => {
@@ -37,30 +84,53 @@ export default function EvaluationPeriodsPage() {
         try {
             const data = await getEvaluationPeriods()
             setPeriods(
-                [...data].sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
+                [...data].sort(
+                    (a, b) =>
+                        new Date(b.startDate).getTime() -
+                        new Date(a.startDate).getTime(),
+                ),
             )
         } catch {
-            setSnackbar({ open: true, message: 'Dönemler yüklenirken hata oluştu.', severity: 'error' })
+            setSnackbar({
+                open: true,
+                message: 'Dönemler yüklenirken hata oluştu.',
+                severity: 'error',
+            })
         } finally {
             setLoading(false)
         }
     }, [])
 
-    useEffect(() => { loadData() }, [loadData])
+    useEffect(() => {
+        loadData()
+    }, [loadData])
 
     const showError = (err: any, fallback: string) =>
-        setSnackbar({ open: true, message: err?.response?.data?.message ?? fallback, severity: 'error' })
+        setSnackbar({
+            open: true,
+            message: err?.response?.data?.message ?? fallback,
+            severity: 'error',
+        })
 
     const handleSubmit = async (values: EvaluationPeriodFormValues) => {
         setSubmitting(true)
         try {
             if (mode === 'create') {
                 await createEvaluationPeriod(values)
-                setSnackbar({ open: true, message: 'Dönem oluşturuldu.', severity: 'success' })
+                setSnackbar({
+                    open: true,
+                    message: 'Dönem oluşturuldu.',
+                    severity: 'success',
+                })
             } else if (selected) {
                 await updateEvaluationPeriod(selected.id, values)
-                setSnackbar({ open: true, message: 'Dönem güncellendi.', severity: 'success' })
+                setSnackbar({
+                    open: true,
+                    message: 'Dönem güncellendi.',
+                    severity: 'success',
+                })
             }
+
             setDialogOpen(false)
             await loadData()
         } catch (err) {
@@ -72,81 +142,422 @@ export default function EvaluationPeriodsPage() {
 
     const handleDelete = async () => {
         if (!deleteTarget) return
+
         setDeleting(true)
         try {
             await deleteEvaluationPeriod(deleteTarget.id)
-            setSnackbar({ open: true, message: 'Dönem silindi.', severity: 'success' })
+            setSnackbar({
+                open: true,
+                message: 'Dönem silindi.',
+                severity: 'success',
+            })
             setDeleteTarget(null)
             await loadData()
         } catch (err) {
-            showError(err, 'Bu döneme ait değerlendirmeler olduğu için silinemedi.')
+            showError(
+                err,
+                'Bu döneme ait değerlendirmeler olduğu için silinemedi.',
+            )
         } finally {
             setDeleting(false)
         }
     }
 
+    const activeCount = useMemo(
+        () => periods.filter((period) => getPeriodStatus(period) === 'active').length,
+        [periods],
+    )
+    const upcomingCount = useMemo(
+        () =>
+            periods.filter(
+                (period) => getPeriodStatus(period) === 'upcoming',
+            ).length,
+        [periods],
+    )
+    const completedCount = useMemo(
+        () =>
+            periods.filter(
+                (period) => getPeriodStatus(period) === 'completed',
+            ).length,
+        [periods],
+    )
+
     return (
-        <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+        <Box
+            sx={{
+                width: '100%',
+                animation: 'periodPageEnter 280ms ease-out',
+                '@keyframes periodPageEnter': {
+                    from: {
+                        opacity: 0,
+                        transform: 'translateY(6px)',
+                    },
+                    to: {
+                        opacity: 1,
+                        transform: 'translateY(0)',
+                    },
+                },
+            }}
+        >
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: { xs: 'flex-start', md: 'center' },
+                    gap: 2,
+                    mb: 3,
+                    flexWrap: 'wrap',
+                }}
+            >
                 <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 800 }}>Değerlendirme Dönemleri</Typography>
-                    <Typography color="text.secondary" sx={{ mt: 0.5, fontSize: 14.5 }}>
-                        Performans değerlendirmelerinin yapılacağı dönemleri tanımla.
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                        }}
+                    >
+                        <CalendarMonthOutlined
+                            sx={{ color: '#C68E00', fontSize: 25 }}
+                        />
+                        <Typography
+                            sx={{
+                                fontSize: { xs: 24, md: 28 },
+                                fontWeight: 850,
+                                letterSpacing: '-0.6px',
+                            }}
+                        >
+                            Değerlendirme Dönemleri
+                        </Typography>
+                    </Box>
+
+                    <Typography
+                        color="text.secondary"
+                        sx={{
+                            mt: 0.6,
+                            fontSize: 13.5,
+                            maxWidth: 680,
+                        }}
+                    >
+                        Performans değerlendirmelerinin yürütüleceği dönemleri oluşturun ve yönetin.
                     </Typography>
                 </Box>
+
                 <Button
                     variant="contained"
                     startIcon={<Add />}
-                    onClick={() => { setMode('create'); setSelected(null); setDialogOpen(true) }}
+                    onClick={() => {
+                        setMode('create')
+                        setSelected(null)
+                        setDialogOpen(true)
+                    }}
+                    sx={{
+                        minHeight: 42,
+                        px: 2,
+                        borderRadius: 2,
+                        bgcolor: '#F5B301',
+                        color: '#111',
+                        fontWeight: 800,
+                        boxShadow: 'none',
+                        '&:hover': {
+                            bgcolor: '#E0A300',
+                            boxShadow:
+                                '0 8px 22px rgba(245,179,1,0.18)',
+                        },
+                    }}
                 >
                     Yeni Dönem
                 </Button>
             </Box>
 
-            {loading ? (
-                <LinearProgress />
-            ) : periods.length === 0 ? (
-                <Typography color="text.secondary">Henüz değerlendirme dönemi tanımlanmamış.</Typography>
-            ) : (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                    {periods.map((period) => (
+            <Box
+                sx={{
+                    display: 'grid',
+                    gridTemplateColumns: {
+                        xs: '1fr 1fr',
+                        md: 'repeat(4, 1fr)',
+                    },
+                    gap: 1.5,
+                    mb: 2.5,
+                }}
+            >
+                {[
+                    { label: 'Toplam Dönem', value: periods.length, Icon: HistoryOutlined },
+                    { label: 'Aktif', value: activeCount, Icon: EventAvailableOutlined },
+                    { label: 'Yaklaşan', value: upcomingCount, Icon: EventOutlined },
+                    { label: 'Tamamlanan', value: completedCount, Icon: CalendarMonthOutlined },
+                ].map(({ label, value, Icon }, index) => (
+                    <Box
+                        key={String(label)}
+                        sx={{
+                            p: 1.8,
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            borderRadius: 2.5,
+                            bgcolor: 'background.paper',
+                            animation: `periodCardEnter 340ms ease-out ${index * 45}ms both`,
+                            transition:
+                                'transform 180ms ease, box-shadow 180ms ease',
+                            '@keyframes periodCardEnter': {
+                                from: {
+                                    opacity: 0,
+                                    transform: 'translateY(5px)',
+                                },
+                                to: {
+                                    opacity: 1,
+                                    transform: 'translateY(0)',
+                                },
+                            },
+                            '&:hover': {
+                                transform: 'translateY(-2px)',
+                                boxShadow:
+                                    '0 8px 24px rgba(0,0,0,0.06)',
+                            },
+                        }}
+                    >
                         <Box
-                            key={period.id}
                             sx={{
-                                p: 2.5,
-                                borderRadius: 2,
-                                border: '1px solid',
-                                borderColor: 'divider',
-                                bgcolor: 'background.paper',
                                 display: 'flex',
-                                justifyContent: 'space-between',
                                 alignItems: 'center',
-                                gap: 2,
-                                flexWrap: 'wrap',
+                                justifyContent: 'space-between',
                             }}
                         >
-                            <Box>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <Typography sx={{ fontWeight: 700 }}>{period.name}</Typography>
-                                    {isCurrentPeriod(period) && (
-                                        <Chip size="small" label="Aktif Dönem" color="success" sx={{ fontWeight: 600 }} />
-                                    )}
-                                </Box>
-                                <Typography color="text.secondary" sx={{ fontSize: 13, mt: 0.5 }}>
-                                    {formatDate(period.startDate)} — {formatDate(period.endDate)}
-                                </Typography>
-                            </Box>
-                            <Box sx={{ display: 'flex', gap: 0.5 }}>
-                                <IconButton size="small" onClick={() => { setMode('edit'); setSelected(period); setDialogOpen(true) }}>
-                                    <Edit fontSize="small" />
-                                </IconButton>
-                                <IconButton size="small" onClick={() => setDeleteTarget(period)}>
-                                    <Delete fontSize="small" />
-                                </IconButton>
-                            </Box>
+                            <Typography
+                                color="text.secondary"
+                                sx={{
+                                    fontSize: 11.5,
+                                    fontWeight: 700,
+                                }}
+                            >
+                                {label}
+                            </Typography>
+                            <Icon
+                                sx={{
+                                    fontSize: 18,
+                                    color: '#C68E00',
+                                }}
+                            />
                         </Box>
-                    ))}
+                        <Typography
+                            sx={{
+                                mt: 0.5,
+                                fontSize: 23,
+                                fontWeight: 850,
+                                letterSpacing: '-0.5px',
+                            }}
+                        >
+                            {value}
+                        </Typography>
+                    </Box>
+                ))}
+            </Box>
+
+            {loading ? (
+                <Box sx={{ py: 1 }}>
+                    <LinearProgress sx={{ borderRadius: 2 }} />
                 </Box>
+            ) : periods.length === 0 ? (
+                <Box
+                    sx={{
+                        p: 5,
+                        textAlign: 'center',
+                        border: '1px dashed',
+                        borderColor: 'divider',
+                        borderRadius: 3,
+                        bgcolor: 'background.paper',
+                    }}
+                >
+                    <CalendarMonthOutlined
+                        sx={{
+                            fontSize: 34,
+                            color: 'text.disabled',
+                            mb: 1,
+                        }}
+                    />
+                    <Typography sx={{ fontWeight: 800 }}>
+                        Henüz değerlendirme dönemi tanımlanmamış.
+                    </Typography>
+                    <Typography
+                        color="text.secondary"
+                        sx={{ mt: 0.5, fontSize: 13 }}
+                    >
+                        İlk dönemi oluşturarak değerlendirme sürecini başlatabilirsiniz.
+                    </Typography>
+                </Box>
+            ) : (
+                <Stack spacing={1.25}>
+                    {periods.map((period, index) => {
+                        const status = getPeriodStatus(period)
+                        const active = isCurrentPeriod(period)
+
+                        return (
+                            <Box
+                                key={period.id}
+                                sx={{
+                                    p: { xs: 1.7, md: 2 },
+                                    borderRadius: 2.5,
+                                    border: '1px solid',
+                                    borderColor: active
+                                        ? 'rgba(46,125,50,0.28)'
+                                        : 'divider',
+                                    bgcolor: 'background.paper',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: 2,
+                                    flexWrap: 'wrap',
+                                    animation: `periodRowEnter 300ms ease-out ${index * 35}ms both`,
+                                    transition:
+                                        'transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease',
+                                    '@keyframes periodRowEnter': {
+                                        from: {
+                                            opacity: 0,
+                                            transform: 'translateY(5px)',
+                                        },
+                                        to: {
+                                            opacity: 1,
+                                            transform: 'translateY(0)',
+                                        },
+                                    },
+                                    '&:hover': {
+                                        transform: 'translateX(2px)',
+                                        boxShadow:
+                                            '0 8px 26px rgba(0,0,0,0.055)',
+                                    },
+                                }}
+                            >
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1.5,
+                                        minWidth: 0,
+                                    }}
+                                >
+                                    <Box
+                                        sx={{
+                                            width: 42,
+                                            height: 42,
+                                            borderRadius: 2,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            flexShrink: 0,
+                                            bgcolor: active
+                                                ? 'rgba(46,125,50,0.10)'
+                                                : 'rgba(245,179,1,0.10)',
+                                            color: active
+                                                ? 'success.main'
+                                                : '#C68E00',
+                                        }}
+                                    >
+                                        {active ? (
+                                            <EventAvailableOutlined />
+                                        ) : (
+                                            <CalendarMonthOutlined />
+                                        )}
+                                    </Box>
+
+                                    <Box sx={{ minWidth: 0 }}>
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 0.8,
+                                                flexWrap: 'wrap',
+                                            }}
+                                        >
+                                            <Typography
+                                                sx={{
+                                                    fontWeight: 800,
+                                                    fontSize: 14,
+                                                }}
+                                            >
+                                                {period.name}
+                                            </Typography>
+
+                                            <Chip
+                                                size="small"
+                                                label={
+                                                    status === 'active'
+                                                        ? 'Aktif'
+                                                        : status === 'upcoming'
+                                                            ? 'Yaklaşan'
+                                                            : 'Tamamlandı'
+                                                }
+                                                color={
+                                                    status === 'active'
+                                                        ? 'success'
+                                                        : 'default'
+                                                }
+                                                sx={{
+                                                    height: 23,
+                                                    fontSize: 10.5,
+                                                    fontWeight: 750,
+                                                }}
+                                            />
+                                        </Box>
+
+                                        <Typography
+                                            color="text.secondary"
+                                            sx={{
+                                                mt: 0.45,
+                                                fontSize: 11.5,
+                                            }}
+                                        >
+                                            {formatDate(period.startDate)} — {formatDate(period.endDate)}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        gap: 0.3,
+                                        flexShrink: 0,
+                                    }}
+                                >
+                                    <Tooltip title="Dönemi düzenle">
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => {
+                                                setMode('edit')
+                                                setSelected(period)
+                                                setDialogOpen(true)
+                                            }}
+                                            sx={{
+                                                '&:hover': {
+                                                    bgcolor:
+                                                        'rgba(245,179,1,0.10)',
+                                                },
+                                            }}
+                                        >
+                                            <Edit fontSize="small" />
+                                        </IconButton>
+                                    </Tooltip>
+
+                                    <Tooltip title="Dönemi sil">
+                                        <IconButton
+                                            size="small"
+                                            onClick={() =>
+                                                setDeleteTarget(period)
+                                            }
+                                            sx={{
+                                                '&:hover': {
+                                                    bgcolor:
+                                                        'rgba(211,47,47,0.08)',
+                                                    color: 'error.main',
+                                                },
+                                            }}
+                                        >
+                                            <Delete fontSize="small" />
+                                        </IconButton>
+                                    </Tooltip>
+                                </Box>
+                            </Box>
+                        )
+                    })}
+                </Stack>
             )}
 
             <EvaluationPeriodFormDialog
@@ -170,10 +581,22 @@ export default function EvaluationPeriodsPage() {
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={4000}
-                onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                onClose={() =>
+                    setSnackbar((s) => ({
+                        ...s,
+                        open: false,
+                    }))
+                }
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                }}
             >
-                <Alert severity={snackbar.severity} variant="filled" sx={{ borderRadius: 2 }}>
+                <Alert
+                    severity={snackbar.severity}
+                    variant="filled"
+                    sx={{ borderRadius: 2 }}
+                >
                     {snackbar.message}
                 </Alert>
             </Snackbar>

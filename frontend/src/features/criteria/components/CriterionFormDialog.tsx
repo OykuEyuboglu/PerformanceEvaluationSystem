@@ -1,9 +1,5 @@
 ﻿import { useEffect, useRef } from 'react'
-import {
-    useForm,
-    Controller,
-    useFieldArray,
-} from 'react-hook-form'
+import { useForm, Controller, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
@@ -22,53 +18,32 @@ import {
     Autocomplete,
     Chip,
 } from '@mui/material'
+import { BadgeOutlined } from '@mui/icons-material'
 
 import type {
     PerformanceCategoryDto,
     PerformanceCriterionDto,
 } from '../types'
-
 import type { JobPositionDto } from '../../../shared/types/jobPosition'
 
 const schema = z.object({
-    name: z
-        .string()
-        .min(
-            2,
-            'Kriter adı en az 2 karakter olmalı'
-        ),
-
-    performanceCategoryId: z
-        .number()
-        .min(
-            1,
-            'Ana kategori belirtilmelidir'
-        ),
-
+    name: z.string().min(2, 'Kriter adı en az 2 karakter olmalı'),
+    performanceCategoryId: z.number().min(1, 'Ana kategori belirtilmelidir'),
     isActive: z.boolean(),
-
     jobPositionDescriptions: z
         .array(
             z.object({
                 jobPositionId: z.number(),
-
                 description: z
                     .string()
                     .trim()
-                    .min(
-                        1,
-                        'Açıklama boş bırakılamaz'
-                    ),
-            })
+                    .min(1, 'Açıklama boş bırakılamaz'),
+            }),
         )
-        .min(
-            1,
-            'En az bir iş pozisyonu seçmelisin'
-        ),
+        .min(1, 'En az bir iş pozisyonu seçmelisin'),
 })
 
-export type CriterionFormValues =
-    z.infer<typeof schema>
+export type CriterionFormValues = z.infer<typeof schema>
 
 interface CriterionFormDialogProps {
     open: boolean
@@ -78,9 +53,7 @@ interface CriterionFormDialogProps {
     jobPositions: JobPositionDto[]
     categoryId?: number | null
     submitting: boolean
-    onSubmit: (
-        values: CriterionFormValues
-    ) => void
+    onSubmit: (values: CriterionFormValues) => void
     onClose: () => void
 }
 
@@ -104,7 +77,6 @@ export default function CriterionFormDialog({
         formState: { errors },
     } = useForm<CriterionFormValues>({
         resolver: zodResolver(schema),
-
         defaultValues: {
             name: '',
             performanceCategoryId: 0,
@@ -113,49 +85,33 @@ export default function CriterionFormDialog({
         },
     })
 
-    const { fields } =
-        useFieldArray({
-            control,
-            name: 'jobPositionDescriptions',
-        })
+    const { fields } = useFieldArray({
+        control,
+        name: 'jobPositionDescriptions',
+    })
 
-    const descriptionCache =
-        useRef<Record<number, string>>({})
+    const descriptionCache = useRef<Record<number, string>>({})
 
     useEffect(() => {
-        if (!open) {
-            return
-        }
+        if (!open) return
 
         descriptionCache.current = {}
 
         if (mode === 'edit' && initialData) {
-            initialData.jobPositionDescriptions.forEach(
-                (item) => {
-                    descriptionCache.current[
-                        item.jobPositionId
-                    ] = item.description
-                }
-            )
+            initialData.jobPositionDescriptions.forEach((item) => {
+                descriptionCache.current[item.jobPositionId] =
+                    item.description
+            })
 
             reset({
                 name: initialData.name,
-
-                performanceCategoryId:
-                    initialData.performanceCategoryId,
-
+                performanceCategoryId: initialData.performanceCategoryId,
                 isActive: initialData.isActive,
-
                 jobPositionDescriptions:
-                    initialData.jobPositionDescriptions.map(
-                        (item) => ({
-                            jobPositionId:
-                                item.jobPositionId,
-
-                            description:
-                                item.description,
-                        })
-                    ),
+                    initialData.jobPositionDescriptions.map((item) => ({
+                        jobPositionId: item.jobPositionId,
+                        description: item.description,
+                    })),
             })
 
             return
@@ -163,113 +119,64 @@ export default function CriterionFormDialog({
 
         reset({
             name: '',
-            performanceCategoryId:
-                categoryId ?? 0,
+            performanceCategoryId: categoryId ?? 0,
             isActive: true,
             jobPositionDescriptions: [],
         })
-    }, [
-        open,
-        mode,
-        initialData,
-        categoryId,
-        reset,
-    ])
+    }, [open, mode, initialData, categoryId, reset])
 
-    const selectedIds =
-        fields.map(
-            (field) =>
-                field.jobPositionId
-        )
+    const selectedIds = fields.map((field) => field.jobPositionId)
 
-    const selectedPositions =
-        jobPositions.filter((position) =>
-            selectedIds.includes(position.id)
-        )
+    const selectedPositions = jobPositions.filter((position) =>
+        selectedIds.includes(position.id),
+    )
 
-    const selectedCategoryId =
-        watch('performanceCategoryId')
+    const selectedCategoryId = watch('performanceCategoryId')
 
-    const selectedCategory =
-        categories.find(
-            (category) =>
-                category.id ===
-                selectedCategoryId
-        )
+    const selectedCategory = categories.find(
+        (category) => category.id === selectedCategoryId,
+    )
 
     const handlePositionSelectionChange = (
-        newSelected: JobPositionDto[]
+        newSelected: JobPositionDto[],
     ) => {
-        const newIds =
-            newSelected.map(
-                (position) => position.id
-            )
+        const newIds = newSelected.map((position) => position.id)
 
-        /*
-         * Kaldırılan pozisyonların açıklamalarını
-         * önbelleğe alıyoruz.
-         */
         fields.forEach((field, index) => {
-            if (
-                !newIds.includes(
-                    field.jobPositionId
-                )
-            ) {
-                descriptionCache.current[
-                    field.jobPositionId
-                ] = watch(
-                    `jobPositionDescriptions.${index}.description`
+            if (!newIds.includes(field.jobPositionId)) {
+                descriptionCache.current[field.jobPositionId] = watch(
+                    `jobPositionDescriptions.${index}.description`,
                 )
             }
         })
 
-        /*
-         * Hâlihazırda seçili olan pozisyonların
-         * açıklamalarını koruyoruz.
-         */
-        const keptDescriptions =
-            fields
-                .map((field, index) => ({
-                    jobPositionId:
-                        field.jobPositionId,
+        const keptDescriptions = fields
+            .map((field, index) => ({
+                jobPositionId: field.jobPositionId,
+                description: watch(
+                    `jobPositionDescriptions.${index}.description`,
+                ),
+            }))
+            .filter((item) => newIds.includes(item.jobPositionId))
 
-                    description: watch(
-                        `jobPositionDescriptions.${index}.description`
-                    ),
-                }))
-                .filter((item) =>
-                    newIds.includes(
-                        item.jobPositionId
-                    )
-                )
-
-        /*
-         * Yeni seçilen pozisyonları ekliyoruz.
-         */
-        const addedIds =
-            newIds.filter(
-                (id) =>
-                    !selectedIds.includes(id)
-            )
+        const addedIds = newIds.filter(
+            (id) => !selectedIds.includes(id),
+        )
 
         setValue(
             'jobPositionDescriptions',
             [
                 ...keptDescriptions,
-
                 ...addedIds.map((id) => ({
                     jobPositionId: id,
-
                     description:
-                        descriptionCache.current[
-                        id
-                        ] ?? '',
+                        descriptionCache.current[id] ?? '',
                 })),
             ],
             {
                 shouldValidate: true,
                 shouldDirty: true,
-            }
+            },
         )
     }
 
@@ -279,115 +186,181 @@ export default function CriterionFormDialog({
             onClose={onClose}
             maxWidth="sm"
             fullWidth
+            slotProps={{
+                paper: {
+                    sx: {
+                        borderRadius: 3,
+                        overflow: 'hidden',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        boxShadow: '0 24px 70px rgba(0,0,0,0.16)',
+                        animation:
+                            'criterionDialogEnter 240ms ease-out',
+                        '@keyframes criterionDialogEnter': {
+                            from: {
+                                opacity: 0,
+                                transform:
+                                    'translateY(8px) scale(0.985)',
+                            },
+                            to: {
+                                opacity: 1,
+                                transform:
+                                    'translateY(0) scale(1)',
+                            },
+                        },
+                    },
+                },
+            }}
         >
             <DialogTitle
                 sx={{
-                    fontWeight: 700,
+                    px: { xs: 2.5, sm: 3 },
+                    py: 2.2,
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
                 }}
             >
-                {mode === 'create'
-                    ? 'Yeni Kriter'
-                    : 'Kriteri Düzenle'}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.3 }}>
+                    <Box
+                        sx={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: 2,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: 'rgba(245,179,1,0.12)',
+                            color: '#C68E00',
+                        }}
+                    >
+                        <BadgeOutlined />
+                    </Box>
+                    <Box>
+                        <Typography sx={{ fontWeight: 850, fontSize: 18 }}>
+                            {mode === 'create'
+                                ? 'Yeni Kriter'
+                                : 'Kriteri Düzenle'}
+                        </Typography>
+                        <Typography
+                            color="text.secondary"
+                            sx={{ fontSize: 11.5, mt: 0.2 }}
+                        >
+                            Pozisyonlara göre uygulanacak performans kriterini tanımlayın.
+                        </Typography>
+                    </Box>
+                </Box>
             </DialogTitle>
 
-            <Box
-                component="form"
-                onSubmit={handleSubmit(onSubmit)}
-            >
-                <DialogContent>
-                    <Stack
-                        spacing={2.5}
-                        sx={{ mt: 0.5 }}
-                    >
-                        {/* Kriter adı */}
+            <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+                <DialogContent
+                    sx={{ px: { xs: 2.5, sm: 3 }, py: 2.5 }}
+                >
+                    <Stack spacing={2.2}>
                         <Controller
                             name="name"
                             control={control}
-                            render={({
-                                field,
-                            }) => (
+                            render={({ field }) => (
                                 <TextField
                                     {...field}
                                     label="Kriter Adı"
                                     fullWidth
-                                    error={
-                                        !!errors.name
-                                    }
-                                    helperText={
-                                        errors
-                                            .name
-                                            ?.message
-                                    }
+                                    size="small"
+                                    error={!!errors.name}
+                                    helperText={errors.name?.message}
+                                    sx={dialogFieldSx}
                                 />
                             )}
                         />
 
-                        {/* Ana kategori */}
                         <TextField
                             label="Ana Kategori"
-                            value={
-                                selectedCategory
-                                    ?.name ?? ''
-                            }
+                            value={selectedCategory?.name ?? ''}
                             fullWidth
+                            size="small"
                             disabled
                             helperText="Kriter bu kategori altında oluşturulur."
+                            sx={dialogFieldSx}
                         />
 
-                        {/* Aktif/Pasif */}
                         {mode === 'edit' && (
-                            <Controller
-                                name="isActive"
-                                control={control}
-                                render={({
-                                    field,
-                                }) => (
-                                    <FormControlLabel
-                                        control={
-                                            <Switch
-                                                checked={
-                                                    field.value
-                                                }
-                                                onChange={
-                                                    field.onChange
-                                                }
-                                            />
-                                        }
-                                        label="Aktif"
-                                    />
-                                )}
-                            />
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    p: 1.4,
+                                    borderRadius: 2,
+                                    bgcolor: 'action.hover',
+                                    border: '1px solid',
+                                    borderColor: 'divider',
+                                }}
+                            >
+                                <Box>
+                                    <Typography
+                                        sx={{
+                                            fontSize: 12.5,
+                                            fontWeight: 750,
+                                        }}
+                                    >
+                                        Kriter Durumu
+                                    </Typography>
+                                    <Typography
+                                        color="text.secondary"
+                                        sx={{
+                                            fontSize: 10.5,
+                                            mt: 0.2,
+                                        }}
+                                    >
+                                        Kriterin değerlendirmelerde kullanılmasını yönetin.
+                                    </Typography>
+                                </Box>
+
+                                <Controller
+                                    name="isActive"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <FormControlLabel
+                                            sx={{ m: 0 }}
+                                            control={
+                                                <Switch
+                                                    checked={field.value}
+                                                    onChange={field.onChange}
+                                                    size="small"
+                                                />
+                                            }
+                                            label={
+                                                field.value
+                                                    ? 'Aktif'
+                                                    : 'Pasif'
+                                            }
+                                        />
+                                    )}
+                                />
+                            </Box>
                         )}
 
                         <Divider />
 
-                        {/* Pozisyon açıklamaları */}
                         <Box>
                             <Typography
                                 sx={{
-                                    fontWeight: 700,
-                                    fontSize: 14,
+                                    fontWeight: 800,
+                                    fontSize: 13.5,
                                 }}
                             >
-                                Bu Kriterin Uygulandığı
-                                Pozisyonlar
+                                Uygulama Pozisyonları
                             </Typography>
-
                             <Typography
                                 color="text.secondary"
                                 sx={{
-                                    fontSize: 12.5,
+                                    fontSize: 11.5,
                                     mt: 0.25,
                                 }}
                             >
-                                Kriterin uygulanacağı
-                                pozisyonları seç.
-                                Seçtiğin her pozisyon
-                                için açıklama girilmelidir.
+                                Kriterin uygulanacağı pozisyonları seçin ve her pozisyon için değerlendirme açıklaması tanımlayın.
                             </Typography>
                         </Box>
 
-                        {/* Pozisyon seçimi */}
                         <Autocomplete
                             multiple
                             options={jobPositions}
@@ -404,12 +377,8 @@ export default function CriterionFormDialog({
                             }
                             renderValue={(value, getItemProps) =>
                                 value.map((option, index) => {
-                                    const {
-                                        key,
-                                        ...itemProps
-                                    } = getItemProps({
-                                        index,
-                                    })
+                                    const { key, ...itemProps } =
+                                        getItemProps({ index })
 
                                     return (
                                         <Chip
@@ -424,97 +393,115 @@ export default function CriterionFormDialog({
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
+                                    label="Pozisyonlar"
                                     placeholder="Pozisyon seç..."
+                                    size="small"
                                     error={
                                         !!errors.jobPositionDescriptions
                                     }
                                     helperText={
-                                        errors
-                                            .jobPositionDescriptions
+                                        errors.jobPositionDescriptions
                                             ?.message
                                     }
+                                    sx={dialogFieldSx}
                                 />
                             )}
                         />
 
-                        {/* Seçilen pozisyonların açıklamaları */}
-                        {fields.map(
-                            (
-                                field,
-                                index
-                            ) => {
-                                const position =
-                                    jobPositions.find(
-                                        (item) =>
-                                            item.id ===
-                                            field.jobPositionId
-                                    )
+                        {fields.map((field, index) => {
+                            const position = jobPositions.find(
+                                (item) =>
+                                    item.id === field.jobPositionId,
+                            )
 
-                                return (
-                                    <Controller
-                                        key={
-                                            field.id
-                                        }
-                                        name={`jobPositionDescriptions.${index}.description`}
-                                        control={control}
-                                        render={({
-                                            field:
-                                            descriptionField,
-                                        }) => (
-                                            <TextField
-                                                {...descriptionField}
-                                                label={`${position?.name ?? ''} için açıklama`}
-                                                fullWidth
-                                                multiline
-                                                minRows={2}
-                                                error={
-                                                    !!errors
-                                                        .jobPositionDescriptions?.[
-                                                        index
-                                                    ]
-                                                        ?.description
-                                                }
-                                                helperText={
-                                                    errors
-                                                        .jobPositionDescriptions?.[
-                                                        index
-                                                    ]
-                                                        ?.description
-                                                        ?.message
-                                                }
-                                            />
-                                        )}
-                                    />
-                                )
-                            }
-                        )}
+                            return (
+                                <Controller
+                                    key={field.id}
+                                    name={`jobPositionDescriptions.${index}.description`}
+                                    control={control}
+                                    render={({
+                                        field: descriptionField,
+                                    }) => (
+                                        <TextField
+                                            {...descriptionField}
+                                            label={`${position?.name ?? ''} için açıklama`}
+                                            fullWidth
+                                            multiline
+                                            minRows={2}
+                                            size="small"
+                                            error={
+                                                !!errors
+                                                    .jobPositionDescriptions?.[
+                                                    index
+                                                ]?.description
+                                            }
+                                            helperText={
+                                                errors
+                                                    .jobPositionDescriptions?.[
+                                                    index
+                                                ]?.description?.message
+                                            }
+                                            sx={dialogFieldSx}
+                                        />
+                                    )}
+                                />
+                            )
+                        })}
                     </Stack>
                 </DialogContent>
 
                 <DialogActions
                     sx={{
-                        px: 3,
-                        pb: 2.5,
+                        px: { xs: 2.5, sm: 3 },
+                        py: 2,
+                        borderTop: '1px solid',
+                        borderColor: 'divider',
+                        gap: 1,
                     }}
                 >
                     <Button
                         onClick={onClose}
                         color="inherit"
+                        sx={{ borderRadius: 2, fontWeight: 700 }}
                     >
                         Vazgeç
                     </Button>
-
                     <Button
                         type="submit"
                         variant="contained"
                         disabled={submitting}
+                        sx={{
+                            minWidth: 110,
+                            borderRadius: 2,
+                            bgcolor: '#F5B301',
+                            color: '#111',
+                            fontWeight: 800,
+                            boxShadow: 'none',
+                            '&:hover': {
+                                bgcolor: '#E0A300',
+                                boxShadow:
+                                    '0 6px 18px rgba(245,179,1,0.18)',
+                            },
+                        }}
                     >
-                        {mode === 'create'
-                            ? 'Oluştur'
-                            : 'Kaydet'}
+                        {submitting
+                            ? 'Kaydediliyor...'
+                            : mode === 'create'
+                                ? 'Oluştur'
+                                : 'Kaydet'}
                     </Button>
                 </DialogActions>
             </Box>
         </Dialog>
     )
+}
+
+const dialogFieldSx = {
+    '& .MuiOutlinedInput-root': {
+        borderRadius: 2,
+        fontSize: 13,
+    },
+    '& .MuiInputLabel-root': {
+        fontSize: 13,
+    },
 }
