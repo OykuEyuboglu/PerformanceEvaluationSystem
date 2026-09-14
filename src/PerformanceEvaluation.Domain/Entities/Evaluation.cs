@@ -1,5 +1,4 @@
 ﻿using PerformanceEvaluation.Domain.Common;
-
 using PerformanceEvaluation.Domain.Enums;
 
 namespace PerformanceEvaluation.Domain.Entities;
@@ -14,6 +13,7 @@ public class Evaluation : AuditableEntity
     public int EvaluatorId { get; set; }
 
     public User Evaluator { get; set; } = null!;
+    public EvaluationStatus Status { get; set; }
 
     public int EvaluationPeriodId { get; set; }
 
@@ -22,8 +22,6 @@ public class Evaluation : AuditableEntity
     public string? Comment { get; set; }
 
     public decimal TotalScore { get; set; } 
-
-    public EvaluationStatus Status { get; set; } = EvaluationStatus.Draft;
 
     public ICollection<EvaluationDetail> Details { get; set; } = new List<EvaluationDetail>();
 

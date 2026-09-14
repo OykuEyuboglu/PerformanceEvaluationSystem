@@ -26,6 +26,7 @@ public static class DependencyInjection
         services.AddScoped<IEvaluatorEmployeeRepository, EvaluatorEmployeeRepository>();
         
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+    
 
         return services;
     }

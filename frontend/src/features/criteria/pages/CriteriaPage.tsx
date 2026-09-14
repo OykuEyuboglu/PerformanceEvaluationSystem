@@ -225,6 +225,8 @@ export default function CriteriaPage() {
                 }}
             >
                 <Box>
+
+
                     <Typography
                         sx={{
                             fontSize: { xs: 24, md: 28 },

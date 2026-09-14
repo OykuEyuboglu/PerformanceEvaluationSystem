@@ -196,7 +196,7 @@ export default function EmployeeDashboardView({
                             letterSpacing: '-0.3px',
                         }}
                     >
-                        Hoş geldin, {firstName || 'Çalışan'} 👋
+                        Hoş geldin, {firstName || 'Çalışan'}
                     </Typography>
 
                     <Typography

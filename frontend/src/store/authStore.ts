@@ -1,6 +1,6 @@
 ﻿import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { UserDto } from '../shared/types/user'
+import type { UserDto } from '../features/users/types'
 
 interface AuthState {
     token: string | null

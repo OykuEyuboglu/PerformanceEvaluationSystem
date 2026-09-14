@@ -30,3 +30,8 @@ export async function getMyPeriodEvaluations(
 
     return res.data
 }
+
+export async function approveEvaluation(id: number): Promise<EvaluationDto> {
+    const res = await axiosInstance.patch<EvaluationDto>(`/evaluations/${id}/approve`)
+    return res.data
+}

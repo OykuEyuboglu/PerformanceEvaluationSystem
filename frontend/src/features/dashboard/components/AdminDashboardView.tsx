@@ -401,7 +401,7 @@ export default function AdminDashboardView() {
                             }}
                         >
                             {t.dashboard.welcome},{' '}
-                            {user?.firstName} 👋
+                            {user?.firstName}
                         </Typography>
 
                         <Typography

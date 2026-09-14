@@ -10,16 +10,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="coverlet.collector" Version="6.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.27" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.27" />
+    <PackageReference Include="coverlet.collector" Version="10.0.1">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="FluentAssertions" Version="8.11.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.31" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.31" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\PerformanceEvaluation.API\PerformanceEvaluation.API.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,8 +27,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-    <Folder Include="Database\" />
+    <ProjectReference Include="..\..\src\PerformanceEvaluation.API\PerformanceEvaluation.API.csproj" />
+    <ProjectReference Include="..\..\src\PerformanceEvaluation.Application\PerformanceEvaluation.Application.csproj" />
+    <ProjectReference Include="..\..\src\PerformanceEvaluation.Domain\PerformanceEvaluation.Domain.csproj" />
+    <ProjectReference Include="..\..\src\PerformanceEvaluation.Infrastructure\PerformanceEvaluation.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

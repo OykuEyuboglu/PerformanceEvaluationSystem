@@ -17,6 +17,7 @@ public class User : AuditableEntity
 
     public int? JobPositionId { get; set; }
     public JobPosition? JobPosition { get; set; }
+    public bool IsDeleted { get; set; } = false;
     public ICollection<EvaluatorEmployee> ManagedEmployees { get; set; } = new List<EvaluatorEmployee>();
     public ICollection<EvaluatorEmployee> Evaluators { get; set; } = new List<EvaluatorEmployee>();
 

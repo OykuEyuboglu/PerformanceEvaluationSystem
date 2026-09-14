@@ -27,8 +27,7 @@ public class ReportService : IReportService
 
         var filtered = evaluations
       .Where(e =>
-          e.EvaluationPeriodId == evaluationPeriodId &&
-          e.Status != EvaluationStatus.Draft);
+          e.EvaluationPeriodId == evaluationPeriodId);
 
         return BuildRanking(filtered);
     }
@@ -58,8 +57,7 @@ public class ReportService : IReportService
         var filtered = evaluations
      .Where(e =>
          managedIds.Contains(e.EmployeeId) &&
-         e.EvaluationPeriodId == evaluationPeriodId &&
-         e.Status != EvaluationStatus.Draft);
+         e.EvaluationPeriodId == evaluationPeriodId);
 
         return BuildRanking(filtered);
     }

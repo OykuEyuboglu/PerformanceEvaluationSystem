@@ -1,11 +1,13 @@
 ﻿import { useEffect, useState } from 'react'
 import { Box } from '@mui/material'
-import { Outlet } from 'react-router-dom'
-
+import {
+    Outlet,
+    useLocation,
+} from 'react-router-dom'
+import { useAuthStore } from '../store/authStore'
 import Header from './Header'
 import Footer from './Footer'
 import Sidebar from '../shared/components/Sidebar'
-import { useLocation } from 'react-router-dom'
 import { HEADER_HEIGHT } from '../shared/constants/layout'
 
 type MainLayoutProps = {
@@ -19,6 +21,8 @@ export default function MainLayout({
     mode,
     setMode,
 }: MainLayoutProps) {
+    const { user } = useAuthStore()
+
     const [sidebarPinned, setSidebarPinned] =
         useState(false)
 
@@ -30,6 +34,41 @@ export default function MainLayout({
 
     const sidebarOpen =
         sidebarPinned || sidebarHovered
+
+    useEffect(() => {
+        if (!user) {
+            setMode('light')
+            return
+        }
+
+        const savedTheme = localStorage.getItem(
+            `vakifbank360-theme-${user.id}`
+        )
+
+        setMode(
+            savedTheme === 'dark'
+                ? 'dark'
+                : 'light'
+        )
+    }, [user, setMode])
+
+    const handleToggleTheme = () => {
+        if (!user) return
+
+        setMode((currentMode) => {
+            const nextMode =
+                currentMode === 'light'
+                    ? 'dark'
+                    : 'light'
+
+            localStorage.setItem(
+                `vakifbank360-theme-${user.id}`,
+                nextMode
+            )
+
+            return nextMode
+        })
+    }
 
     const handleToggleSidebar = () => {
         setSidebarPinned((prev) => !prev)
@@ -102,16 +141,14 @@ export default function MainLayout({
                 minHeight: '100vh',
                 width: '100%',
                 maxWidth: '100%',
-
                 overflowX: 'hidden',
-
                 display: 'flex',
                 flexDirection: 'column',
             }}
         >
             <Header
                 mode={mode}
-                setMode={setMode}
+                onToggleTheme={handleToggleTheme}
                 sidebarOpen={sidebarOpen}
                 onToggleSidebar={
                     handleToggleSidebar
@@ -134,7 +171,6 @@ export default function MainLayout({
                     flex: 1,
                     minHeight: 0,
                     minWidth: 0,
-
                     width: '100%',
                     maxWidth: '100%',
                 }}
@@ -154,14 +190,11 @@ export default function MainLayout({
                     component="main"
                     sx={{
                         flex: 1,
-
                         minWidth: 0,
                         width: '100%',
                         maxWidth: '100%',
-
                         display: 'flex',
                         flexDirection: 'column',
-
                         overflowX: 'hidden',
                     }}
                 >
@@ -172,18 +205,25 @@ export default function MainLayout({
                             minWidth: 0,
                             width: '100%',
                             boxSizing: 'border-box',
-                            p: { xs: 1.5, sm: 2, md: 4 },
+                            p: {
+                                xs: 1.5,
+                                sm: 2,
+                                md: 4,
+                            },
 
-                            animation: 'pageEnter 260ms ease-out',
+                            animation:
+                                'pageEnter 260ms ease-out',
 
                             '@keyframes pageEnter': {
                                 from: {
                                     opacity: 0,
-                                    transform: 'translateY(6px)',
+                                    transform:
+                                        'translateY(6px)',
                                 },
                                 to: {
                                     opacity: 1,
-                                    transform: 'translateY(0)',
+                                    transform:
+                                        'translateY(0)',
                                 },
                             },
                         }}

@@ -122,18 +122,15 @@ public class UserService : IUserService
     public async Task DeleteAsync(int id)
     {
         var user = await _userRepository.GetByIdAsync(id)
-            ?? throw new KeyNotFoundException(
-                "Kullanıcı bulunamadı.");
+            ?? throw new Exception("Kullanıcı bulunamadı.");
 
-        if (!user.IsActive)
-            throw new InvalidOperationException(
-                "Kullanıcı zaten pasif durumda.");
+        if (user.IsDeleted)
+            throw new Exception("Kullanıcı zaten silinmiş.");
 
-        user.IsActive = false;
+        user.IsDeleted = true;
         user.UpdatedAt = DateTime.Now;
 
         _userRepository.Update(user);
-
         await _userRepository.SaveChangesAsync();
     }
 }

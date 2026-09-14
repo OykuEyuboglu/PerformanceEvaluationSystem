@@ -73,4 +73,13 @@ public class EvaluationsController(
 
         return Ok(result);
     }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPatch("{id}/approve")]
+    [SwaggerOperation(Summary = "Değerlendirmeyi onayla")]
+    public async Task<IActionResult> Approve(int id)
+    {
+        var result = await evaluationService.ApproveAsync(id);
+        return Ok(result);
+    }
 }
