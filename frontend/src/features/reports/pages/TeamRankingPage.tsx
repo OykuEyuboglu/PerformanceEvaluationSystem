@@ -148,9 +148,30 @@ export default function TeamRankingPage() {
                     <Button component={RouterLink} to="/dashboard" startIcon={<ArrowBack />} size="small" sx={{ mb: 1 }}>
                         Dashboard
                     </Button>
-                    <Typography variant="h5" sx={{ fontWeight: 850, letterSpacing: '-.35px' }}>
-                        Ekip Sıralaması
-                    </Typography>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                        }}
+                    >
+                        <EmojiEvents
+                            sx={{
+                                fontSize: 28,
+                                color: 'primary.main',
+                            }}
+                        />
+
+                        <Typography
+                            variant="h5"
+                            sx={{
+                                fontWeight: 850,
+                                letterSpacing: '-.35px',
+                            }}
+                        >
+                            Ekip Sıralaması
+                        </Typography>
+                    </Box>
                     <Typography color="text.secondary" sx={{ mt: .5, fontSize: 14 }}>
                         Seçilen dönemdeki ekip performansını karşılaştır ve sonuçları incele.
                     </Typography>
@@ -325,7 +346,11 @@ export default function TeamRankingPage() {
                                         </TableCell>
                                         <TableCell>
                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
-                                                <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main', fontSize: 12, fontWeight: 800 }}>
+                                                <Avatar sx={{ width: 32, height: 32, bgcolor: (theme) =>
+                                                theme.palette.mode === 'dark'
+                                                    ? theme.palette.avatar.dark
+                                                        : theme.palette.avatar.light, fontSize: 12, fontWeight: 800
+                                                }}>
                                                     {item.employeeName.charAt(0).toUpperCase()}
                                                 </Avatar>
                                                 <Typography sx={{ fontWeight: 750 }}>{item.employeeName}</Typography>

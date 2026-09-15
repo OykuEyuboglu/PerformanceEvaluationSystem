@@ -232,11 +232,9 @@ public class EvaluationService : IEvaluationService
         return _mapper.Map<EvaluationDto>(created);
     }
 
-    public async Task<IEnumerable<EvaluationDto>> GetAllAsync()
+    public async Task<IEnumerable<EvaluationDto>> GetAllAsync(int? evaluationPeriodId = null)
     {
-        var evaluations =
-            await _evaluationRepository.GetAllWithDetailsAsync();
-
+        var evaluations = await _evaluationRepository.GetAllSummaryAsync(evaluationPeriodId);
         return _mapper.Map<IEnumerable<EvaluationDto>>(evaluations);
     }
 
@@ -303,13 +301,11 @@ public class EvaluationService : IEvaluationService
         var role =
             userClaims.FindFirst(ClaimTypes.Role)?.Value;
 
-        // Admin tüm değerlendirmeleri görebilir.
         if (role == "Admin")
         {
             return _mapper.Map<EvaluationDto>(evaluation);
         }
 
-        // Employee sadece kendi değerlendirmesini görebilir.
         if (role == "Employee")
         {
             if (evaluation.EmployeeId != userId)
@@ -319,8 +315,6 @@ public class EvaluationService : IEvaluationService
             return _mapper.Map<EvaluationDto>(evaluation);
         }
 
-        // Evaluator sadece kendi ekibindeki çalışanların
-        // değerlendirmelerini görebilir.
         if (role == "Evaluator")
         {
             var isAssignedEmployee =
@@ -356,5 +350,25 @@ public class EvaluationService : IEvaluationService
 
         var updated = await _evaluationRepository.GetByIdWithDetailsAsync(id);
         return _mapper.Map<EvaluationDto>(updated);
+    }
+
+    public async Task<int> ApproveManyAsync(IEnumerable<int> ids)
+    {
+        var approvedCount = 0;
+
+        foreach (var id in ids)
+        {
+            var evaluation = await _evaluationRepository.GetByIdAsync(id);
+            if (evaluation is null || evaluation.Status != EvaluationStatus.Submitted)
+                continue;
+
+            evaluation.Status = EvaluationStatus.Approved;
+            evaluation.UpdatedAt = DateTime.Now;
+            _evaluationRepository.Update(evaluation);
+            approvedCount++;
+        }
+
+        await _evaluationRepository.SaveChangesAsync();
+        return approvedCount;
     }
 }

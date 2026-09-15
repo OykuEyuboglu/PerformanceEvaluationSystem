@@ -381,6 +381,9 @@ export default function UsersPage() {
                     sx={{
                         minWidth: 0,
                         width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
                     }}
                 >
                     <Typography
@@ -393,18 +396,6 @@ export default function UsersPage() {
                         }}
                     >
                         {params.value}
-                    </Typography>
-                    <Typography
-                        color="text.secondary"
-                        sx={{
-                            fontSize: 10.5,
-                            mt: 0.15,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                        }}
-                    >
-                        {params.row.email}
                     </Typography>
                 </Box>
             ),
@@ -963,7 +954,7 @@ export default function UsersPage() {
                         '& .MuiDataGrid-columnHeaderTitle':
                         {
                             fontSize: 11.5,
-                            fontWeight: 800,
+                            fontWeight: 650,
                             color: 'text.secondary',
                         },
 
@@ -1052,8 +1043,8 @@ export default function UsersPage() {
                     >
                         <Typography
                             sx={{
-                                fontWeight: 800,
-                                fontSize: 14,
+                                fontWeight: 650,
+                                fontSize: 12,
                                 mb: 1.5,
                             }}
                         >
@@ -1296,8 +1287,8 @@ function SummaryCard({
             <Typography
                 sx={{
                     mt: 0.3,
-                    fontSize: 25,
-                    fontWeight: 850,
+                    fontSize: 20,
+                    fontWeight: 650,
                     lineHeight: 1,
                     fontVariantNumeric:
                         'tabular-nums',

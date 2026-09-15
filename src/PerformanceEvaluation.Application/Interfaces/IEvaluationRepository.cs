@@ -16,7 +16,7 @@ public interface IEvaluationRepository : IRepository<Evaluation>
     int evaluatorId,
     int employeeId,
     int evaluationPeriodId);
-
+    Task<IEnumerable<Evaluation>> GetAllSummaryAsync(int? evaluationPeriodId = null);
     Task<IEnumerable<Evaluation>> GetByEvaluatorAndPeriodAsync(
         int evaluatorId,
         int evaluationPeriodId);

@@ -16,6 +16,7 @@ import EvaluationDetailDialog from '../components/EvaluationDetailDialog'
 
 import {
     Search,
+    TrendingUp,
 } from '@mui/icons-material'
 
 const STATUS_LABELS: Record<string, string> = {
@@ -130,17 +131,31 @@ export default function MyEvaluationsPage() {
 
     return (
         <Box>
-            {/* HEADER */}
             <Box sx={{ mb: 3 }}>
-                <Typography
-                    variant="h5"
+                <Box
                     sx={{
-                        fontWeight: 800,
-                        letterSpacing: '-0.3px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
                     }}
                 >
-                    Performansım
-                </Typography>
+                    <TrendingUp
+                        sx={{
+                            fontSize: 28,
+                            color: 'primary.main',
+                        }}
+                    />
+
+                    <Typography
+                        variant="h5"
+                        sx={{
+                            fontWeight: 800,
+                            letterSpacing: '-0.3px',
+                        }}
+                    >
+                        Performansım
+                    </Typography>
+                </Box>
 
                 <Typography
                     color="text.secondary"

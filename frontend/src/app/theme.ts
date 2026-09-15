@@ -1,5 +1,21 @@
 ﻿import { createTheme } from '@mui/material/styles'
 
+declare module '@mui/material/styles' {
+    interface Palette {
+        avatar: {
+            light: string
+            dark: string
+        }
+    }
+
+    interface PaletteOptions {
+        avatar?: {
+            light?: string
+            dark?: string
+        }
+    }
+}
+
 export const createAppTheme = (mode: 'light' | 'dark') =>
     createTheme({
         palette: {
@@ -24,6 +40,11 @@ export const createAppTheme = (mode: 'light' | 'dark') =>
             text: {
                 primary: mode === 'light' ? '#161616' : '#ffffff',
                 secondary: mode === 'light' ? '#5f5f5f' : '#bdbdbd',
+            },
+
+            avatar: {
+                light: '#BDBDBD',
+                dark: '#757575',
             },
 
             success: { main: '#2e7d32' },

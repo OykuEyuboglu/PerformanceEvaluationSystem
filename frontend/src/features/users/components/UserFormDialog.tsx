@@ -78,11 +78,15 @@ export default function UserFormDialog({
     const baseSchema = {
         firstName: z
             .string()
-            .min(2, t.userForm.firstNameMin),
+            .trim()
+            .min(1, 'Ad gereklidir')
+            .max(100, 'Ad maksimum 100 karakter olabilir'),
 
         lastName: z
             .string()
-            .min(2, t.userForm.lastNameMin),
+            .trim()
+            .min(1, 'Soyad gereklidir')
+            .max(100, 'Soyad maksimum 100 karakter olabilir'),
 
         role: z.enum([
             'Admin',
@@ -110,15 +114,54 @@ export default function UserFormDialog({
 
         email: z
             .string()
-            .email(t.userForm.validEmail),
+            .min(1, 'Email gereklidir')
+            .email('Geçerli bir email adresi giriniz')
+            .max(200, 'Email maksimum 200 karakter olabilir'),
+
 
         password: z
             .string()
-            .min(6, t.userForm.passwordMin),
+            .min(1, 'Şifre gereklidir')
+            .min(8, 'Şifre en az 8 karakter olmalı')
+            .max(256, 'Şifre maksimum 256 karakter olabilir')
+            .regex(/[A-Z]/, 'Şifre en az bir büyük harf içermeli')
+            .regex(/[a-z]/, 'Şifre en az bir küçük harf içermeli')
+            .regex(/[0-9]/, 'Şifre en az bir sayı içermeli')
+            .regex(
+                /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
+                'Şifre en az bir özel karakter içermeli'
+            ),
     })
 
     const editSchema = z.object({
-        ...baseSchema,
+        firstName: z
+            .string()
+            .min(1, 'Ad boş olamaz.')
+            .max(100, 'Ad maksimum 100 karakter olabilir.'),
+
+        lastName: z
+            .string()
+            .min(1, 'Soyad boş olamaz.')
+            .max(100, 'Soyad maksimum 100 karakter olabilir.'),
+
+        role: z.enum(
+            ['Admin', 'Evaluator', 'Employee'],
+            {
+                message: 'Geçerli bir rol seçilmelidir.',
+            }
+        ),
+
+        departmentId: z
+            .number()
+            .gt(0, 'Departman seçilmelidir.'),
+
+        jobPositionId: z
+            .number()
+            .optional()
+            .nullable(),
+
+        isActive: z.boolean(),
+
         email: z.string().optional(),
         password: z.string().optional(),
     })
@@ -519,7 +562,7 @@ export default function UserFormDialog({
                                     sx={{
                                         fontSize: 10.5,
                                         color: 'text.secondary',
-                                        fontWeight: 700,
+                                        fontWeight: 200,
                                         mb: 0.3,
                                     }}
                                 >
@@ -537,7 +580,7 @@ export default function UserFormDialog({
                                         <Typography
                                             sx={{
                                                 fontSize: 13,
-                                                fontWeight: 700,
+                                                fontWeight: 400,
                                             }}
                                         >
                                             {field.value ||
@@ -776,7 +819,7 @@ export default function UserFormDialog({
                                         <Typography
                                             sx={{
                                                 fontSize: 13,
-                                                fontWeight: 750,
+                                                fontWeight: 400,
                                             }}
                                         >
                                             {language ===
@@ -856,7 +899,7 @@ export default function UserFormDialog({
                         color="inherit"
                         sx={{
                             borderRadius: 2,
-                            fontWeight: 700,
+                            fontWeight: 500,
                         }}
                     >
                         {t.userForm.cancel}
@@ -872,7 +915,7 @@ export default function UserFormDialog({
                             borderRadius: 2,
                             bgcolor: '#F5B301',
                             color: '#111111',
-                            fontWeight: 800,
+                            fontWeight: 500,
                             boxShadow: 'none',
                             '&:hover': {
                                 bgcolor: '#E0A300',
@@ -924,7 +967,7 @@ function SectionTitle({
             <Typography
                 sx={{
                     fontSize: 12,
-                    fontWeight: 800,
+                    fontWeight: 200,
                     letterSpacing: 0.3,
                     textTransform: 'uppercase',
                 }}
@@ -939,6 +982,8 @@ const fieldSx = {
     '& .MuiOutlinedInput-root': {
         borderRadius: 2,
         fontSize: 13,
+        fontWeight: 400,
+
     },
     '& .MuiInputLabel-root': {
         fontSize: 13,

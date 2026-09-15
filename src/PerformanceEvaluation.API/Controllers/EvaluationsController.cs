@@ -82,4 +82,15 @@ public class EvaluationsController(
         var result = await evaluationService.ApproveAsync(id);
         return Ok(result);
     }
+
+    public record BulkApproveRequest(List<int> Ids);
+
+    [Authorize(Roles = "Admin")]
+    [HttpPatch("approve-bulk")]
+    [SwaggerOperation(Summary = "Seçilen değerlendirmeleri toplu onayla")]
+    public async Task<IActionResult> ApproveBulk([FromBody] BulkApproveRequest request)
+    {
+        var approvedCount = await evaluationService.ApproveManyAsync(request.Ids);
+        return Ok(new { approvedCount });
+    }
 }

@@ -55,6 +55,23 @@ namespace PerformanceEvaluation.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Evaluation>> GetAllSummaryAsync(int? evaluationPeriodId = null)
+        {
+            var query = _dbSet
+                .AsNoTracking()
+                .Include(e => e.Employee)
+                .Include(e => e.Evaluator)
+                .Include(e => e.EvaluationPeriod)
+                .AsQueryable();
+
+            if (evaluationPeriodId.HasValue)
+                query = query.Where(e => e.EvaluationPeriodId == evaluationPeriodId.Value);
+
+            return await query
+                .OrderByDescending(e => e.CreatedAt)
+                .ToListAsync();
+        }
+
         public async Task<bool> ExistsByEvaluatorEmployeePeriodAsync(int evaluatorId, int employeeId, int evaluationPeriodId)
         {
             return await _dbSet.AnyAsync(e =>

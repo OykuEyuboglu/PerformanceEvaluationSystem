@@ -467,7 +467,11 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
                                         <Box sx={{ width: 25, textAlign: 'center', flexShrink: 0 }}>
                                             {item.rank <= 3 ? <EmojiEvents sx={{ fontSize: 19, color: RANK_COLORS[item.rank] }} /> : <Typography sx={{ fontSize: 12, fontWeight: 800 }}>#{item.rank}</Typography>}
                                         </Box>
-                                        <Avatar sx={{ width: 34, height: 34, bgcolor: 'secondary.main', fontSize: 12, fontWeight: 800 }}>
+                                        <Avatar sx={{
+                                            width: 34, height: 34, bgcolor: (theme) =>
+                                                theme.palette.mode === 'dark'
+                                                    ? theme.palette.avatar.dark
+                                                    : theme.palette.avatar.light, fontSize: 12, fontWeight: 800 }}>
                                             {item.employeeName.charAt(0).toUpperCase()}
                                         </Avatar>
                                         <Box sx={{ minWidth: 0, flex: 1 }}>
