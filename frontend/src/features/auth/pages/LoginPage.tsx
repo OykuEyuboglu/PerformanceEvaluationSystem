@@ -26,8 +26,14 @@ import { useAuthStore } from '../../../store/authStore'
 import Logo from '../../../shared/components/logo'
 
 const loginSchema = z.object({
-    email: z.string().email('Geçerli bir e-posta adresi girin'),
-    password: z.string().min(1, 'Şifre zorunludur'),
+    email: z
+        .string()
+        .min(1, 'Email boş olamaz.')
+        .email('Geçerli bir e-posta adresi girin'),
+
+    password: z
+        .string()
+        .min(1, 'Şifre boş olamaz.'),
 })
 
 type LoginFormValues = z.infer<typeof loginSchema>
@@ -138,7 +144,6 @@ export default function LoginPage() {
                         p: { md: 5, lg: 6 },
                     }}
                 >
-                    {/* Üst ışık efekti */}
                     <Box
                         sx={{
                             position: 'absolute',
@@ -152,7 +157,6 @@ export default function LoginPage() {
                         }}
                     />
 
-                    {/* Alt daire */}
                     <Box
                         sx={{
                             position: 'absolute',
@@ -170,7 +174,6 @@ export default function LoginPage() {
                         size={52}
                     />
 
-                    {/* Marka mesajı */}
                     <Box
                         sx={{
                             position: 'relative',
@@ -292,7 +295,6 @@ export default function LoginPage() {
                             Devam etmek için hesabınıza giriş yapın
                         </Typography>
 
-                        {/* Backend Hatası */}
                         {serverError && (
                             <Alert
                                 severity="error"

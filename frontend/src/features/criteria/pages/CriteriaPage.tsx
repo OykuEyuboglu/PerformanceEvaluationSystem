@@ -218,34 +218,62 @@ export default function CriteriaPage() {
                 sx={{
                     display: 'flex',
                     justifyContent: 'space-between',
-                    alignItems: { xs: 'flex-start', md: 'center' },
+                    alignItems: {
+                        xs: 'flex-start',
+                        md: 'center',
+                    },
                     gap: 2,
                     mb: 3,
                     flexWrap: 'wrap',
                 }}
             >
-                <Box>
-
-
-                    <Typography
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: 1,
+                    }}
+                >
+                    <Box
                         sx={{
-                            fontSize: { xs: 24, md: 28 },
-                            fontWeight: 850,
-                            letterSpacing: '-0.6px',
+                            width: 8,
+                            height: 28,
+                            borderRadius: 1,
+                            bgcolor: 'primary.main',
+                            flexShrink: 0,
+                            mt: 0.35,
                         }}
-                    >
-                        Kriter Yönetimi
-                    </Typography>
-                    <Typography
-                        color="text.secondary"
-                        sx={{
-                            mt: 0.6,
-                            fontSize: 13.5,
-                            maxWidth: 680,
-                        }}
-                    >
-                        Performans kategorilerini, ağırlıklarını ve pozisyon bazlı değerlendirme kriterlerini yönetin.
-                    </Typography>
+                    />
+
+                    <Box>
+                        <Typography
+                            sx={{
+                                fontSize: {
+                                    xs: 24,
+                                    md: 28,
+                                },
+                                fontWeight: 850,
+                                letterSpacing: '-0.6px',
+                                lineHeight: 1.2,
+                            }}
+                        >
+                            Kriter Yönetimi
+                        </Typography>
+
+                        <Typography
+                            color="text.secondary"
+                            sx={{
+                                mt: 0.6,
+                                fontSize: 13.5,
+                                maxWidth: 680,
+                                lineHeight: 1.5,
+                            }}
+                        >
+                            Performans kategorilerini,
+                            ağırlıklarını ve pozisyon bazlı
+                            değerlendirme kriterlerini yönetin.
+                        </Typography>
+                    </Box>
                 </Box>
 
                 <Button
@@ -260,13 +288,15 @@ export default function CriteriaPage() {
                         minHeight: 42,
                         px: 2,
                         borderRadius: 2,
-                        bgcolor: '#F5B301',
-                        color: '#111',
+                        bgcolor: 'primary.main',
+                        color: 'primary.contrastText',
                         fontWeight: 800,
                         boxShadow: 'none',
+
                         '&:hover': {
-                            bgcolor: '#E0A300',
-                            boxShadow: '0 8px 22px rgba(245,179,1,0.18)',
+                            bgcolor: 'primary.dark',
+                            boxShadow:
+                                '0 8px 22px rgba(245,179,1,0.18)',
                         },
                     }}
                 >

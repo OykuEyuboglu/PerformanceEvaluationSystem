@@ -18,6 +18,15 @@ import {
     InputAdornment,
     IconButton,
     Tooltip,
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions,
+    Snackbar,
+    Alert,
+    CircularProgress,
 } from '@mui/material'
 
 import {
@@ -32,11 +41,14 @@ import {
     DataGrid,
     type GridColDef,
     type GridRenderCellParams,
+    type GridRowSelectionModel,
 } from '@mui/x-data-grid'
 
 import {
     getAllEvaluations,
     approveEvaluation,
+    approveBulk,
+    getEvaluationById,
 } from '../evaluationsApi'
 
 import { getEvaluationPeriods } from '../../evaluationPeriods/evaluationPeriodsApi'
@@ -50,6 +62,7 @@ const STATUS_LABELS: Record<string, string> = {
     Submitted: 'Gönderildi',
     Approved: 'Onaylandı',
 }
+
 
 const STATUS_COLORS: Record<
     string,
@@ -199,25 +212,25 @@ export default function EvaluationsPage() {
     const [approving, setApproving] =
         useState(false)
 
-    const loadData = useCallback(async () => {
-        setLoading(true)
+    const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>({
+        type: 'include',
+        ids: new Set(),
+    })
+    const [bulkApproving, setBulkApproving] = useState(false)
+    const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
+        open: false, message: '', severity: 'success',
+    })
+    const [bulkApproveDialogOpen, setBulkApproveDialogOpen] = useState(false)
 
+    const loadData = useCallback(async (periodIdFilter?: number) => {
+        setLoading(true)
         try {
-            const [
-                evalData,
-                periodData,
-            ] = await Promise.all([
-                getAllEvaluations(),
+            const [evalData, periodData] = await Promise.all([
+                getAllEvaluations(periodIdFilter),
                 getEvaluationPeriods(),
             ])
-
             setEvaluations(evalData)
             setPeriods(periodData)
-        } catch (error) {
-            console.error(
-                'Değerlendirmeler yüklenemedi:',
-                error
-            )
         } finally {
             setLoading(false)
         }
@@ -246,6 +259,72 @@ export default function EvaluationsPage() {
             )
         }
     }, [periods, searchParams])
+
+    const handleRowClick = async (params: any) => {
+        try {
+            const full = await getEvaluationById(params.row.id)
+            setSelected(full)
+        } catch {
+            setSnackbar({
+                open: true,
+                message: 'Detay yüklenemedi.',
+                severity: 'error',
+            })
+        }
+    }
+
+    const isRowSelected = (id: number) => {
+        if (selectionModel.type === 'include') {
+            return selectionModel.ids.has(id)
+        }
+
+        return !selectionModel.ids.has(id)
+    }
+
+    const selectedSubmittedCount = evaluations.filter(
+        (evaluation) =>
+            isRowSelected(evaluation.id) &&
+            evaluation.status === 'Submitted'
+    ).length
+
+    const selectedEvaluationIds = evaluations
+        .filter((evaluation) => isRowSelected(evaluation.id))
+        .map((evaluation) => evaluation.id)
+
+    const handleBulkApprove = async () => {
+        if (!selectedEvaluationIds.length) return
+
+        setBulkApproving(true)
+
+        try {
+            const { approvedCount } = await approveBulk(selectedEvaluationIds)
+
+            setSnackbar({
+                open: true,
+                message: `${approvedCount} değerlendirme onaylandı.`,
+                severity: 'success',
+            })
+
+            setSelectionModel({
+                type: 'include',
+                ids: new Set(),
+            })
+
+            setBulkApproveDialogOpen(false)
+
+            await loadData(
+                periods.find((period) => period.name === periodFilter)?.id
+            )
+        } catch {
+            setSnackbar({
+                open: true,
+                message: 'Toplu onaylama sırasında hata oluştu.',
+                severity: 'error',
+            })
+        } finally {
+            setBulkApproving(false)
+        }
+    }
 
     const handleApprove = async (id: number) => {
         setApproving(true)
@@ -369,7 +448,7 @@ export default function EvaluationsPage() {
                                 fontSize: 11.5,
                                 fontWeight: 800,
                                 bgcolor:
-                                    'rgba(245,179,1,0.16)',
+                                    '#bdbdbd',
                                 color: 'text.primary',
                                 flexShrink: 0,
                             }}
@@ -536,9 +615,7 @@ export default function EvaluationsPage() {
                             size="small"
                             onClick={(event) => {
                                 event.stopPropagation()
-                                setSelected(
-                                    params.row
-                                )
+                                void handleRowClick(params)
                             }}
                             sx={{
                                 color:
@@ -557,7 +634,7 @@ export default function EvaluationsPage() {
                 ),
             },
         ],
-        []
+        [handleRowClick]
     )
 
     return (
@@ -719,17 +796,18 @@ export default function EvaluationsPage() {
                     label="Onaylanan"
                     value={stats.approved}
                     caption={`${stats.total
-                            ? Math.round(
-                                (stats.approved /
-                                    stats.total) *
-                                100
-                            )
-                            : 0
-                        }% onay oranı`}
+                        ? Math.round(
+                            (stats.approved /
+                                stats.total) *
+                            100
+                        )
+                        : 0
+                        }% onay oranı`
+                    }
                     icon={
                         <CheckCircleOutlined fontSize="small" />
                     }
-                />                       
+                />
             </Box>
 
             <Paper
@@ -817,6 +895,28 @@ export default function EvaluationsPage() {
                             },
                         }}
                     />
+
+                    {selectedSubmittedCount > 0 && (
+                        <Button
+                            variant="contained"
+                            color="success"
+                            size="small"
+                            startIcon={
+                                bulkApproving ? (
+                                    <CircularProgress size={16} sx={{ color: '#fff' }} />
+                                ) : (
+                                    <CheckCircleOutlined />
+                                )
+                            }
+                            disabled={bulkApproving}
+                            onClick={() => setBulkApproveDialogOpen(true)}
+                            sx={{ borderRadius: 2, flexShrink: 0 }}
+                        >
+                            {bulkApproving
+                                ? 'Onaylanıyor...'
+                                : `Seçilenleri Onayla (${selectedSubmittedCount})`}
+                        </Button>
+                    )}
                 </Box>
 
                 <DataGrid
@@ -825,11 +925,12 @@ export default function EvaluationsPage() {
                     loading={loading}
                     getRowId={(row) => row.id}
                     autoHeight
+                    checkboxSelection
                     disableRowSelectionOnClick
-                    onRowClick={(params) =>
-                        setSelected(
-                            params.row
-                        )
+                    onRowClick={handleRowClick}
+                    rowSelectionModel={selectionModel}
+                    onRowSelectionModelChange={(newSelection) =>
+                        setSelectionModel(newSelection)
                     }
                     pageSizeOptions={[
                         10,
@@ -1028,6 +1129,65 @@ export default function EvaluationsPage() {
                 onApprove={handleApprove}
                 approving={approving}
             />
+
+            <Dialog
+                open={bulkApproveDialogOpen}
+                onClose={() => !bulkApproving && setBulkApproveDialogOpen(false)}
+                maxWidth="xs"
+                fullWidth
+            >
+                <DialogTitle>Değerlendirmeleri Onayla</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Seçilen {selectedSubmittedCount} değerlendirmeyi onaylamak
+                        istediğinize emin misiniz? Bu işlem sonrasında
+                        değerlendirmelerin durumu <strong>Onaylandı</strong> olarak
+                        değiştirilecektir.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={() => setBulkApproveDialogOpen(false)}
+                        disabled={bulkApproving}
+                    >
+                        Vazgeç
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="success"
+                        onClick={handleBulkApprove}
+                        disabled={bulkApproving}
+                        startIcon={
+                            bulkApproving ? (
+                                <CircularProgress size={16} sx={{ color: '#fff' }} />
+                            ) : (
+                                <CheckCircleOutlined />
+                            )
+                        }
+                    >
+                        {bulkApproving ? 'Onaylanıyor...' : 'Onayla'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={3500}
+                onClose={() =>
+                    setSnackbar((prev) => ({ ...prev, open: false }))
+                }
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert
+                    severity={snackbar.severity}
+                    variant="filled"
+                    onClose={() =>
+                        setSnackbar((prev) => ({ ...prev, open: false }))
+                    }
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Box>
     )
 }

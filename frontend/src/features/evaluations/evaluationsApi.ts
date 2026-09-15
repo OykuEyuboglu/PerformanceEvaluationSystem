@@ -6,8 +6,11 @@ export async function createEvaluation(dto: CreateEvaluationDto): Promise<Evalua
     return res.data
 }
 
-export async function getAllEvaluations(): Promise<EvaluationDto[]> {
-    const res = await axiosInstance.get<EvaluationDto[]>('/evaluations')
+
+export async function getAllEvaluations(evaluationPeriodId?: number): Promise<EvaluationDto[]> {
+    const res = await axiosInstance.get<EvaluationDto[]>('/evaluations', {
+        params: evaluationPeriodId ? { evaluationPeriodId } : undefined,
+    })
     return res.data
 }
 
@@ -33,5 +36,10 @@ export async function getMyPeriodEvaluations(
 
 export async function approveEvaluation(id: number): Promise<EvaluationDto> {
     const res = await axiosInstance.patch<EvaluationDto>(`/evaluations/${id}/approve`)
+    return res.data
+}
+
+export async function approveBulk(ids: number[]): Promise<{ approvedCount: number }> {
+    const res = await axiosInstance.patch<{ approvedCount: number }>('/evaluations/approve-bulk', { ids })
     return res.data
 }

@@ -19,6 +19,7 @@ import {
 import {
     Send,
     Person,
+    RateReview
 } from '@mui/icons-material'
 
 import { useAuthStore } from '../../../store/authStore'
@@ -419,8 +420,24 @@ export default function NewEvaluationPage() {
 
     return (
         <Box>
-            {/* Sayfa başlığı */}
-            <Box sx={{ mb: 3 }}>
+
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.2,
+                    mb: 0.5,
+                }}
+            >
+                <Avatar
+                    sx={{
+                        width: 42,
+                        height: 40,
+                    }}
+                >
+                    <RateReview />
+                </Avatar>
+
                 <Typography
                     variant="h5"
                     sx={{
@@ -430,19 +447,16 @@ export default function NewEvaluationPage() {
                 >
                     Ekibimi Değerlendir
                 </Typography>
+            </Box>
 
                 <Typography
                     color="text.secondary"
                     sx={{
-                        mt: 0.5,
                         fontSize: 14.5,
                     }}
                 >
-                    Ekibindeki çalışanları aktif
-                    değerlendirme dönemi kapsamında
-                    değerlendir.
+                    Ekibindeki çalışanları aktif değerlendirme dönemi kapsamında değerlendir.
                 </Typography>
-            </Box>
 
             {team.length === 0 ? (
                 <Paper
@@ -461,13 +475,11 @@ export default function NewEvaluationPage() {
                             height: 52,
                             mx: 'auto',
                             mb: 1.5,
-                            bgcolor:
-                                'action.selected',
-                            color:
-                                'text.secondary',
+                            bgcolor: 'primary.main',
+                            color: 'primary.contrastText',
                         }}
                     >
-                        <Person />
+                        <RateReview />
                     </Avatar>
 
                     <Typography

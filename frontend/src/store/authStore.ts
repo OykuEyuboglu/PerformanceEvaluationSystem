@@ -35,6 +35,7 @@ export const useAuthStore = create<AuthState>()(
                     token: null,
                     user: null,
                     isAuthenticated: false,
+                    sessionExpired: false,
                 }),
 
             expireSession: () =>
