@@ -663,10 +663,7 @@ export default function UserFormDialog({
                                 }) => (
                                     <TextField
                                         {...field}
-                                        value={
-                                            field.value ??
-                                            ''
-                                        }
+                                        value={field.value === 0 ? '' : field.value ?? ''}
                                         onChange={(
                                             event
                                         ) =>
@@ -731,10 +728,7 @@ export default function UserFormDialog({
                             render={({ field }) => (
                                 <TextField
                                     {...field}
-                                    value={
-                                        field.value ??
-                                        ''
-                                    }
+                                    value={field.value === 0 ? '' : field.value ?? ''}
                                     onChange={(
                                         event
                                     ) =>

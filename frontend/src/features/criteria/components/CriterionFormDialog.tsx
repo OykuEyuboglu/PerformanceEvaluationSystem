@@ -276,10 +276,12 @@ export default function CriterionFormDialog({
                             label="Ana Kategori"
                             value={selectedCategory?.name ?? ''}
                             fullWidth
-                            size="small"
                             disabled
-                            helperText="Kriter bu kategori altında oluşturulur."
-                            sx={dialogFieldSx}
+                            error={!!errors.performanceCategoryId}
+                            helperText={
+                                errors.performanceCategoryId?.message ??
+                                'Kriter bu kategori altında oluşturulur.'
+                            }
                         />
 
                         {mode === 'edit' && (

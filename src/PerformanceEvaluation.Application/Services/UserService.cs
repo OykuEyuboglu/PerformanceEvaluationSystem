@@ -58,9 +58,7 @@ public class UserService : IUserService
         await _userRepository.AddAsync(user);
         await _userRepository.SaveChangesAsync();
 
-        var createdUser = await _userRepository.GetByIdAsync(user.Id);
-
-        return _mapper.Map<UserDto>(createdUser);
+        return _mapper.Map<UserDto>(user);
     }
 
     public async Task<UserDto> UpdateAsync(int id, UpdateUserDto dto)
