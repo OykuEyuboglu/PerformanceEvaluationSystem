@@ -1,19 +1,17 @@
-﻿using PerformanceEvaluation.Application.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using PerformanceEvaluation.Application.Interfaces;
 using PerformanceEvaluation.Domain.Entities;
 using PerformanceEvaluation.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace PerformanceEvaluation.Infrastructure.Repositories;
 
 public class UserRepository : Repository<User>, IUserRepository
 {
-    private new readonly AppDbContext _context;
-
     public UserRepository(AppDbContext context)
         : base(context)
     {
-        _context = context;
     }
+
     public new async Task<User?> GetByIdAsync(int id)
     {
         return await _context.Users
@@ -36,7 +34,7 @@ public class UserRepository : Repository<User>, IUserRepository
         return await _context.Users
             .Include(u => u.Department)
             .Include(u => u.JobPosition)
-            .FirstOrDefaultAsync(u => u.Email == email);
+            .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
     }
 
     public async Task<IEnumerable<User>> GetEmployeesByEvaluatorIdAsync(int evaluatorId)
@@ -44,6 +42,7 @@ public class UserRepository : Repository<User>, IUserRepository
         return await _context.EvaluatorEmployees
             .Where(x => x.EvaluatorId == evaluatorId)
             .Select(x => x.Employee)
+            .Where(u => !u.IsDeleted)
             .ToListAsync();
     }
 }
