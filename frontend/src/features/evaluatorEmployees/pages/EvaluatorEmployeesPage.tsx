@@ -5,7 +5,12 @@
     useMemo,
     useRef,
 } from 'react'
-import type { ReactElement } from 'react'
+
+import type {
+    ReactElement,
+    MouseEvent,
+} from 'react'
+
 import {
     Box,
     Typography,
@@ -27,6 +32,7 @@ import {
     Chip,
     Stack,
 } from '@mui/material'
+
 import {
     Delete,
     PersonAdd,
@@ -37,15 +43,22 @@ import {
     SupervisorAccountOutlined,
     GroupOutlined,
 } from '@mui/icons-material'
+
 import { getUsers } from '../../users/usersApi'
+
 import {
     getTeamByEvaluator,
     assignEmployee,
     removeAssignment,
 } from '../evaluatorEmployeesApi'
+
 import type { UserDto } from '../../users/types'
 import type { EvaluatorEmployeeDto } from '../types'
+
 import ConfirmDialog from '../../../shared/components/ConfirmDialog'
+
+import { useLanguage } from '../../../shared/i18n/LanguageContext'
+import { translations } from '../../../shared/i18n/translations'
 
 type UserInfoTooltipProps = {
     user: UserDto
@@ -58,6 +71,9 @@ function UserInfoTooltip({
     roleLabel,
     children,
 }: UserInfoTooltipProps) {
+    const { language } = useLanguage()
+    const t = translations[language]
+
     return (
         <Tooltip
             placement="right"
@@ -85,7 +101,9 @@ function UserInfoTooltip({
                                 color: 'primary.contrastText',
                             }}
                         >
-                            {user.firstName.charAt(0).toUpperCase()}
+                            {user.firstName
+                                .charAt(0)
+                                .toUpperCase()}
                         </Avatar>
 
                         <Box sx={{ minWidth: 0 }}>
@@ -96,7 +114,8 @@ function UserInfoTooltip({
                                     lineHeight: 1.3,
                                 }}
                             >
-                                {user.firstName} {user.lastName}
+                                {user.firstName}{' '}
+                                {user.lastName}
                             </Typography>
 
                             <Typography
@@ -127,8 +146,16 @@ function UserInfoTooltip({
                                 color: 'text.secondary',
                             }}
                         >
-                            <strong>Departman:</strong>{' '}
-                            {user.departmentName || 'Belirtilmemiş'}
+                            <strong>
+                                {
+                                    t.evaluatorEmployees
+                                        .department
+                                }
+                                :
+                            </strong>{' '}
+                            {user.departmentName ||
+                                t.evaluatorEmployees
+                                    .notSpecified}
                         </Typography>
 
                         <Typography
@@ -137,8 +164,16 @@ function UserInfoTooltip({
                                 color: 'text.secondary',
                             }}
                         >
-                            <strong>Pozisyon:</strong>{' '}
-                            {user.jobPositionName || 'Belirtilmemiş'}
+                            <strong>
+                                {
+                                    t.evaluatorEmployees
+                                        .position
+                                }
+                                :
+                            </strong>{' '}
+                            {user.jobPositionName ||
+                                t.evaluatorEmployees
+                                    .notSpecified}
                         </Typography>
 
                         <Typography
@@ -148,7 +183,13 @@ function UserInfoTooltip({
                                 wordBreak: 'break-word',
                             }}
                         >
-                            <strong>E-posta:</strong>{' '}
+                            <strong>
+                                {
+                                    t.evaluatorEmployees
+                                        .email
+                                }
+                                :
+                            </strong>{' '}
                             {user.email}
                         </Typography>
                     </Box>
@@ -162,7 +203,8 @@ function UserInfoTooltip({
                         border: '1px solid',
                         borderColor: 'divider',
                         borderRadius: 2,
-                        boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+                        boxShadow:
+                            '0 8px 24px rgba(0,0,0,0.18)',
                         p: 1.25,
                         maxWidth: 290,
                     },
@@ -180,32 +222,50 @@ function UserInfoTooltip({
 }
 
 export default function EvaluatorEmployeesPage() {
-    const [allUsers, setAllUsers] = useState<UserDto[]>([])
-    const [loadingUsers, setLoadingUsers] = useState(true)
+    const { language } = useLanguage()
+    const t = translations[language]
 
-    const [evaluatorSearch, setEvaluatorSearch] = useState('')
-    const [employeeSearch, setEmployeeSearch] = useState('')
+    const [allUsers, setAllUsers] =
+        useState<UserDto[]>([])
+
+    const [loadingUsers, setLoadingUsers] =
+        useState(true)
+
+    const [evaluatorSearch, setEvaluatorSearch] =
+        useState('')
+
+    const [employeeSearch, setEmployeeSearch] =
+        useState('')
 
     const [selectedEvaluator, setSelectedEvaluator] =
         useState<UserDto | null>(null)
 
-    const [team, setTeam] = useState<EvaluatorEmployeeDto[]>([])
-    const [loadingTeam, setLoadingTeam] = useState(false)
+    const [team, setTeam] =
+        useState<EvaluatorEmployeeDto[]>([])
+
+    const [loadingTeam, setLoadingTeam] =
+        useState(false)
 
     const [employeesToAdd, setEmployeesToAdd] =
         useState<UserDto[]>([])
 
-    const [assigning, setAssigning] = useState(false)
+    const [assigning, setAssigning] =
+        useState(false)
 
     const [removeTarget, setRemoveTarget] =
         useState<EvaluatorEmployeeDto | null>(null)
 
-    const [removing, setRemoving] = useState(false)
+    const [removing, setRemoving] =
+        useState(false)
 
-    const [leftPanelWidth, setLeftPanelWidth] = useState(400)
-    const [isResizing, setIsResizing] = useState(false)
+    const [leftPanelWidth, setLeftPanelWidth] =
+        useState(400)
 
-    const layoutRef = useRef<HTMLDivElement | null>(null)
+    const [isResizing, setIsResizing] =
+        useState(false)
+
+    const layoutRef =
+        useRef<HTMLDivElement | null>(null)
 
     const [snackbar, setSnackbar] = useState<{
         open: boolean
@@ -217,28 +277,40 @@ export default function EvaluatorEmployeesPage() {
         severity: 'success',
     })
 
-    const showError = (err: any, fallback: string) =>
+    const showError = (
+        err: any,
+        fallback: string,
+    ) =>
         setSnackbar({
             open: true,
-            message: err?.response?.data?.message ?? fallback,
+            message:
+                err?.response?.data?.message ??
+                fallback,
             severity: 'error',
         })
 
     const evaluators = useMemo(
-        () => allUsers.filter((u) => u.role === 'Evaluator'),
-        [allUsers]
+        () =>
+            allUsers.filter(
+                (u) => u.role === 'Evaluator',
+            ),
+        [allUsers],
     )
 
     const employees = useMemo(
         () =>
             allUsers.filter(
-                (u) => u.role === 'Employee' && u.isActive
+                (u) =>
+                    u.role === 'Employee' &&
+                    u.isActive,
             ),
-        [allUsers]
+        [allUsers],
     )
 
     const filteredEvaluators = useMemo(() => {
-        const q = evaluatorSearch.trim().toLowerCase()
+        const q = evaluatorSearch
+            .trim()
+            .toLowerCase()
 
         if (!q) return evaluators
 
@@ -247,7 +319,8 @@ export default function EvaluatorEmployeesPage() {
                 `${ev.firstName} ${ev.lastName}`.toLowerCase()
 
             const department =
-                ev.departmentName?.toLowerCase() ?? ''
+                ev.departmentName
+                    ?.toLowerCase() ?? ''
 
             const email =
                 ev.email?.toLowerCase() ?? ''
@@ -261,12 +334,17 @@ export default function EvaluatorEmployeesPage() {
     }, [evaluators, evaluatorSearch])
 
     const filteredEmployees = useMemo(() => {
-        const q = employeeSearch.trim().toLowerCase()
+        const q = employeeSearch
+            .trim()
+            .toLowerCase()
 
         return employees.filter((employee) => {
-            const alreadyAssigned = team.some(
-                (member) => member.employeeId === employee.id
-            )
+            const alreadyAssigned =
+                team.some(
+                    (member) =>
+                        member.employeeId ===
+                        employee.id,
+                )
 
             if (alreadyAssigned) return false
 
@@ -276,13 +354,16 @@ export default function EvaluatorEmployeesPage() {
                 `${employee.firstName} ${employee.lastName}`.toLowerCase()
 
             const department =
-                employee.departmentName?.toLowerCase() ?? ''
+                employee.departmentName
+                    ?.toLowerCase() ?? ''
 
             const jobPosition =
-                employee.jobPositionName?.toLowerCase() ?? ''
+                employee.jobPositionName
+                    ?.toLowerCase() ?? ''
 
             const email =
-                employee.email?.toLowerCase() ?? ''
+                employee.email
+                    ?.toLowerCase() ?? ''
 
             return (
                 fullName.includes(q) ||
@@ -291,53 +372,82 @@ export default function EvaluatorEmployeesPage() {
                 email.includes(q)
             )
         })
-    }, [employees, team, employeeSearch])
+    }, [
+        employees,
+        team,
+        employeeSearch,
+    ])
 
     const enrichMember = (
-        member: EvaluatorEmployeeDto
+        member: EvaluatorEmployeeDto,
     ): UserDto | undefined =>
-        allUsers.find((u) => u.id === member.employeeId)
+        allUsers.find(
+            (u) => u.id === member.employeeId,
+        )
 
-    const loadUsers = useCallback(async () => {
-        setLoadingUsers(true)
+    const loadUsers = useCallback(
+        async () => {
+            setLoadingUsers(true)
 
-        try {
-            const data = await getUsers()
-            setAllUsers(data)
-        } catch {
-            setSnackbar({
-                open: true,
-                message: 'Kullanıcılar yüklenemedi.',
-                severity: 'error',
-            })
-        } finally {
-            setLoadingUsers(false)
-        }
-    }, [])
+            try {
+                const data = await getUsers()
+                setAllUsers(data)
+            } catch {
+                setSnackbar({
+                    open: true,
+                    message:
+                        t.evaluatorEmployees
+                            .usersLoadError,
+                    severity: 'error',
+                })
+            } finally {
+                setLoadingUsers(false)
+            }
+        },
+        [
+            t.evaluatorEmployees
+                .usersLoadError,
+        ],
+    )
 
     useEffect(() => {
         loadUsers()
     }, [loadUsers])
 
-    const loadTeam = useCallback(async (evaluatorId: number) => {
-        setLoadingTeam(true)
+    const loadTeam = useCallback(
+        async (evaluatorId: number) => {
+            setLoadingTeam(true)
 
-        try {
-            const data = await getTeamByEvaluator(evaluatorId)
-            setTeam(data)
-        } catch {
-            setSnackbar({
-                open: true,
-                message: 'Ekip bilgisi yüklenemedi.',
-                severity: 'error',
-            })
-            setTeam([])
-        } finally {
-            setLoadingTeam(false)
-        }
-    }, [])
+            try {
+                const data =
+                    await getTeamByEvaluator(
+                        evaluatorId,
+                    )
 
-    const handleSelectEvaluator = (evaluator: UserDto) => {
+                setTeam(data)
+            } catch {
+                setSnackbar({
+                    open: true,
+                    message:
+                        t.evaluatorEmployees
+                            .teamLoadError,
+                    severity: 'error',
+                })
+
+                setTeam([])
+            } finally {
+                setLoadingTeam(false)
+            }
+        },
+        [
+            t.evaluatorEmployees
+                .teamLoadError,
+        ],
+    )
+
+    const handleSelectEvaluator = (
+        evaluator: UserDto,
+    ) => {
         setSelectedEvaluator(evaluator)
         setEmployeesToAdd([])
         setEmployeeSearch('')
@@ -345,32 +455,52 @@ export default function EvaluatorEmployeesPage() {
     }
 
     const handleAssign = async () => {
-        if (!selectedEvaluator || employeesToAdd.length === 0) return
+        if (
+            !selectedEvaluator ||
+            employeesToAdd.length === 0
+        ) {
+            return
+        }
 
         setAssigning(true)
 
         try {
             await Promise.all(
-                employeesToAdd.map((employee) =>
-                    assignEmployee({
-                        evaluatorId: selectedEvaluator.id,
-                        employeeId: employee.id,
-                    })
-                )
+                employeesToAdd.map(
+                    (employee) =>
+                        assignEmployee({
+                            evaluatorId:
+                                selectedEvaluator.id,
+                            employeeId:
+                                employee.id,
+                        }),
+                ),
             )
 
             setSnackbar({
                 open: true,
-                message: `${employeesToAdd.length} çalışan ekibe eklendi.`,
+                message: t.evaluatorEmployees
+                    .employeesAdded.replace(
+                        '{count}',
+                        String(
+                            employeesToAdd.length,
+                        ),
+                    ),
                 severity: 'success',
             })
 
             setEmployeesToAdd([])
             setEmployeeSearch('')
 
-            await loadTeam(selectedEvaluator.id)
+            await loadTeam(
+                selectedEvaluator.id,
+            )
         } catch (err) {
-            showError(err, 'Çalışanlar eklenirken hata oluştu.')
+            showError(
+                err,
+                t.evaluatorEmployees
+                    .assignError,
+            )
         } finally {
             setAssigning(false)
         }
@@ -384,29 +514,37 @@ export default function EvaluatorEmployeesPage() {
         try {
             await removeAssignment(
                 removeTarget.evaluatorId,
-                removeTarget.employeeId
+                removeTarget.employeeId,
             )
 
             setSnackbar({
                 open: true,
-                message: 'Çalışan ekipten çıkarıldı.',
+                message:
+                    t.evaluatorEmployees
+                        .employeeRemoved,
                 severity: 'success',
             })
 
             setRemoveTarget(null)
 
             if (selectedEvaluator) {
-                await loadTeam(selectedEvaluator.id)
+                await loadTeam(
+                    selectedEvaluator.id,
+                )
             }
         } catch (err) {
-            showError(err, 'Çıkarma sırasında hata oluştu.')
+            showError(
+                err,
+                t.evaluatorEmployees
+                    .removeError,
+            )
         } finally {
             setRemoving(false)
         }
     }
 
     const handleResizeStart = (
-        event: React.MouseEvent<HTMLDivElement>
+        event: MouseEvent<HTMLDivElement>,
     ) => {
         event.preventDefault()
         setIsResizing(true)
@@ -415,23 +553,32 @@ export default function EvaluatorEmployeesPage() {
     useEffect(() => {
         if (!isResizing) return
 
-        const handleMouseMove = (event: MouseEvent) => {
-            const layout = layoutRef.current
+        const handleMouseMove = (
+            event: globalThis.MouseEvent,
+        ) => {
+            const layout =
+                layoutRef.current
 
             if (!layout) return
 
-            const rect = layout.getBoundingClientRect()
+            const rect =
+                layout.getBoundingClientRect()
 
-            const newWidth = event.clientX - rect.left
+            const newWidth =
+                event.clientX - rect.left
 
             const minWidth = 280
-            const maxWidth = rect.width * 0.5
+            const maxWidth =
+                rect.width * 0.5
 
             setLeftPanelWidth(
                 Math.min(
-                    Math.max(newWidth, minWidth),
-                    maxWidth
-                )
+                    Math.max(
+                        newWidth,
+                        minWidth,
+                    ),
+                    maxWidth,
+                ),
             )
         }
 
@@ -439,23 +586,42 @@ export default function EvaluatorEmployeesPage() {
             setIsResizing(false)
         }
 
-        document.addEventListener('mousemove', handleMouseMove)
-        document.addEventListener('mouseup', handleMouseUp)
+        document.addEventListener(
+            'mousemove',
+            handleMouseMove,
+        )
+
+        document.addEventListener(
+            'mouseup',
+            handleMouseUp,
+        )
 
         return () => {
-            document.removeEventListener('mousemove', handleMouseMove)
-            document.removeEventListener('mouseup', handleMouseUp)
+            document.removeEventListener(
+                'mousemove',
+                handleMouseMove,
+            )
+
+            document.removeEventListener(
+                'mouseup',
+                handleMouseUp,
+            )
         }
     }, [isResizing])
 
     return (
         <Box>
+            {/* HEADER */}
             <Box
                 sx={{
                     mb: 3,
                     display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: { xs: 'flex-start', md: 'center' },
+                    justifyContent:
+                        'space-between',
+                    alignItems: {
+                        xs: 'flex-start',
+                        md: 'center',
+                    },
                     gap: 2,
                     flexWrap: 'wrap',
                 }}
@@ -476,45 +642,101 @@ export default function EvaluatorEmployeesPage() {
                                 borderRadius: 2.25,
                                 display: 'grid',
                                 placeItems: 'center',
-                                bgcolor: 'primary.main',
-                                color: 'primary.contrastText',
-                                boxShadow: '0 8px 20px rgba(245,179,1,0.20)',
+                                bgcolor:
+                                    'primary.main',
+                                color:
+                                    'primary.contrastText',
+                                boxShadow:
+                                    '0 8px 20px rgba(245,179,1,0.20)',
                             }}
                         >
                             <Groups fontSize="small" />
                         </Box>
+
                         <Box>
-                            <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: -0.35 }}>
-                                Ekip Atamaları
+                            <Typography
+                                variant="h5"
+                                sx={{
+                                    fontWeight: 800,
+                                    letterSpacing:
+                                        -0.35,
+                                }}
+                            >
+                                {
+                                    t
+                                        .evaluatorEmployees
+                                        .title
+                                }
                             </Typography>
-                            <Typography color="text.secondary" sx={{ mt: 0.2, fontSize: 13.5 }}>
-                                Değerlendiricilerin sorumlu olduğu çalışan ekiplerini yönet.
+
+                            <Typography
+                                color="text.secondary"
+                                sx={{
+                                    mt: 0.2,
+                                    fontSize: 13.5,
+                                }}
+                            >
+                                {
+                                    t
+                                        .evaluatorEmployees
+                                        .description
+                                }
                             </Typography>
                         </Box>
                     </Stack>
                 </Box>
-                <Stack direction="row" spacing={1}>
+
+                <Stack
+                    direction="row"
+                    spacing={1}
+                >
                     <Chip
-                        icon={<SupervisorAccountOutlined sx={{ fontSize: 17 }} />}
-                        label={`${evaluators.length} değerlendirici`}
+                        icon={
+                            <SupervisorAccountOutlined
+                                sx={{
+                                    fontSize: 17,
+                                }}
+                            />
+                        }
+                        label={`${evaluators.length} ${t.evaluatorEmployees
+                                .evaluators
+                            }`}
                         variant="outlined"
-                        sx={{ fontWeight: 600, borderRadius: 2 }}
+                        sx={{
+                            fontWeight: 600,
+                            borderRadius: 2,
+                        }}
                     />
+
                     <Chip
-                        icon={<PeopleAltOutlined sx={{ fontSize: 17 }} />}
-                        label={`${employees.length} aktif çalışan`}
+                        icon={
+                            <PeopleAltOutlined
+                                sx={{
+                                    fontSize: 17,
+                                }}
+                            />
+                        }
+                        label={`${employees.length} ${t.evaluatorEmployees
+                                .activeEmployees
+                            }`}
                         variant="outlined"
-                        sx={{ fontWeight: 600, borderRadius: 2 }}
+                        sx={{
+                            fontWeight: 600,
+                            borderRadius: 2,
+                        }}
                     />
                 </Stack>
             </Box>
 
+            {/* LOADING / EMPTY */}
             {loadingUsers ? (
                 <LinearProgress />
             ) : evaluators.length === 0 ? (
                 <Typography color="text.secondary">
-                    Sistemde henüz "Değerlendirici" rolünde kullanıcı yok.
-                    Önce Kullanıcı Yönetimi'nden ekle.
+                    {
+                        t.evaluatorEmployees
+                            .noEvaluators
+                    }
                 </Typography>
             ) : (
                 <Box
@@ -530,13 +752,14 @@ export default function EvaluatorEmployeesPage() {
                         minHeight: 420,
                     }}
                 >
-                    {/* SOL PANEL */}
+                    {/* LEFT PANEL */}
                     <Paper
                         elevation={0}
                         sx={{
                             minWidth: 0,
                             border: '1px solid',
-                            borderColor: 'divider',
+                            borderColor:
+                                'divider',
                             borderRadius: 3,
                             overflow: 'hidden',
                         }}
@@ -545,8 +768,10 @@ export default function EvaluatorEmployeesPage() {
                             sx={{
                                 px: 2.5,
                                 py: 2,
-                                borderBottom: '1px solid',
-                                borderColor: 'divider',
+                                borderBottom:
+                                    '1px solid',
+                                borderColor:
+                                    'divider',
                             }}
                         >
                             <Typography
@@ -556,168 +781,223 @@ export default function EvaluatorEmployeesPage() {
                                     mb: 1.25,
                                 }}
                             >
-                                Değerlendiriciler
+                                {
+                                    t
+                                        .evaluatorEmployees
+                                        .evaluatorsTitle
+                                }
                             </Typography>
 
                             <TextField
                                 size="small"
                                 fullWidth
-                                placeholder="İsim, departman veya e-posta ara..."
-                                value={evaluatorSearch}
+                                placeholder={
+                                    t
+                                        .evaluatorEmployees
+                                        .evaluatorSearchPlaceholder
+                                }
+                                value={
+                                    evaluatorSearch
+                                }
                                 onChange={(e) =>
-                                    setEvaluatorSearch(e.target.value)
+                                    setEvaluatorSearch(
+                                        e.target.value,
+                                    )
                                 }
                                 slotProps={{
                                     input: {
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <Search
-                                                    fontSize="small"
-                                                    sx={{
-                                                        color: 'text.secondary',
-                                                    }}
-                                                />
-                                            </InputAdornment>
-                                        ),
+                                        startAdornment:
+                                            (
+                                                <InputAdornment position="start">
+                                                    <Search
+                                                        fontSize="small"
+                                                        sx={{
+                                                            color: 'text.secondary',
+                                                        }}
+                                                    />
+                                                </InputAdornment>
+                                            ),
                                     },
                                 }}
                                 sx={{
-                                    '& .MuiOutlinedInput-root': {
+                                    '& .MuiOutlinedInput-root':
+                                    {
                                         borderRadius: 2,
                                     },
                                 }}
                             />
                         </Box>
 
-                        {filteredEvaluators.length === 0 ? (
+                        {filteredEvaluators.length ===
+                            0 ? (
                             <Box sx={{ p: 3 }}>
                                 <Typography
                                     color="text.secondary"
-                                    sx={{ fontSize: 13.5 }}
+                                    sx={{
+                                        fontSize: 13.5,
+                                    }}
                                 >
-                                    Aramayla eşleşen değerlendirici yok.
+                                    {
+                                        t
+                                            .evaluatorEmployees
+                                            .noMatchingEvaluators
+                                    }
                                 </Typography>
                             </Box>
                         ) : (
                             <List
-                                            sx={{
-                                                py: 0,
-                                                maxHeight: {
-                                                    xs: 420,
-                                                    md: 'calc(100vh - 400px)',
-                                                },
-                                                overflowY: 'auto',
-                                            }}
-                                        
+                                sx={{
+                                    py: 0,
+                                    maxHeight: {
+                                        xs: 420,
+                                        md: 'calc(100vh - 400px)',
+                                    },
+                                    overflowY:
+                                        'auto',
+                                }}
                             >
-                                {filteredEvaluators.map((ev) => {
-                                    const isSelected =
-                                        selectedEvaluator?.id === ev.id
+                                {filteredEvaluators.map(
+                                    (ev) => {
+                                        const isSelected =
+                                            selectedEvaluator?.id ===
+                                            ev.id
 
-                                    return (
-                                        <UserInfoTooltip
-                                            key={ev.id}
-                                            user={ev}
-                                            roleLabel="Değerlendirici"
-                                        >
-                                            <ListItemButton
-                                                selected={isSelected}
-                                                onClick={() =>
-                                                    handleSelectEvaluator(ev)
+                                        return (
+                                            <UserInfoTooltip
+                                                key={
+                                                    ev.id
                                                 }
-                                                sx={{
-                                                    py: 1.5,
-                                                    px: 2,
-                                                    transition:
-                                                        'background-color 0.15s ease',
-                                                    '&:hover': {
-                                                        bgcolor:
-                                                            'action.hover',
-                                                    },
-                                                    '&.Mui-selected': {
-                                                        bgcolor:
-                                                            'primary.main',
-                                                        color:
-                                                            'primary.contrastText',
-                                                        '&:hover': {
-                                                            bgcolor:
-                                                                'primary.main',
-                                                        },
-                                                    },
-                                                }}
+                                                user={ev}
+                                                roleLabel={
+                                                    t
+                                                        .evaluatorEmployees
+                                                        .evaluator
+                                                }
                                             >
-                                                <Avatar
-                                                    sx={{
-                                                        width: 34,
-                                                        height: 34,
-                                                        fontSize: 13,
-                                                        fontWeight: 700,
-                                                        mr: 1.5,
-                                                        bgcolor: isSelected
-                                                            ? '#111111'
-                                                            : 'action.selected',
-                                                        color: isSelected
-                                                            ? '#FFFFFF'
-                                                            : 'text.primary',
-                                                        flexShrink: 0,
-                                                    }}
-                                                >
-                                                    {ev.firstName
-                                                        .charAt(0)
-                                                        .toUpperCase()}
-                                                </Avatar>
-
-                                                <ListItemText
-                                                    primary={`${ev.firstName} ${ev.lastName}`}
-                                                    secondary={
-                                                        ev.departmentName
+                                                <ListItemButton
+                                                    selected={
+                                                        isSelected
+                                                    }
+                                                    onClick={() =>
+                                                        handleSelectEvaluator(
+                                                            ev,
+                                                        )
                                                     }
                                                     sx={{
-                                                        minWidth: 0,
-                                                        '& .MuiListItemText-primary':
+                                                        py: 1.5,
+                                                        px: 2,
+                                                        transition:
+                                                            'background-color 0.15s ease',
+
+                                                        '&:hover':
                                                         {
-                                                            fontSize: 14,
-                                                            fontWeight: 600,
-                                                            whiteSpace:
-                                                                'nowrap',
-                                                            overflow:
-                                                                'hidden',
-                                                            textOverflow:
-                                                                'ellipsis',
+                                                            bgcolor:
+                                                                'action.hover',
                                                         },
-                                                        '& .MuiListItemText-secondary':
+
+                                                        '&.Mui-selected':
                                                         {
-                                                            fontSize: 12,
-                                                            color: isSelected
-                                                                ? 'rgba(17,17,17,0.7)'
-                                                                : 'text.secondary',
+                                                            bgcolor:
+                                                                'primary.main',
+                                                            color:
+                                                                'primary.contrastText',
+
+                                                            '&:hover':
+                                                            {
+                                                                bgcolor:
+                                                                    'primary.main',
+                                                            },
                                                         },
                                                     }}
-                                                />
-                                            </ListItemButton>
-                                        </UserInfoTooltip>
-                                    )
-                                })}
+                                                >
+                                                    <Avatar
+                                                        sx={{
+                                                            width: 34,
+                                                            height: 34,
+                                                            fontSize: 13,
+                                                            fontWeight: 700,
+                                                            mr: 1.5,
+                                                            bgcolor:
+                                                                isSelected
+                                                                    ? '#111111'
+                                                                    : 'action.selected',
+                                                            color:
+                                                                isSelected
+                                                                    ? '#FFFFFF'
+                                                                    : 'text.primary',
+                                                            flexShrink: 0,
+                                                        }}
+                                                    >
+                                                        {ev.firstName
+                                                            .charAt(
+                                                                0,
+                                                            )
+                                                            .toUpperCase()}
+                                                    </Avatar>
+
+                                                    <ListItemText
+                                                        primary={`${ev.firstName} ${ev.lastName}`}
+                                                        secondary={
+                                                            ev.departmentName
+                                                        }
+                                                        sx={{
+                                                            minWidth: 0,
+
+                                                            '& .MuiListItemText-primary':
+                                                            {
+                                                                fontSize: 14,
+                                                                fontWeight: 600,
+                                                                whiteSpace:
+                                                                    'nowrap',
+                                                                overflow:
+                                                                    'hidden',
+                                                                textOverflow:
+                                                                    'ellipsis',
+                                                            },
+
+                                                            '& .MuiListItemText-secondary':
+                                                            {
+                                                                fontSize: 12,
+                                                                color:
+                                                                    isSelected
+                                                                        ? 'rgba(17,17,17,0.7)'
+                                                                        : 'text.secondary',
+                                                            },
+                                                        }}
+                                                    />
+                                                </ListItemButton>
+                                            </UserInfoTooltip>
+                                        )
+                                    },
+                                )}
                             </List>
                         )}
                     </Paper>
 
                     {/* RESIZE DIVIDER */}
                     <Box
-                        onMouseDown={handleResizeStart}
+                        onMouseDown={
+                            handleResizeStart
+                        }
                         sx={{
                             display: {
                                 xs: 'none',
                                 md: 'flex',
                             },
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'col-resize',
+                            alignItems:
+                                'center',
+                            justifyContent:
+                                'center',
+                            cursor:
+                                'col-resize',
                             userSelect: 'none',
                             position: 'relative',
-                            '&:hover .resize-handle': {
+
+                            '&:hover .resize-handle':
+                            {
                                 opacity: 1,
-                                bgcolor: 'primary.main',
+                                bgcolor:
+                                    'primary.main',
                             },
                         }}
                     >
@@ -727,32 +1007,44 @@ export default function EvaluatorEmployeesPage() {
                                 width: 3,
                                 height: 48,
                                 borderRadius: 2,
-                                bgcolor: isResizing
-                                    ? 'primary.main'
-                                    : 'divider',
-                                opacity: isResizing ? 1 : 0.7,
-                                transition: 'all 0.15s ease',
+                                bgcolor:
+                                    isResizing
+                                        ? 'primary.main'
+                                        : 'divider',
+                                opacity:
+                                    isResizing
+                                        ? 1
+                                        : 0.7,
+                                transition:
+                                    'all 0.15s ease',
                             }}
                         />
 
                         <DragIndicator
                             sx={{
-                                position: 'absolute',
+                                position:
+                                    'absolute',
                                 fontSize: 16,
-                                color: 'text.secondary',
-                                opacity: isResizing ? 1 : 0,
-                                pointerEvents: 'none',
+                                color:
+                                    'text.secondary',
+                                opacity:
+                                    isResizing
+                                        ? 1
+                                        : 0,
+                                pointerEvents:
+                                    'none',
                             }}
                         />
                     </Box>
 
-                    {/* SAĞ PANEL */}
+                    {/* RIGHT PANEL */}
                     <Paper
                         elevation={0}
                         sx={{
                             minWidth: 0,
                             border: '1px solid',
-                            borderColor: 'divider',
+                            borderColor:
+                                'divider',
                             borderRadius: 3,
                             overflow: 'hidden',
                             mt: {
@@ -765,128 +1057,237 @@ export default function EvaluatorEmployeesPage() {
                             <Box
                                 sx={{
                                     p: 5,
-                                    textAlign: 'center',
+                                    textAlign:
+                                        'center',
                                 }}
                             >
                                 <Groups
                                     sx={{
                                         fontSize: 40,
-                                        color: 'text.secondary',
+                                        color:
+                                            'text.secondary',
                                         mb: 1,
                                     }}
                                 />
 
                                 <Typography color="text.secondary">
-                                    Bir değerlendirici seç.
+                                    {
+                                        t
+                                            .evaluatorEmployees
+                                            .selectEvaluator
+                                    }
                                 </Typography>
                             </Box>
                         ) : (
                             <>
+                                {/* SELECTED EVALUATOR */}
                                 <Box
                                     sx={{
                                         px: 2.5,
                                         py: 2,
-                                        borderBottom: '1px solid',
-                                        borderColor: 'divider',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
+                                        borderBottom:
+                                            '1px solid',
+                                        borderColor:
+                                            'divider',
+                                        display:
+                                            'flex',
+                                        alignItems:
+                                            'center',
+                                        justifyContent:
+                                            'space-between',
                                         gap: 2,
                                     }}
                                 >
-                                                <Stack
-                                                    direction="row"
-                                                    spacing={1.5}
-                                                    sx={{
-                                                        alignItems: 'center',
-                                                        minWidth: 0,
-                                                    }}
-                                                >
-                                                    <Avatar
+                                    <Stack
+                                        direction="row"
+                                        spacing={1.5}
+                                        sx={{
+                                            alignItems:
+                                                'center',
+                                            minWidth: 0,
+                                        }}
+                                    >
+                                        <Avatar
                                             sx={{
                                                 width: 38,
                                                 height: 38,
-                                                bgcolor: 'primary.main',
-                                                color: 'primary.contrastText',
+                                                bgcolor:
+                                                    'primary.main',
+                                                color:
+                                                    'primary.contrastText',
                                                 fontWeight: 800,
                                                 fontSize: 14,
                                             }}
                                         >
-                                            {selectedEvaluator.firstName.charAt(0).toUpperCase()}
+                                            {selectedEvaluator.firstName
+                                                .charAt(
+                                                    0,
+                                                )
+                                                .toUpperCase()}
                                         </Avatar>
-                                                    <Box sx={{ minWidth: 0 }}>
-                                                        <Typography sx={{ fontWeight: 750, fontSize: 15 }}>
-                                                {selectedEvaluator.firstName} {selectedEvaluator.lastName}
+
+                                        <Box
+                                            sx={{
+                                                minWidth: 0,
+                                            }}
+                                        >
+                                            <Typography
+                                                sx={{
+                                                    fontWeight: 750,
+                                                    fontSize: 15,
+                                                }}
+                                            >
+                                                {
+                                                    selectedEvaluator.firstName
+                                                }{' '}
+                                                {
+                                                    selectedEvaluator.lastName
+                                                }
                                             </Typography>
+
                                             <Typography
                                                 color="text.secondary"
-                                                sx={{ fontSize: 12, mt: 0.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                                                sx={{
+                                                    fontSize: 12,
+                                                    mt: 0.2,
+                                                    whiteSpace:
+                                                        'nowrap',
+                                                    overflow:
+                                                        'hidden',
+                                                    textOverflow:
+                                                        'ellipsis',
+                                                }}
                                             >
-                                                {selectedEvaluator.departmentName || 'Departman belirtilmemiş'}
+                                                {
+                                                    selectedEvaluator.departmentName
+                                                    ||
+                                                    t
+                                                        .evaluatorEmployees
+                                                        .departmentNotSpecified
+                                                }
                                             </Typography>
                                         </Box>
                                     </Stack>
+
                                     <Chip
-                                        icon={<GroupOutlined sx={{ fontSize: 16 }} />}
-                                        label={`${team.length} çalışan`}
+                                        icon={
+                                            <GroupOutlined
+                                                sx={{
+                                                    fontSize: 16,
+                                                }}
+                                            />
+                                        }
+                                        label={`${team.length} ${t
+                                                .evaluatorEmployees
+                                                .employees
+                                            }`}
                                         size="small"
                                         sx={{
                                             flexShrink: 0,
                                             fontWeight: 700,
                                             borderRadius: 1.5,
-                                            bgcolor: 'action.selected',
+                                            bgcolor:
+                                                'action.selected',
                                         }}
                                     />
                                 </Box>
 
-                                {/* ÇALIŞAN ARAMA */}
+                                {/* EMPLOYEE SEARCH */}
                                 <Box
                                     sx={{
                                         px: 2.5,
                                         py: 2,
-                                        display: 'flex',
+                                        display:
+                                            'flex',
                                         gap: 1.5,
-                                        alignItems: 'center',
-                                        bgcolor: 'background.default',
+                                        alignItems:
+                                            'center',
+                                        bgcolor:
+                                            'background.default',
                                     }}
                                 >
-                                    <Box sx={{ minWidth: 0, flex: 1 }}>
+                                    <Box
+                                        sx={{
+                                            minWidth: 0,
+                                            flex: 1,
+                                        }}
+                                    >
                                         <Autocomplete
                                             multiple
-                                            options={filteredEmployees}
-                                            value={employeesToAdd}
-                                            inputValue={employeeSearch}
-                                            onChange={(_, values) => {
-                                                setEmployeesToAdd(values)
+                                            options={
+                                                filteredEmployees
+                                            }
+                                            value={
+                                                employeesToAdd
+                                            }
+                                            inputValue={
+                                                employeeSearch
+                                            }
+                                            onChange={(
+                                                _,
+                                                values,
+                                            ) => {
+                                                setEmployeesToAdd(
+                                                    values,
+                                                )
                                             }}
-                                            onInputChange={(_, value, reason) => {
-                                                if (reason === 'input' || reason === 'clear') {
-                                                    setEmployeeSearch(value)
+                                            onInputChange={(
+                                                _,
+                                                value,
+                                                reason,
+                                            ) => {
+                                                if (
+                                                    reason ===
+                                                    'input' ||
+                                                    reason ===
+                                                    'clear'
+                                                ) {
+                                                    setEmployeeSearch(
+                                                        value,
+                                                    )
                                                 }
                                             }}
-                                            isOptionEqualToValue={(option, value) =>
-                                                option.id === value.id
+                                            isOptionEqualToValue={(
+                                                option,
+                                                value,
+                                            ) =>
+                                                option.id ===
+                                                value.id
                                             }
-                                            filterOptions={(options) => options}
-                                            getOptionLabel={(user) =>
-                                                `${user.firstName} ${user.lastName}`
+                                            filterOptions={(
+                                                options,
+                                            ) =>
+                                                options
                                             }
+                                            getOptionLabel={(
+                                                user,
+                                            ) =>
+                                                `${user.firstName} ${user.lastName}`}
                                             disableCloseOnSelect
                                             sx={{
                                                 flex: 1,
                                                 minWidth: 0,
-                                                '& .MuiAutocomplete-inputRoot': {
+
+                                                '& .MuiAutocomplete-inputRoot':
+                                                {
                                                     minHeight: 42,
                                                 },
                                             }}
-                                            renderOption={(props, option) => (
+                                            renderOption={(
+                                                props,
+                                                option,
+                                            ) => (
                                                 <Box
                                                     component="li"
                                                     {...props}
-                                                    key={option.id}
+                                                    key={
+                                                        option.id
+                                                    }
                                                     sx={{
-                                                        display: 'flex !important',
-                                                        alignItems: 'center',
+                                                        display:
+                                                            'flex !important',
+                                                        alignItems:
+                                                            'center',
                                                         gap: 1.5,
                                                         px: '14px !important',
                                                         py: '10px !important',
@@ -898,76 +1299,127 @@ export default function EvaluatorEmployeesPage() {
                                                             height: 34,
                                                             fontSize: 13,
                                                             fontWeight: 700,
-                                                            bgcolor: 'action.selected',
-                                                            color: 'text.primary',
+                                                            bgcolor:
+                                                                'action.selected',
+                                                            color:
+                                                                'text.primary',
                                                             flexShrink: 0,
                                                         }}
                                                     >
                                                         {option.firstName
-                                                            .charAt(0)
+                                                            .charAt(
+                                                                0,
+                                                            )
                                                             .toUpperCase()}
                                                     </Avatar>
 
-                                                    <Box sx={{ minWidth: 0 }}>
+                                                    <Box
+                                                        sx={{
+                                                            minWidth: 0,
+                                                        }}
+                                                    >
                                                         <Typography
                                                             sx={{
                                                                 fontSize: 13.5,
                                                                 fontWeight: 600,
                                                             }}
                                                         >
-                                                            {option.firstName} {option.lastName}
+                                                            {
+                                                                option.firstName
+                                                            }{' '}
+                                                            {
+                                                                option.lastName
+                                                            }
                                                         </Typography>
 
                                                         <Typography
                                                             sx={{
                                                                 fontSize: 11.5,
-                                                                color: 'text.secondary',
+                                                                color:
+                                                                    'text.secondary',
                                                                 mt: 0.25,
                                                             }}
                                                         >
-                                                            {option.departmentName} ·{' '}
-                                                            {option.jobPositionName ||
-                                                                'Pozisyon belirtilmemiş'}
+                                                            {
+                                                                option.departmentName
+                                                            }{' '}
+                                                            ·{' '}
+                                                            {
+                                                                option.jobPositionName
+                                                                ||
+                                                                t
+                                                                    .evaluatorEmployees
+                                                                    .positionNotSpecified
+                                                            }
                                                         </Typography>
                                                     </Box>
                                                 </Box>
                                             )}
-                                            renderValue={(value, getItemProps) =>
-                                                value.map((option, index) => (
-                                                    <Chip
-                                                        {...getItemProps({ index })}
-                                                        key={option.id}
-                                                        label={`${option.firstName} ${option.lastName}`}
-                                                        size="small"
-                                                        sx={{
-                                                            maxWidth: 180,
-                                                            fontWeight: 600,
-                                                            borderRadius: 1.5,
-                                                            bgcolor: 'action.selected',
-                                                            color: 'text.primary',
-                                                            border: '1px solid',
-                                                            borderColor: 'divider',
-
-                                                            '& .MuiChip-deleteIcon': {
-                                                                color: 'text.secondary',
-                                                                fontSize: 17,
-
-                                                                '&:hover': {
-                                                                    color: 'error.main',
+                                            renderValue={(
+                                                value,
+                                                getItemProps,
+                                            ) =>
+                                                value.map(
+                                                    (
+                                                        option,
+                                                        index,
+                                                    ) => (
+                                                        <Chip
+                                                            {...getItemProps(
+                                                                {
+                                                                    index,
                                                                 },
-                                                            },
-                                                        }}
-                                                    />
-                                                ))
+                                                            )}
+                                                            key={
+                                                                option.id
+                                                            }
+                                                            label={`${option.firstName} ${option.lastName}`}
+                                                            size="small"
+                                                            sx={{
+                                                                maxWidth: 180,
+                                                                fontWeight: 600,
+                                                                borderRadius: 1.5,
+                                                                bgcolor:
+                                                                    'action.selected',
+                                                                color:
+                                                                    'text.primary',
+                                                                border:
+                                                                    '1px solid',
+                                                                borderColor:
+                                                                    'divider',
+
+                                                                '& .MuiChip-deleteIcon':
+                                                                {
+                                                                    color:
+                                                                        'text.secondary',
+                                                                    fontSize: 17,
+
+                                                                    '&:hover':
+                                                                    {
+                                                                        color:
+                                                                            'error.main',
+                                                                    },
+                                                                },
+                                                            }}
+                                                        />
+                                                    ),
+                                                )
                                             }
-                                            renderInput={(params) => (
+                                            renderInput={(
+                                                params,
+                                            ) => (
                                                 <TextField
                                                     {...params}
                                                     size="small"
                                                     placeholder={
-                                                        employeesToAdd.length > 0
-                                                            ? 'Başka çalışan ara...'
-                                                            : 'Çalışan adı, e-posta veya departman ara...'
+                                                        employeesToAdd.length >
+                                                            0
+                                                            ? t
+                                                                .evaluatorEmployees
+                                                                .anotherEmployeeSearch
+                                                            : t
+                                                                .evaluatorEmployees
+                                                                .employeeSearchPlaceholder
                                                     }
                                                 />
                                             )}
@@ -976,22 +1428,32 @@ export default function EvaluatorEmployeesPage() {
 
                                     <Button
                                         variant="contained"
-                                        startIcon={<PersonAdd />}
+                                        startIcon={
+                                            <PersonAdd />
+                                        }
                                         disabled={
-                                            employeesToAdd.length === 0 ||
+                                            employeesToAdd.length ===
+                                            0 ||
                                             assigning
                                         }
-                                        onClick={handleAssign}
+                                        onClick={
+                                            handleAssign
+                                        }
                                         sx={{
                                             flexShrink: 0,
                                         }}
                                     >
-                                        Ekle
+                                        {
+                                            t
+                                                .evaluatorEmployees
+                                                .add
+                                        }
                                     </Button>
                                 </Box>
 
                                 <Divider />
 
+                                {/* TEAM */}
                                 {loadingTeam ? (
                                     <LinearProgress />
                                 ) : team.length === 0 ? (
@@ -999,10 +1461,14 @@ export default function EvaluatorEmployeesPage() {
                                         sx={{
                                             minHeight: 260,
                                             p: 4,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            textAlign: 'center',
+                                            display:
+                                                'flex',
+                                            alignItems:
+                                                'center',
+                                            justifyContent:
+                                                'center',
+                                            textAlign:
+                                                'center',
                                         }}
                                     >
                                         <Box>
@@ -1013,69 +1479,237 @@ export default function EvaluatorEmployeesPage() {
                                                     mx: 'auto',
                                                     mb: 1.5,
                                                     borderRadius: 2.5,
-                                                    display: 'grid',
-                                                    placeItems: 'center',
-                                                    bgcolor: 'action.selected',
-                                                    color: 'text.secondary',
+                                                    display:
+                                                        'grid',
+                                                    placeItems:
+                                                        'center',
+                                                    bgcolor:
+                                                        'action.selected',
+                                                    color:
+                                                        'text.secondary',
                                                 }}
                                             >
                                                 <GroupOutlined />
                                             </Box>
-                                            <Typography sx={{ fontWeight: 700, mb: 0.5 }}>
-                                                Henüz ekip üyesi yok
+
+                                            <Typography
+                                                sx={{
+                                                    fontWeight: 700,
+                                                    mb: 0.5,
+                                                }}
+                                            >
+                                                {
+                                                    t
+                                                        .evaluatorEmployees
+                                                        .noTeamMembers
+                                                }
                                             </Typography>
-                                            <Typography color="text.secondary" sx={{ fontSize: 13 }}>
-                                                Yukarıdaki alandan çalışan seçerek bu ekibe atama yapabilirsin.
+
+                                            <Typography
+                                                color="text.secondary"
+                                                sx={{
+                                                    fontSize: 13,
+                                                }}
+                                            >
+                                                {
+                                                    t
+                                                        .evaluatorEmployees
+                                                        .noTeamMembersDescription
+                                                }
                                             </Typography>
                                         </Box>
                                     </Box>
                                 ) : (
-                                                        <List
-                                                            sx={{
-                                                                py: 0,
-                                                                maxHeight: {
-                                                                    xs: 420,
-                                                                    md: 'calc(100vh - 430px)',
-                                                                },
-                                                                overflowY: 'auto',
-                                                            }}
-                                                        >
-                                                            {team.map((member) => {
-                                            const details =
-                                                enrichMember(member)
+                                    <List
+                                        sx={{
+                                            py: 0,
+                                            maxHeight: {
+                                                xs: 420,
+                                                md: 'calc(100vh - 430px)',
+                                            },
+                                            overflowY:
+                                                'auto',
+                                        }}
+                                    >
+                                        {team.map(
+                                            (
+                                                member,
+                                            ) => {
+                                                const details =
+                                                    enrichMember(
+                                                        member,
+                                                    )
 
-                                            return (
-                                                <Box
-                                                    key={member.id}
-                                                    sx={{
-                                                        display: 'flex',
-                                                        alignItems:
-                                                            'center',
-                                                        justifyContent:
-                                                            'space-between',
-                                                        px: 2.5,
-                                                        py: 1.5,
-                                                        borderBottom:
-                                                            '1px solid',
-                                                        borderColor:
-                                                            'divider',
-                                                        transition:
-                                                            'background-color 0.15s ease',
-                                                        '&:hover': {
-                                                            bgcolor:
-                                                                'action.hover',
-                                                        },
-                                                        '&:last-child': {
+                                                return (
+                                                    <Box
+                                                        key={
+                                                            member.id
+                                                        }
+                                                        sx={{
+                                                            display:
+                                                                'flex',
+                                                            alignItems:
+                                                                'center',
+                                                            justifyContent:
+                                                                'space-between',
+                                                            px: 2.5,
+                                                            py: 1.5,
                                                             borderBottom:
-                                                                'none',
-                                                        },
-                                                    }}
-                                                >
-                                                    {details ? (
-                                                        <UserInfoTooltip
-                                                            user={details}
-                                                            roleLabel="Çalışan"
-                                                        >
+                                                                '1px solid',
+                                                            borderColor:
+                                                                'divider',
+                                                            transition:
+                                                                'background-color 0.15s ease',
+
+                                                            '&:hover':
+                                                            {
+                                                                bgcolor:
+                                                                    'action.hover',
+                                                            },
+
+                                                            '&:last-child':
+                                                            {
+                                                                borderBottom:
+                                                                    'none',
+                                                            },
+                                                        }}
+                                                    >
+                                                        {details ? (
+                                                            <UserInfoTooltip
+                                                                user={
+                                                                    details
+                                                                }
+                                                                roleLabel={
+                                                                    t
+                                                                        .evaluatorEmployees
+                                                                        .employee
+                                                                }
+                                                            >
+                                                                <Box
+                                                                    sx={{
+                                                                        display:
+                                                                            'flex',
+                                                                        alignItems:
+                                                                            'center',
+                                                                        gap: 1.5,
+                                                                        minWidth: 0,
+                                                                        cursor:
+                                                                            'default',
+                                                                    }}
+                                                                >
+                                                                    <Avatar
+                                                                        sx={{
+                                                                            width: 34,
+                                                                            height: 34,
+                                                                            fontSize: 13,
+                                                                            fontWeight: 700,
+                                                                            bgcolor:
+                                                                                'action.selected',
+                                                                            color:
+                                                                                'text.primary',
+                                                                            flexShrink: 0,
+                                                                        }}
+                                                                    >
+                                                                        {member.employeeName
+                                                                            .charAt(
+                                                                                0,
+                                                                            )
+                                                                            .toUpperCase()}
+                                                                    </Avatar>
+
+                                                                    <Box
+                                                                        sx={{
+                                                                            minWidth: 0,
+                                                                        }}
+                                                                    >
+                                                                        <Typography
+                                                                            sx={{
+                                                                                fontWeight: 600,
+                                                                                fontSize: 14,
+                                                                                whiteSpace:
+                                                                                    'nowrap',
+                                                                                overflow:
+                                                                                    'hidden',
+                                                                                textOverflow:
+                                                                                    'ellipsis',
+                                                                            }}
+                                                                        >
+                                                                            {
+                                                                                member.employeeName
+                                                                            }
+                                                                        </Typography>
+
+                                                                        <Box
+                                                                            sx={{
+                                                                                display:
+                                                                                    'flex',
+                                                                                alignItems:
+                                                                                    'center',
+                                                                                gap: 0.75,
+                                                                                minWidth: 0,
+                                                                            }}
+                                                                        >
+                                                                            <Typography
+                                                                                sx={{
+                                                                                    fontSize: 12,
+                                                                                    color:
+                                                                                        'text.secondary',
+                                                                                    mt: 0.25,
+                                                                                    whiteSpace:
+                                                                                        'nowrap',
+                                                                                    overflow:
+                                                                                        'hidden',
+                                                                                    textOverflow:
+                                                                                        'ellipsis',
+                                                                                }}
+                                                                            >
+                                                                                {
+                                                                                    details.departmentName
+                                                                                }{' '}
+                                                                                ·{' '}
+                                                                                {
+                                                                                    details.jobPositionName
+                                                                                    ||
+                                                                                    t
+                                                                                        .evaluatorEmployees
+                                                                                        .positionNone
+                                                                                }
+                                                                            </Typography>
+
+                                                                            {!details.isActive && (
+                                                                                <Chip
+                                                                                    label={
+                                                                                        t
+                                                                                            .evaluatorEmployees
+                                                                                            .inactive
+                                                                                    }
+                                                                                    size="small"
+                                                                                    sx={{
+                                                                                        height: 20,
+                                                                                        fontSize: 10.5,
+                                                                                        fontWeight: 600,
+                                                                                        flexShrink: 0,
+                                                                                        bgcolor:
+                                                                                            'action.selected',
+                                                                                        color:
+                                                                                            'text.secondary',
+                                                                                        border:
+                                                                                            '1px solid',
+                                                                                        borderColor:
+                                                                                            'divider',
+
+                                                                                        '& .MuiChip-label':
+                                                                                        {
+                                                                                            px: 0.75,
+                                                                                        },
+                                                                                    }}
+                                                                                />
+                                                                            )}
+                                                                        </Box>
+                                                                    </Box>
+                                                                </Box>
+                                                            </UserInfoTooltip>
+                                                        ) : (
                                                             <Box
                                                                 sx={{
                                                                     display:
@@ -1084,8 +1718,6 @@ export default function EvaluatorEmployeesPage() {
                                                                         'center',
                                                                     gap: 1.5,
                                                                     minWidth: 0,
-                                                                    cursor:
-                                                                        'default',
                                                                 }}
                                                             >
                                                                 <Avatar
@@ -1098,149 +1730,54 @@ export default function EvaluatorEmployeesPage() {
                                                                             'action.selected',
                                                                         color:
                                                                             'text.primary',
-                                                                        flexShrink: 0,
                                                                     }}
                                                                 >
                                                                     {member.employeeName
                                                                         .charAt(
-                                                                            0
+                                                                            0,
                                                                         )
                                                                         .toUpperCase()}
                                                                 </Avatar>
 
-                                                                <Box
+                                                                <Typography
                                                                     sx={{
-                                                                        minWidth: 0,
+                                                                        fontWeight: 600,
+                                                                        fontSize: 14,
                                                                     }}
                                                                 >
-                                                                    <Typography
-                                                                        sx={{
-                                                                            fontWeight: 600,
-                                                                            fontSize: 14,
-                                                                            whiteSpace:
-                                                                                'nowrap',
-                                                                            overflow:
-                                                                                'hidden',
-                                                                            textOverflow:
-                                                                                'ellipsis',
-                                                                        }}
-                                                                    >
-                                                                        {
-                                                                            member.employeeName
-                                                                        }
-                                                                    </Typography>
-
-                                                                    <Box
-                                                                        sx={{
-                                                                            display: 'flex',
-                                                                            alignItems: 'center',
-                                                                            gap: 0.75,
-                                                                            minWidth: 0,
-                                                                        }}
-                                                                    >
-                                                                        <Typography
-                                                                            sx={{
-                                                                                fontSize: 12,
-                                                                                color: 'text.secondary',
-                                                                                mt: 0.25,
-                                                                                whiteSpace: 'nowrap',
-                                                                                overflow: 'hidden',
-                                                                                textOverflow: 'ellipsis',
-                                                                            }}
-                                                                        >
-                                                                            {details.departmentName} ·{' '}
-                                                                            {details.jobPositionName || 'Pozisyon yok'}
-                                                                        </Typography>
-
-                                                                        {!details.isActive && (
-                                                                            <Chip
-                                                                                label="Pasif"
-                                                                                size="small"
-                                                                                sx={{
-                                                                                    height: 20,
-                                                                                    fontSize: 10.5,
-                                                                                    fontWeight: 600,
-                                                                                    flexShrink: 0,
-                                                                                    bgcolor: 'action.selected',
-                                                                                    color: 'text.secondary',
-                                                                                    border: '1px solid',
-                                                                                    borderColor: 'divider',
-                                                                                    '& .MuiChip-label': {
-                                                                                        px: 0.75,
-                                                                                    },
-                                                                                }}
-                                                                            />
-                                                                        )}
-                                                                    </Box>
-                                                                </Box>
+                                                                    {
+                                                                        member.employeeName
+                                                                    }
+                                                                </Typography>
                                                             </Box>
-                                                        </UserInfoTooltip>
-                                                    ) : (
-                                                        <Box
+                                                        )}
+
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() =>
+                                                                setRemoveTarget(
+                                                                    member,
+                                                                )
+                                                            }
                                                             sx={{
-                                                                display:
-                                                                    'flex',
-                                                                alignItems:
-                                                                    'center',
-                                                                gap: 1.5,
-                                                                minWidth: 0,
+                                                                flexShrink: 0,
+                                                                ml: 2,
+                                                                color:
+                                                                    'text.secondary',
+
+                                                                '&:hover':
+                                                                {
+                                                                    color:
+                                                                        'error.main',
+                                                                },
                                                             }}
                                                         >
-                                                            <Avatar
-                                                                sx={{
-                                                                    width: 34,
-                                                                    height: 34,
-                                                                    fontSize: 13,
-                                                                    fontWeight: 700,
-                                                                    bgcolor:
-                                                                        'action.selected',
-                                                                    color:
-                                                                        'text.primary',
-                                                                }}
-                                                            >
-                                                                {member.employeeName
-                                                                    .charAt(
-                                                                        0
-                                                                    )
-                                                                    .toUpperCase()}
-                                                            </Avatar>
-
-                                                            <Typography
-                                                                sx={{
-                                                                    fontWeight: 600,
-                                                                    fontSize: 14,
-                                                                }}
-                                                            >
-                                                                {
-                                                                    member.employeeName
-                                                                }
-                                                            </Typography>
-                                                        </Box>
-                                                    )}
-
-                                                    <IconButton
-                                                        size="small"
-                                                        onClick={() =>
-                                                            setRemoveTarget(
-                                                                member
-                                                            )
-                                                        }
-                                                        sx={{
-                                                            flexShrink: 0,
-                                                            ml: 2,
-                                                            color:
-                                                                'text.secondary',
-                                                            '&:hover': {
-                                                                color:
-                                                                    'error.main',
-                                                            },
-                                                        }}
-                                                    >
-                                                        <Delete fontSize="small" />
-                                                    </IconButton>
-                                                </Box>
-                                            )
-                                        })}
+                                                            <Delete fontSize="small" />
+                                                        </IconButton>
+                                                    </Box>
+                                                )
+                                            },
+                                        )}
                                     </List>
                                 )}
                             </>
@@ -1249,16 +1786,30 @@ export default function EvaluatorEmployeesPage() {
                 </Box>
             )}
 
+            {/* REMOVE CONFIRMATION */}
             <ConfirmDialog
                 open={!!removeTarget}
-                title="Ekipten Çıkar"
-                description={`"${removeTarget?.employeeName}" adlı çalışanı bu değerlendiricinin ekibinden çıkarmak istediğine emin misin?`}
-                confirmLabel="Çıkar"
+                title={
+                    t.evaluatorEmployees
+                        .removeTitle
+                }
+                description={
+                    language === 'tr'
+                        ? `"${removeTarget?.employeeName}" adlı çalışanı bu değerlendiricinin ekibinden çıkarmak istediğine emin misin?`
+                        : `Are you sure you want to remove "${removeTarget?.employeeName}" from this evaluator's team?`
+                }
+                confirmLabel={
+                    t.evaluatorEmployees
+                        .remove
+                }
                 loading={removing}
                 onConfirm={handleRemove}
-                onCancel={() => setRemoveTarget(null)}
+                onCancel={() =>
+                    setRemoveTarget(null)
+                }
             />
 
+            {/* SNACKBAR */}
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={4000}
@@ -1274,9 +1825,13 @@ export default function EvaluatorEmployeesPage() {
                 }}
             >
                 <Alert
-                    severity={snackbar.severity}
+                    severity={
+                        snackbar.severity
+                    }
                     variant="filled"
-                    sx={{ borderRadius: 2 }}
+                    sx={{
+                        borderRadius: 2,
+                    }}
                 >
                     {snackbar.message}
                 </Alert>

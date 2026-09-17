@@ -33,6 +33,8 @@ import { getTeamRanking, type EmployeeRanking } from '../dashboardApi'
 import { getDefaultPeriod } from '../../../shared/utils/period'
 import type { EvaluationPeriod } from '../../evaluationPeriods/types'
 import type { EvaluatorEmployeeDto } from '../../evaluatorEmployees/types'
+import { useLanguage } from '../../../shared/i18n/LanguageContext'
+import { translations } from '../../../shared/i18n/translations'
 
 const RANK_COLORS: Record<number, string> = {
     1: '#F5B301',
@@ -60,6 +62,8 @@ type EvaluatorDashboardViewProps = {
 }
 
 export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboardViewProps) {
+    const { language } = useLanguage()
+    const t = translations[language]
     const currentUser = useAuthStore((s) => s.user)
 
     const [periods, setPeriods] = useState<EvaluationPeriod[]>([])
@@ -190,6 +194,15 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
 
     const status = selectedPeriod ? periodState(selectedPeriod) : null
 
+    const getPeriodStatusLabel = (value: string | null) =>
+        value === 'Aktif'
+            ? t.evaluatorDashboard.active
+            : value === 'Başlamadı'
+                ? t.evaluatorDashboard.notStarted
+                : value === 'Tamamlandı'
+                    ? t.evaluatorDashboard.completed
+                    : '—'
+
     if (loading) {
         return (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 12 }}>
@@ -214,10 +227,10 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
             >
                 <Box>
                     <Typography variant="h5" sx={{ fontWeight: 800, letterSpacing: '-0.3px' }}>
-                        Hoş geldin, {firstName || 'Değerlendirici'}
+                        {t.evaluatorDashboard.welcome}, {firstName || t.evaluatorDashboard.evaluator}
                     </Typography>
                     <Typography color="text.secondary" sx={{ mt: 0.5, fontSize: 14 }}>
-                        Ekibinin performansını tek ekrandan analiz et ve değerlendirme sürecini yönet.
+                        {t.evaluatorDashboard.description}
                     </Typography>
                 </Box>
 
@@ -226,7 +239,7 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
                         <TextField
                             select
                             size="small"
-                            label="Değerlendirme Dönemi"
+                            label={t.evaluatorDashboard.evaluationPeriod}
                             value={selectedPeriodId}
                             onChange={(e) => setSelectedPeriodId(Number(e.target.value))}
                             sx={{ width: { xs: 220, sm: 450 } }}
@@ -237,7 +250,7 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                         {period.name}
                                         {periodState(period) === 'Aktif' && (
-                                            <Chip label="Aktif" size="small" color="success" />
+                                            <Chip label={t.evaluatorDashboard.active} size="small" color="success" />
                                         )}
                                     </Box>
                                 </MenuItem>
@@ -252,9 +265,9 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
                     elevation={0}
                     sx={{ p: 6, textAlign: 'center', border: '1px solid', borderColor: 'divider', borderRadius: 3 }}
                 >
-                    <Typography sx={{ fontWeight: 800 }}>Henüz değerlendirme dönemi bulunmuyor.</Typography>
+                    <Typography sx={{ fontWeight: 800 }}>{t.evaluatorDashboard.noPeriods}</Typography>
                     <Typography color="text.secondary" sx={{ mt: 0.5, fontSize: 14 }}>
-                        Bir dönem oluşturulduğunda ekip analizleri burada görünecek.
+                        {t.evaluatorDashboard.noPeriodsDescription}
                     </Typography>
                 </Paper>
             ) : (
@@ -269,27 +282,27 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
                     >
                         {[
                             {
-                                title: 'Değerlendirme İlerlemesi',
+                                title: t.evaluatorDashboard.progress,
                                 value: `${animated.count} / ${stats.total}`,
-                                subtitle: `%${Math.round(animated.progress)} tamamlandı`,
+                                subtitle: `%${Math.round(animated.progress)} ${t.evaluatorDashboard.completedSuffix}`,
                                 icon: <AssignmentTurnedIn />,
                             },
                             {
-                                title: 'Ekip Ortalaması',
+                                title: t.evaluatorDashboard.teamAverage,
                                 value: stats.average ? `${animated.average.toFixed(2)} / 5` : '—',
-                                subtitle: 'Değerlendirilen çalışanlar',
+                                subtitle: t.evaluatorDashboard.evaluatedEmployees,
                                 icon: <Insights />,
                             },
                             {
-                                title: 'Bekleyen',
+                                title: t.evaluatorDashboard.pending,
                                 value: animated.pending,
-                                subtitle: 'Değerlendirme bekleyen çalışan',
+                                subtitle: t.evaluatorDashboard.pendingEmployees,
                                 icon: <Schedule />,
                             },
                             {
-                                title: 'Performans Aralığı',
+                                title: t.evaluatorDashboard.performanceRange,
                                 value: stats.evaluated ? `${stats.lowest.toFixed(2)} – ${stats.highest.toFixed(2)}` : '—',
-                                subtitle: stats.evaluated > 1 ? `Fark: ${stats.gap.toFixed(2)} puan` : 'Yeterli veri yok',
+                                subtitle: stats.evaluated > 1 ? `${t.evaluatorDashboard.gap}: ${stats.gap.toFixed(2)} ${t.evaluatorDashboard.points}` : t.evaluatorDashboard.insufficientData,
                                 icon: <TrendingUp />,
                             },
                         ].map((item) => (
@@ -325,7 +338,7 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
                                 <Typography color="text.secondary" sx={{ fontSize: 11.5, mt: 1 }}>
                                     {item.subtitle}
                                 </Typography>
-                                {item.title === 'Değerlendirme İlerlemesi' && (
+                                {item.title === t.evaluatorDashboard.progress && (
                                     <LinearProgress variant="determinate" value={animated.progress} sx={{ mt: 1.5, height: 5, borderRadius: 5 }} />
                                 )}
                             </Paper>
@@ -343,12 +356,12 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
                         <Paper elevation={0} sx={{ p: { xs: 2, md: 3 }, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, alignItems: 'flex-start', mb: 2 }}>
                                 <Box>
-                                    <Typography sx={{ fontWeight: 800, fontSize: 16 }}>Performans Analizi</Typography>
+                                    <Typography sx={{ fontWeight: 800, fontSize: 16 }}>{t.evaluatorDashboard.performanceAnalysis}</Typography>
                                     <Typography color="text.secondary" sx={{ fontSize: 12.5, mt: .3 }}>
-                                        Seçilen dönemdeki çalışan skorlarının dağılımı.
+                                        {t.evaluatorDashboard.performanceAnalysisDescription}
                                     </Typography>
                                 </Box>
-                                <Chip label={`${stats.evaluated} sonuç`} size="small" variant="outlined" />
+                                <Chip label={`${stats.evaluated} ${t.evaluatorDashboard.results}`} size="small" variant="outlined" />
                             </Box>
 
                             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1.25fr .8fr' }, gap: 3, alignItems: 'center' }}>
@@ -359,7 +372,7 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
                                             <Box key={item.label} sx={{ mb: 1.8 }}>
                                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: .55 }}>
                                                     <Typography sx={{ fontSize: 12.5, fontWeight: 700 }}>{item.label}</Typography>
-                                                    <Typography color="text.secondary" sx={{ fontSize: 11.5 }}>{item.count} kişi</Typography>
+                                                    <Typography color="text.secondary" sx={{ fontSize: 11.5 }}>{item.count} {t.evaluatorDashboard.people}</Typography>
                                                 </Box>
                                                 <LinearProgress variant="determinate" value={percentage} sx={{ height: 7, borderRadius: 7 }} />
                                             </Box>
@@ -368,7 +381,7 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
                                 </Box>
 
                                 <Box sx={{ textAlign: 'center', p: 2, borderRadius: 3, bgcolor: 'action.hover' }}>
-                                    <Typography color="text.secondary" sx={{ fontSize: 11, fontWeight: 800 }}>EKİP SKORU</Typography>
+                                    <Typography color="text.secondary" sx={{ fontSize: 11, fontWeight: 800 }}>{t.evaluatorDashboard.teamScore}</Typography>
                                     <Typography sx={{ fontSize: 38, fontWeight: 900, lineHeight: 1.1, mt: .5 }}>
                                         {stats.average ? stats.average.toFixed(2) : '—'}
                                     </Typography>
@@ -389,9 +402,9 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
                         </Paper>
 
                         <Paper elevation={0} sx={{ p: { xs: 2, md: 3 }, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
-                            <Typography sx={{ fontWeight: 800, fontSize: 16 }}>Süreç Sağlığı</Typography>
+                            <Typography sx={{ fontWeight: 800, fontSize: 16 }}>{t.evaluatorDashboard.processHealth}</Typography>
                             <Typography color="text.secondary" sx={{ fontSize: 12.5, mt: .3 }}>
-                                Değerlendirme sürecinin genel görünümü.
+                                {t.evaluatorDashboard.processHealthDescription}
                             </Typography>
 
                             <Box sx={{ display: 'grid', placeItems: 'center', my: 2.5 }}>
@@ -412,7 +425,7 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
                                     <Box sx={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center' }}>
                                         <Box sx={{ textAlign: 'center' }}>
                                             <Typography sx={{ fontSize: 26, fontWeight: 900 }}>{Math.round(animated.progress)}%</Typography>
-                                            <Typography color="text.secondary" sx={{ fontSize: 10 }}>TAMAMLANDI</Typography>
+                                            <Typography color="text.secondary" sx={{ fontSize: 10 }}>{t.evaluatorDashboard.completedUpper}</Typography>
                                         </Box>
                                     </Box>
                                 </Box>
@@ -420,11 +433,11 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
 
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', px: .5 }}>
                                 <Box>
-                                    <Typography color="text.secondary" sx={{ fontSize: 10 }}>DURUM</Typography>
-                                    <Typography sx={{ fontSize: 13, fontWeight: 800 }}>{status}</Typography>
+                                    <Typography color="text.secondary" sx={{ fontSize: 10 }}>{t.evaluatorDashboard.status}</Typography>
+                                    <Typography sx={{ fontSize: 13, fontWeight: 800 }}>{getPeriodStatusLabel(status)}</Typography>
                                 </Box>
                                 <Box sx={{ textAlign: 'right' }}>
-                                    <Typography color="text.secondary" sx={{ fontSize: 10 }}>BEKLEYEN</Typography>
+                                    <Typography color="text.secondary" sx={{ fontSize: 10 }}>{t.evaluatorDashboard.pendingUpper}</Typography>
                                     <Typography sx={{ fontSize: 13, fontWeight: 800 }}>{stats.pending}</Typography>
                                 </Box>
                             </Box>
@@ -442,18 +455,18 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
                         <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 3, overflow: 'hidden' }}>
                             <Box sx={{ p: { xs: 2, md: 2.5 }, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
                                 <Box>
-                                    <Typography sx={{ fontWeight: 800, fontSize: 16 }}>En Yüksek Performanslar</Typography>
-                                    <Typography color="text.secondary" sx={{ fontSize: 12.5, mt: .3 }}>Ekibin öne çıkan çalışanları.</Typography>
+                                    <Typography sx={{ fontWeight: 800, fontSize: 16 }}>{t.evaluatorDashboard.topPerformances}</Typography>
+                                    <Typography color="text.secondary" sx={{ fontSize: 12.5, mt: .3 }}>{t.evaluatorDashboard.topPerformancesDescription}</Typography>
                                 </Box>
                                 <Button component={RouterLink} to="/reports/team-ranking" size="small" endIcon={<ArrowForward />}>
-                                    Tümünü Gör
+                                    {t.evaluatorDashboard.viewAll}
                                 </Button>
                             </Box>
 
                             {loadingRanking ? (
                                 <Box sx={{ display: 'grid', placeItems: 'center', py: 5 }}><CircularProgress size={26} /></Box>
                             ) : stats.top.length === 0 ? (
-                                <Box sx={{ p: 4 }}><Typography color="text.secondary" sx={{ fontSize: 14 }}>Bu dönem için henüz sonuç bulunmuyor.</Typography></Box>
+                                <Box sx={{ p: 4 }}><Typography color="text.secondary" sx={{ fontSize: 14 }}>{t.evaluatorDashboard.noResults}</Typography></Box>
                             ) : (
                                 stats.top.map((item) => (
                                     <Box
@@ -471,7 +484,8 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
                                             width: 34, height: 34, bgcolor: (theme) =>
                                                 theme.palette.mode === 'dark'
                                                     ? theme.palette.avatar.dark
-                                                    : theme.palette.avatar.light, fontSize: 12, fontWeight: 800 }}>
+                                                    : theme.palette.avatar.light, fontSize: 12, fontWeight: 800
+                                        }}>
                                             {item.employeeName.charAt(0).toUpperCase()}
                                         </Avatar>
                                         <Box sx={{ minWidth: 0, flex: 1 }}>
@@ -491,16 +505,16 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
                         </Paper>
 
                         <Paper elevation={0} sx={{ p: { xs: 2, md: 2.5 }, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
-                            <Typography sx={{ fontWeight: 800, fontSize: 16 }}>Analist Özeti</Typography>
-                            <Typography color="text.secondary" sx={{ fontSize: 12.5, mt: .3 }}>Bu dönem için dikkat çeken göstergeler.</Typography>
+                            <Typography sx={{ fontWeight: 800, fontSize: 16 }}>{t.evaluatorDashboard.analystSummary}</Typography>
+                            <Typography color="text.secondary" sx={{ fontSize: 12.5, mt: .3 }}>{t.evaluatorDashboard.analystSummaryDescription}</Typography>
 
                             <Box sx={{ mt: 2 }}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, py: 1.3 }}>
                                     {trend.direction === 'up' ? <TrendingUp color="success" /> : trend.direction === 'down' ? <TrendingDown color="error" /> : <Remove color="disabled" />}
                                     <Box>
-                                        <Typography sx={{ fontSize: 12, fontWeight: 800 }}>Sıralama görünümü</Typography>
+                                        <Typography sx={{ fontSize: 12, fontWeight: 800 }}>{t.evaluatorDashboard.rankingView}</Typography>
                                         <Typography color="text.secondary" sx={{ fontSize: 11.5 }}>
-                                            {trend.direction === 'up' ? 'Üst sıralardaki skorlar güçlü görünüyor.' : trend.direction === 'down' ? 'Skorlar arasında belirgin bir düşüş aralığı var.' : 'Skorlar birbirine yakın seyrediyor.'}
+                                            {trend.direction === 'up' ? t.evaluatorDashboard.trendUp : trend.direction === 'down' ? t.evaluatorDashboard.trendDown : t.evaluatorDashboard.trendStable}
                                         </Typography>
                                     </Box>
                                 </Box>
@@ -508,24 +522,24 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, py: 1.3 }}>
                                     <Groups sx={{ color: 'primary.main' }} />
                                     <Box>
-                                        <Typography sx={{ fontSize: 12, fontWeight: 800 }}>Ekip büyüklüğü</Typography>
-                                        <Typography color="text.secondary" sx={{ fontSize: 11.5 }}>{stats.total} atanmış çalışan bulunuyor.</Typography>
+                                        <Typography sx={{ fontSize: 12, fontWeight: 800 }}>{t.evaluatorDashboard.teamSize}</Typography>
+                                        <Typography color="text.secondary" sx={{ fontSize: 11.5 }}>{stats.total} {t.evaluatorDashboard.assignedEmployees}</Typography>
                                     </Box>
                                 </Box>
                                 <Divider />
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, py: 1.3 }}>
                                     <Schedule sx={{ color: 'primary.main' }} />
                                     <Box>
-                                        <Typography sx={{ fontSize: 12, fontWeight: 800 }}>Öncelik</Typography>
+                                        <Typography sx={{ fontSize: 12, fontWeight: 800 }}>{t.evaluatorDashboard.priority}</Typography>
                                         <Typography color="text.secondary" sx={{ fontSize: 11.5 }}>
-                                            {stats.pending > 0 ? `${stats.pending} değerlendirme tamamlanmayı bekliyor.` : 'Tüm değerlendirmeler tamamlandı.'}
+                                            {stats.pending > 0 ? `${stats.pending} ${t.evaluatorDashboard.waitingSuffix}` : t.evaluatorDashboard.allCompleted}
                                         </Typography>
                                     </Box>
                                 </Box>
                             </Box>
 
                             <Button component={RouterLink} to="/evaluations/new" variant="contained" fullWidth startIcon={<RateReview />} sx={{ mt: 1.5, minHeight: 44, borderRadius: 2, fontWeight: 800, boxShadow: 'none' }}>
-                                Değerlendirme Yap
+                                {t.evaluatorDashboard.evaluate}
                             </Button>
                         </Paper>
                     </Box>
@@ -533,12 +547,12 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
                     <Paper elevation={0} sx={{ p: { xs: 2, md: 2.5 }, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
                             <Box>
-                                <Typography sx={{ fontWeight: 800, fontSize: 16 }}>Dönem Bilgisi</Typography>
+                                <Typography sx={{ fontWeight: 800, fontSize: 16 }}>{t.evaluatorDashboard.periodInfo}</Typography>
                                 <Typography color="text.secondary" sx={{ fontSize: 12.5, mt: .3 }}>
-                                    {selectedPeriod?.name} · {selectedPeriod ? `${new Date(selectedPeriod.startDate).toLocaleDateString('tr-TR')} – ${new Date(selectedPeriod.endDate).toLocaleDateString('tr-TR')}` : ''}
+                                    {selectedPeriod?.name} · {selectedPeriod ? `${new Date(selectedPeriod.startDate).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US')} – ${new Date(selectedPeriod.endDate).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US')}` : ''}
                                 </Typography>
                             </Box>
-                            <Chip label={status || '—'} color={status === 'Aktif' ? 'success' : 'default'} size="small" sx={{ fontWeight: 800 }} />
+                            <Chip label={getPeriodStatusLabel(status)} color={status === 'Aktif' ? 'success' : 'default'} size="small" sx={{ fontWeight: 800 }} />
                         </Box>
                     </Paper>
                 </>

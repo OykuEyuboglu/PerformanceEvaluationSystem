@@ -2,6 +2,10 @@
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+
+import { useLanguage } from '../../../shared/i18n/LanguageContext'
+import { translations } from '../../../shared/i18n/translations'
+
 import {
     Dialog,
     DialogTitle,
@@ -21,22 +25,6 @@ import {
 
 import type { EvaluationPeriod } from '../types'
 
-const schema = z
-    .object({
-        name: z.string().min(2, 'Dönem adı en az 2 karakter olmalı'),
-        startDate: z.string().min(1, 'Başlangıç tarihi gerekli'),
-        endDate: z.string().min(1, 'Bitiş tarihi gerekli'),
-    })
-    .refine(
-        (data) => new Date(data.endDate) >= new Date(data.startDate),
-        {
-            message: 'Bitiş tarihi başlangıçtan önce olamaz',
-            path: ['endDate'],
-        },
-    )
-
-export type EvaluationPeriodFormValues = z.infer<typeof schema>
-
 interface EvaluationPeriodFormDialogProps {
     open: boolean
     mode: 'create' | 'edit'
@@ -46,7 +34,51 @@ interface EvaluationPeriodFormDialogProps {
     onClose: () => void
 }
 
-const toInputDate = (iso: string) => iso.split('T')[0]
+const getEvaluationPeriodSchema = (
+    language: 'tr' | 'en',
+) =>
+    z
+        .object({
+            name: z.string().min(
+                2,
+                language === 'tr'
+                    ? 'Dönem adı en az 2 karakter olmalı'
+                    : 'Period name must be at least 2 characters',
+            ),
+
+            startDate: z.string().min(
+                1,
+                language === 'tr'
+                    ? 'Başlangıç tarihi gerekli'
+                    : 'Start date is required',
+            ),
+
+            endDate: z.string().min(
+                1,
+                language === 'tr'
+                    ? 'Bitiş tarihi gerekli'
+                    : 'End date is required',
+            ),
+        })
+        .refine(
+            (data) =>
+                new Date(data.endDate) >=
+                new Date(data.startDate),
+            {
+                message:
+                    language === 'tr'
+                        ? 'Bitiş tarihi başlangıçtan önce olamaz'
+                        : 'End date cannot be before the start date',
+                path: ['endDate'],
+            },
+        )
+
+export type EvaluationPeriodFormValues = z.infer<
+    ReturnType<typeof getEvaluationPeriodSchema>
+>
+
+const toInputDate = (iso: string) =>
+    iso.split('T')[0]
 
 export default function EvaluationPeriodFormDialog({
     open,
@@ -56,13 +88,18 @@ export default function EvaluationPeriodFormDialog({
     onSubmit,
     onClose,
 }: EvaluationPeriodFormDialogProps) {
+    const { language } = useLanguage()
+    const t = translations[language]
+
     const {
         control,
         handleSubmit,
         reset,
         formState: { errors },
     } = useForm<EvaluationPeriodFormValues>({
-        resolver: zodResolver(schema),
+        resolver: zodResolver(
+            getEvaluationPeriodSchema(language),
+        ),
         defaultValues: {
             name: '',
             startDate: '',
@@ -77,8 +114,12 @@ export default function EvaluationPeriodFormDialog({
             mode === 'edit' && initialData
                 ? {
                     name: initialData.name,
-                    startDate: toInputDate(initialData.startDate),
-                    endDate: toInputDate(initialData.endDate),
+                    startDate: toInputDate(
+                        initialData.startDate,
+                    ),
+                    endDate: toInputDate(
+                        initialData.endDate,
+                    ),
                 }
                 : {
                     name: '',
@@ -86,7 +127,12 @@ export default function EvaluationPeriodFormDialog({
                     endDate: '',
                 },
         )
-    }, [open, mode, initialData, reset])
+    }, [
+        open,
+        mode,
+        initialData,
+        reset,
+    ])
 
     return (
         <Dialog
@@ -101,9 +147,11 @@ export default function EvaluationPeriodFormDialog({
                         overflow: 'hidden',
                         border: '1px solid',
                         borderColor: 'divider',
-                        boxShadow: '0 24px 70px rgba(0,0,0,0.16)',
+                        boxShadow:
+                            '0 24px 70px rgba(0,0,0,0.16)',
                         animation:
                             'periodDialogEnter 240ms ease-out',
+
                         '@keyframes periodDialogEnter': {
                             from: {
                                 opacity: 0,
@@ -143,7 +191,8 @@ export default function EvaluationPeriodFormDialog({
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            bgcolor: 'rgba(245,179,1,0.12)',
+                            bgcolor:
+                                'rgba(245,179,1,0.12)',
                             color: '#C68E00',
                         }}
                     >
@@ -158,9 +207,12 @@ export default function EvaluationPeriodFormDialog({
                             }}
                         >
                             {mode === 'create'
-                                ? 'Yeni Değerlendirme Dönemi'
-                                : 'Dönemi Düzenle'}
+                                ? t.evaluationPeriodForm
+                                    .createTitle
+                                : t.evaluationPeriodForm
+                                    .editTitle}
                         </Typography>
+
                         <Typography
                             color="text.secondary"
                             sx={{
@@ -168,14 +220,25 @@ export default function EvaluationPeriodFormDialog({
                                 mt: 0.2,
                             }}
                         >
-                            Değerlendirme sürecinin adını ve tarih aralığını tanımlayın.
+                            {
+                                t.evaluationPeriodForm
+                                    .description
+                            }
                         </Typography>
                     </Box>
                 </Box>
             </DialogTitle>
 
-            <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-                <DialogContent sx={{ px: 3, py: 2.5 }}>
+            <Box
+                component="form"
+                onSubmit={handleSubmit(onSubmit)}
+            >
+                <DialogContent
+                    sx={{
+                        px: 3,
+                        py: 2.5,
+                    }}
+                >
                     <Stack spacing={2.1}>
                         <Controller
                             name="name"
@@ -183,12 +246,20 @@ export default function EvaluationPeriodFormDialog({
                             render={({ field }) => (
                                 <TextField
                                     {...field}
-                                    label="Dönem Adı"
-                                    placeholder="Örn. 2026 Yıl Sonu Performans Değerlendirmesi"
+                                    label={
+                                        t.evaluationPeriodForm
+                                            .periodName
+                                    }
+                                    placeholder={
+                                        t.evaluationPeriodForm
+                                            .periodNamePlaceholder
+                                    }
                                     fullWidth
                                     size="small"
                                     error={!!errors.name}
-                                    helperText={errors.name?.message}
+                                    helperText={
+                                        errors.name?.message
+                                    }
                                     sx={fieldSx}
                                 />
                             )}
@@ -203,8 +274,12 @@ export default function EvaluationPeriodFormDialog({
                                     fontSize: 13,
                                 }}
                             >
-                                Tarih Aralığı
+                                {
+                                    t.evaluationPeriodForm
+                                        .dateRange
+                                }
                             </Typography>
+
                             <Typography
                                 color="text.secondary"
                                 sx={{
@@ -212,7 +287,10 @@ export default function EvaluationPeriodFormDialog({
                                     mt: 0.25,
                                 }}
                             >
-                                Değerlendirmelerin yapılabileceği başlangıç ve bitiş tarihlerini belirleyin.
+                                {
+                                    t.evaluationPeriodForm
+                                        .dateRangeDescription
+                                }
                             </Typography>
                         </Box>
 
@@ -223,7 +301,10 @@ export default function EvaluationPeriodFormDialog({
                                 <TextField
                                     {...field}
                                     type="date"
-                                    label="Başlangıç Tarihi"
+                                    label={
+                                        t.evaluationPeriodForm
+                                            .startDate
+                                    }
                                     fullWidth
                                     size="small"
                                     slotProps={{
@@ -231,9 +312,12 @@ export default function EvaluationPeriodFormDialog({
                                             shrink: true,
                                         },
                                     }}
-                                    error={!!errors.startDate}
+                                    error={
+                                        !!errors.startDate
+                                    }
                                     helperText={
-                                        errors.startDate?.message
+                                        errors.startDate
+                                            ?.message
                                     }
                                     sx={fieldSx}
                                 />
@@ -247,7 +331,10 @@ export default function EvaluationPeriodFormDialog({
                                 <TextField
                                     {...field}
                                     type="date"
-                                    label="Bitiş Tarihi"
+                                    label={
+                                        t.evaluationPeriodForm
+                                            .endDate
+                                    }
                                     fullWidth
                                     size="small"
                                     slotProps={{
@@ -255,9 +342,12 @@ export default function EvaluationPeriodFormDialog({
                                             shrink: true,
                                         },
                                     }}
-                                    error={!!errors.endDate}
+                                    error={
+                                        !!errors.endDate
+                                    }
                                     helperText={
-                                        errors.endDate?.message
+                                        errors.endDate
+                                            ?.message
                                     }
                                     sx={fieldSx}
                                 />
@@ -283,7 +373,10 @@ export default function EvaluationPeriodFormDialog({
                             fontWeight: 700,
                         }}
                     >
-                        Vazgeç
+                        {
+                            t.evaluationPeriodForm
+                                .cancel
+                        }
                     </Button>
 
                     <Button
@@ -297,6 +390,7 @@ export default function EvaluationPeriodFormDialog({
                             color: '#111',
                             fontWeight: 800,
                             boxShadow: 'none',
+
                             '&:hover': {
                                 bgcolor: '#E0A300',
                                 boxShadow:
@@ -305,10 +399,13 @@ export default function EvaluationPeriodFormDialog({
                         }}
                     >
                         {submitting
-                            ? 'Kaydediliyor...'
+                            ? t.evaluationPeriodForm
+                                .saving
                             : mode === 'create'
-                                ? 'Oluştur'
-                                : 'Kaydet'}
+                                ? t.evaluationPeriodForm
+                                    .create
+                                : t.evaluationPeriodForm
+                                    .save}
                     </Button>
                 </DialogActions>
             </Box>
@@ -321,6 +418,7 @@ const fieldSx = {
         borderRadius: 2,
         fontSize: 13,
     },
+
     '& .MuiInputLabel-root': {
         fontSize: 13,
     },

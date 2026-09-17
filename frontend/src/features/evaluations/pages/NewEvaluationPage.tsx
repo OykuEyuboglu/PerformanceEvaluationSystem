@@ -23,6 +23,8 @@ import {
 } from '@mui/icons-material'
 
 import { useAuthStore } from '../../../store/authStore'
+import { useLanguage } from '../../../shared/i18n/LanguageContext'
+import { translations } from '../../../shared/i18n/translations'
 
 import { getEvaluationPeriods } from '../../evaluationPeriods/evaluationPeriodsApi'
 import { getTeamByEvaluator } from '../../evaluatorEmployees/evaluatorEmployeesApi'
@@ -47,6 +49,8 @@ import type {
 
 export default function NewEvaluationPage() {
     const currentUser = useAuthStore((s) => s.user)
+    const { language } = useLanguage()
+    const t = translations[language]
 
     const [periods, setPeriods] =
         useState<EvaluationPeriod[]>([])
@@ -160,13 +164,13 @@ export default function NewEvaluationPage() {
             setSnackbar({
                 open: true,
                 message:
-                    'Veriler yüklenirken hata oluştu.',
+                    t.newEvaluation.loadError,
                 severity: 'error',
             })
         } finally {
             setLoading(false)
         }
-    }, [currentUser])
+    }, [currentUser, language])
 
     useEffect(() => {
         loadInitial()
@@ -207,7 +211,7 @@ export default function NewEvaluationPage() {
                 setSnackbar({
                     open: true,
                     message:
-                        'Değerlendirme durumları alınamadı.',
+                        t.newEvaluation.statusLoadError,
                     severity: 'error',
                 })
             } finally {
@@ -216,6 +220,7 @@ export default function NewEvaluationPage() {
         }, [
             currentUser,
             selectedPeriodId,
+            language,
         ])
 
     useEffect(() => {
@@ -349,7 +354,7 @@ export default function NewEvaluationPage() {
             setSnackbar({
                 open: true,
                 message:
-                    'Bu çalışan seçilen dönemde zaten değerlendirilmiş.',
+                    t.newEvaluation.alreadyEvaluated,
                 severity: 'error',
             })
 
@@ -393,7 +398,7 @@ export default function NewEvaluationPage() {
             setSnackbar({
                 open: true,
                 message:
-                    'Değerlendirme başarıyla kaydedildi.',
+                    t.newEvaluation.success,
                 severity: 'success',
             })
 
@@ -405,7 +410,7 @@ export default function NewEvaluationPage() {
                 open: true,
                 message:
                     error?.response?.data?.message ??
-                    'Değerlendirme kaydedilirken hata oluştu.',
+                    t.newEvaluation.saveError,
                 severity: 'error',
             })
         } finally {
@@ -445,18 +450,18 @@ export default function NewEvaluationPage() {
                         letterSpacing: '-0.4px',
                     }}
                 >
-                    Ekibimi Değerlendir
+                    {t.newEvaluation.title}
                 </Typography>
             </Box>
 
-                <Typography
-                    color="text.secondary"
-                    sx={{
-                        fontSize: 14.5,
-                    }}
-                >
-                    Ekibindeki çalışanları aktif değerlendirme dönemi kapsamında değerlendir.
-                </Typography>
+            <Typography
+                color="text.secondary"
+                sx={{
+                    fontSize: 14.5,
+                }}
+            >
+                {t.newEvaluation.description}
+            </Typography>
 
             {team.length === 0 ? (
                 <Paper
@@ -487,7 +492,7 @@ export default function NewEvaluationPage() {
                             fontWeight: 700,
                         }}
                     >
-                        Ekibinde çalışan bulunmuyor
+                        {t.newEvaluation.noTeamMembers}
                     </Typography>
 
                     <Typography
@@ -497,8 +502,7 @@ export default function NewEvaluationPage() {
                             fontSize: 13.5,
                         }}
                     >
-                        Henüz sana atanmış bir çalışan
-                        bulunmuyor.
+                        {t.newEvaluation.noTeamMembersDescription}
                     </Typography>
                 </Paper>
             ) : (
@@ -535,7 +539,7 @@ export default function NewEvaluationPage() {
                                 select
                                 fullWidth
                                 size="small"
-                                label="Değerlendirme Dönemi"
+                                label={t.newEvaluation.evaluationPeriod}
                                 value={
                                     selectedPeriodId
                                 }
@@ -600,10 +604,10 @@ export default function NewEvaluationPage() {
                                         option.employeeId
                                     )
                                 }
-                                noOptionsText="Çalışan bulunamadı"
-                                clearText="Temizle"
-                                openText="Aç"
-                                closeText="Kapat"
+                                noOptionsText={t.newEvaluation.noEmployees}
+                                clearText={t.newEvaluation.clear}
+                                openText={t.newEvaluation.open}
+                                closeText={t.newEvaluation.close}
                                 filterOptions={(
                                     options,
                                     state
@@ -719,14 +723,14 @@ export default function NewEvaluationPage() {
                                                         }}
                                                     >
                                                         {option.employeeJobPositionName ??
-                                                            'Pozisyon belirtilmemiş'}
+                                                            t.newEvaluation.positionNotSpecified}
                                                     </Typography>
                                                 </Box>
                                             </Box>
 
                                             {completed && (
                                                 <Chip
-                                                    label="✓ Tamamlandı"
+                                                    label={`✓ ${t.newEvaluation.completed}`}
                                                     size="small"
                                                     sx={{
                                                         flexShrink: 0,
@@ -747,8 +751,8 @@ export default function NewEvaluationPage() {
                                 ) => (
                                     <TextField
                                         {...params}
-                                        label="Çalışan"
-                                        placeholder="Çalışan ara..."
+                                        label={t.newEvaluation.employee}
+                                        placeholder={t.newEvaluation.searchEmployee}
                                         size="small"
                                     />
                                 )}
@@ -774,8 +778,7 @@ export default function NewEvaluationPage() {
                                             'text.secondary',
                                     }}
                                 >
-                                    Değerlendirme
-                                    ilerlemesi
+                                    {t.newEvaluation.evaluationProgress}
                                 </Typography>
 
                                 <Typography
@@ -788,7 +791,7 @@ export default function NewEvaluationPage() {
                                         completedEmployeeIds.length
                                     }{' '}
                                     / {team.length}{' '}
-                                    tamamlandı
+                                    {t.newEvaluation.completedCount}
                                 </Typography>
                             </Box>
 
@@ -816,9 +819,7 @@ export default function NewEvaluationPage() {
                                             'text.secondary',
                                     }}
                                 >
-                                    Değerlendirme
-                                    durumları
-                                    kontrol ediliyor...
+                                    {t.newEvaluation.checkingStatus}
                                 </Typography>
                             )}
                         </Box>
@@ -841,8 +842,7 @@ export default function NewEvaluationPage() {
                                     mb: 0.5,
                                 }}
                             >
-                                Aktif değerlendirme dönemi
-                                bulunmuyor
+                                {t.newEvaluation.noActivePeriod}
                             </Typography>
 
                             <Typography
@@ -851,10 +851,7 @@ export default function NewEvaluationPage() {
                                     fontSize: 13.5,
                                 }}
                             >
-                                Yeni bir değerlendirme
-                                oluşturabilmek için
-                                aktif bir dönem
-                                bulunması gerekiyor.
+                                {t.newEvaluation.noActivePeriodDescription}
                             </Typography>
                         </Box>
                     ) : !selectedEmployee ? (
@@ -886,7 +883,7 @@ export default function NewEvaluationPage() {
                                     fontSize: 15,
                                 }}
                             >
-                                Çalışan seçerek başlayın
+                                {t.newEvaluation.selectEmployee}
                             </Typography>
 
                             <Typography
@@ -896,9 +893,7 @@ export default function NewEvaluationPage() {
                                     fontSize: 13,
                                 }}
                             >
-                                Çalışanın pozisyonuna uygun
-                                performans kriterleri
-                                burada görüntülenecek.
+                                {t.newEvaluation.selectEmployeeDescription}
                             </Typography>
                         </Box>
                     ) : completedEmployeeIds.includes(
@@ -932,7 +927,7 @@ export default function NewEvaluationPage() {
                                     fontSize: 15,
                                 }}
                             >
-                                Değerlendirme tamamlandı
+                                {t.newEvaluation.completedEvaluation}
                             </Typography>
 
                             <Typography
@@ -942,12 +937,10 @@ export default function NewEvaluationPage() {
                                     fontSize: 13,
                                 }}
                             >
-                                {
-                                    selectedEmployee.employeeName
-                                }{' '}
-                                için seçilen döneme ait
-                                değerlendirme zaten
-                                oluşturulmuş.
+                                {t.newEvaluation.completedForEmployee.replace(
+                                    '{name}',
+                                    selectedEmployee.employeeName,
+                                )}
                             </Typography>
                         </Box>
                     ) : !employeeJobPositionId ? (
@@ -962,11 +955,7 @@ export default function NewEvaluationPage() {
                             <Typography
                                 color="warning.main"
                             >
-                                Bu çalışanın iş pozisyonu
-                                tanımlı değil. Kriterlerin
-                                görüntülenebilmesi için
-                                kullanıcıya bir iş pozisyonu
-                                atanmalıdır.
+                                {t.newEvaluation.missingPosition}
                             </Typography>
                         </Box>
                     ) : relevantCriteriaByCategory.length ===
@@ -982,9 +971,7 @@ export default function NewEvaluationPage() {
                             <Typography
                                 color="text.secondary"
                             >
-                                Bu pozisyon için
-                                tanımlanmış aktif kriter
-                                bulunmuyor.
+                                {t.newEvaluation.noActiveCriteria}
                             </Typography>
                         </Box>
                     ) : (
@@ -1051,12 +1038,12 @@ export default function NewEvaluationPage() {
                                         }}
                                     >
                                         {selectedEmployee.employeeJobPositionName ??
-                                            'Pozisyon belirtilmemiş'}
+                                            t.newEvaluation.positionNotSpecified}
                                     </Typography>
                                 </Box>
 
                                 <Chip
-                                    label="Değerlendirme"
+                                    label={t.newEvaluation.evaluation}
                                     size="small"
                                     sx={{
                                         ml: 'auto',
@@ -1215,7 +1202,7 @@ export default function NewEvaluationPage() {
 
                             {/* Yorum */}
                             <TextField
-                                label="Yorum (opsiyonel)"
+                                label={t.newEvaluation.commentOptional}
                                 multiline
                                 minRows={3}
                                 fullWidth
@@ -1248,7 +1235,7 @@ export default function NewEvaluationPage() {
                                                 'text.secondary',
                                         }}
                                     >
-                                        Tahmini Toplam Skor
+                                        {t.newEvaluation.estimatedScore}
                                     </Typography>
 
                                     <Typography
@@ -1274,9 +1261,7 @@ export default function NewEvaluationPage() {
                                                 mt: 0.5,
                                             }}
                                         >
-                                            Göndermeden önce
-                                            tüm kriterleri
-                                            puanlamalısın.
+                                            {t.newEvaluation.allCriteriaRequired}
                                         </Typography>
                                     )}
                                 </Box>
@@ -1296,8 +1281,8 @@ export default function NewEvaluationPage() {
                                     }
                                 >
                                     {submitting
-                                        ? 'Kaydediliyor...'
-                                        : 'Değerlendirmeyi Gönder'}
+                                        ? t.newEvaluation.submitting
+                                        : t.newEvaluation.submit}
                                 </Button>
                             </Box>
                         </Box>

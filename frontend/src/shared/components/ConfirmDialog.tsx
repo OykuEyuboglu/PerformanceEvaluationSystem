@@ -6,6 +6,7 @@
     DialogActions,
     Button,
 } from '@mui/material'
+import { useLanguage } from '../i18n/LanguageContext'
 
 interface ConfirmDialogProps {
     open: boolean
@@ -21,11 +22,14 @@ export default function ConfirmDialog({
     open,
     title,
     description,
-    confirmLabel = 'Sil',
+    confirmLabel,
     loading = false,
     onConfirm,
     onCancel,
 }: ConfirmDialogProps) {
+
+    const { language } = useLanguage()
+
     return (
         <Dialog open={open} onClose={onCancel} maxWidth="xs" fullWidth>
             <DialogTitle sx={{ fontWeight: 700 }}> {title} </DialogTitle>
@@ -35,11 +39,19 @@ export default function ConfirmDialog({
             <DialogActions sx={{ px: 3, pb: 2.5 }
             }>
                 <Button onClick={onCancel} color="inherit">
-                    Vazgeç
+                    {language === 'tr' ? 'Vazgeç' : 'Cancel'}
                 </Button>
-                <Button onClick={onConfirm} color="error" variant="contained" disabled={loading}>
-                    {confirmLabel}
+
+                <Button
+                    onClick={onConfirm}
+                    color="error"
+                    variant="contained"
+                    disabled={loading}
+                >
+                    {confirmLabel ??
+                        (language === 'tr' ? 'Sil' : 'Delete')}
                 </Button>
+                
             </DialogActions>
         </Dialog>
     )

@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState, useCallback } from 'react'
+
 import {
     Box,
     Typography,
@@ -14,7 +15,14 @@ import {
     Tooltip,
     Stack,
 } from '@mui/material'
-import { Add, Edit, Delete, ExpandMore } from '@mui/icons-material'
+
+import {
+    Add,
+    Edit,
+    Delete,
+    ExpandMore,
+} from '@mui/icons-material'
+
 import {
     getCategories,
     createCategory,
@@ -25,31 +33,73 @@ import {
     updateCriterion,
     deleteCriterion,
 } from '../criteriaApi'
+
 import { getJobPositions } from '../../../shared/api/jobPositionsApi'
-import type { PerformanceCategoryDto, PerformanceCriterionDto } from '../types'
-import type { JobPositionDto } from '../../../shared/types/jobPosition'
-import CategoryFormDialog, { type CategoryFormValues } from '../components/CategoryFormDialog'
-import CriterionFormDialog, { type CriterionFormValues } from '../components/CriterionFormDialog'
+
+import type {
+    PerformanceCategoryDto,
+    PerformanceCriterionDto,
+} from '../types'
+
+import type {
+    JobPositionDto,
+} from '../../../shared/types/jobPosition'
+
+import CategoryFormDialog, {
+    type CategoryFormValues,
+} from '../components/CategoryFormDialog'
+
+import CriterionFormDialog, {
+    type CriterionFormValues,
+} from '../components/CriterionFormDialog'
+
 import ConfirmDialog from '../../../shared/components/ConfirmDialog'
 
+import { useLanguage } from '../../../shared/i18n/LanguageContext'
+import { translations } from '../../../shared/i18n/translations'
+
 export default function CriteriaPage() {
-    const [categories, setCategories] = useState<PerformanceCategoryDto[]>([])
-    const [criteria, setCriteria] = useState<PerformanceCriterionDto[]>([])
-    const [jobPositions, setJobPositions] = useState<JobPositionDto[]>([])
+    const { language } = useLanguage()
+    const t = translations[language]
+
+    const [categories, setCategories] = useState<
+        PerformanceCategoryDto[]
+    >([])
+
+    const [criteria, setCriteria] = useState<
+        PerformanceCriterionDto[]
+    >([])
+
+    const [jobPositions, setJobPositions] = useState<
+        JobPositionDto[]
+    >([])
+
     const [loading, setLoading] = useState(true)
 
     const [catDialogOpen, setCatDialogOpen] = useState(false)
     const [catMode, setCatMode] = useState<'create' | 'edit'>('create')
-    const [selectedCategory, setSelectedCategory] = useState<PerformanceCategoryDto | null>(null)
-    const [catDeleteTarget, setCatDeleteTarget] = useState<PerformanceCategoryDto | null>(null)
+
+    const [selectedCategory, setSelectedCategory] =
+        useState<PerformanceCategoryDto | null>(null)
+
+    const [catDeleteTarget, setCatDeleteTarget] =
+        useState<PerformanceCategoryDto | null>(null)
 
     const [critDialogOpen, setCritDialogOpen] = useState(false)
-    const [critMode, setCritMode] = useState<'create' | 'edit'>('create')
-    const [selectedCriterion, setSelectedCriterion] = useState<PerformanceCriterionDto | null>(null)
-    const [prefillCategoryId, setPrefillCategoryId] = useState<number | null>(null)
-    const [critDeleteTarget, setCritDeleteTarget] = useState<PerformanceCriterionDto | null>(null)
+    const [critMode, setCritMode] =
+        useState<'create' | 'edit'>('create')
+
+    const [selectedCriterion, setSelectedCriterion] =
+        useState<PerformanceCriterionDto | null>(null)
+
+    const [prefillCategoryId, setPrefillCategoryId] =
+        useState<number | null>(null)
+
+    const [critDeleteTarget, setCritDeleteTarget] =
+        useState<PerformanceCriterionDto | null>(null)
 
     const [submitting, setSubmitting] = useState(false)
+
     const [snackbar, setSnackbar] = useState<{
         open: boolean
         message: string
@@ -63,31 +113,36 @@ export default function CriteriaPage() {
     const showError = (err: any, fallback: string) =>
         setSnackbar({
             open: true,
-            message: err?.response?.data?.message ?? fallback,
+            message:
+                err?.response?.data?.message ??
+                fallback,
             severity: 'error',
         })
 
     const loadData = useCallback(async () => {
         setLoading(true)
+
         try {
-            const [cats, crits, positions] = await Promise.all([
-                getCategories(),
-                getCriteria(),
-                getJobPositions(),
-            ])
+            const [cats, crits, positions] =
+                await Promise.all([
+                    getCategories(),
+                    getCriteria(),
+                    getJobPositions(),
+                ])
+
             setCategories(cats)
             setCriteria(crits)
             setJobPositions(positions)
         } catch {
             setSnackbar({
                 open: true,
-                message: 'Veriler yüklenirken hata oluştu.',
+                message: t.criteria.loadError,
                 severity: 'error',
             })
         } finally {
             setLoading(false)
         }
-    }, [])
+    }, [t.criteria.loadError])
 
     useEffect(() => {
         loadData()
@@ -95,29 +150,43 @@ export default function CriteriaPage() {
 
     const totalWeight = categories
         .filter((c) => c.isActive)
-        .reduce((sum, c) => sum + c.weight, 0)
+        .reduce(
+            (sum, c) => sum + c.weight,
+            0,
+        )
 
-    const activeCriteria = criteria.filter((c) => c.isActive)
-    const categoriesAtTarget = totalWeight === 100
+    const activeCriteria =
+        criteria.filter((c) => c.isActive)
 
-    const handleCategorySubmit = async (values: CategoryFormValues) => {
+    const categoriesAtTarget =
+        totalWeight === 100
+
+    const handleCategorySubmit = async (
+        values: CategoryFormValues,
+    ) => {
         setSubmitting(true)
+
         try {
             if (catMode === 'create') {
                 await createCategory({
                     name: values.name,
                     weight: values.weight,
                 })
+
                 setSnackbar({
                     open: true,
-                    message: 'Kategori oluşturuldu.',
+                    message: t.criteria.categoryCreated,
                     severity: 'success',
                 })
             } else if (selectedCategory) {
-                await updateCategory(selectedCategory.id, values)
+                await updateCategory(
+                    selectedCategory.id,
+                    values,
+                )
+
                 setSnackbar({
                     open: true,
-                    message: 'Kategori güncellendi.',
+                    message: t.criteria.categoryUpdated,
                     severity: 'success',
                 })
             }
@@ -125,7 +194,10 @@ export default function CriteriaPage() {
             setCatDialogOpen(false)
             await loadData()
         } catch (err) {
-            showError(err, 'İşlem sırasında hata oluştu.')
+            showError(
+                err,
+                t.criteria.operationError,
+            )
         } finally {
             setSubmitting(false)
         }
@@ -135,38 +207,54 @@ export default function CriteriaPage() {
         if (!catDeleteTarget) return
 
         try {
-            await deleteCategory(catDeleteTarget.id)
+            await deleteCategory(
+                catDeleteTarget.id,
+            )
+
             setSnackbar({
                 open: true,
-                message: 'Kategori silindi.',
+                message: t.criteria.categoryDeleted,
                 severity: 'success',
             })
+
             setCatDeleteTarget(null)
             await loadData()
         } catch (err) {
-            showError(err, 'Kategori silinemedi. İçinde kriter olabilir.')
+            showError(
+                err,
+                t.criteria.categoryDeleteError,
+            )
         }
     }
 
-    const handleCriterionSubmit = async (values: CriterionFormValues) => {
+    const handleCriterionSubmit = async (
+        values: CriterionFormValues,
+    ) => {
         setSubmitting(true)
+
         try {
             if (critMode === 'create') {
                 await createCriterion(values)
+
                 setSnackbar({
                     open: true,
-                    message: 'Kriter oluşturuldu.',
+                    message: t.criteria.criterionCreated,
                     severity: 'success',
                 })
             } else if (selectedCriterion) {
-                await updateCriterion(selectedCriterion.id, {
-                    name: values.name,
-                    isActive: values.isActive,
-                    jobPositionDescriptions: values.jobPositionDescriptions,
-                })
+                await updateCriterion(
+                    selectedCriterion.id,
+                    {
+                        name: values.name,
+                        isActive: values.isActive,
+                        jobPositionDescriptions:
+                            values.jobPositionDescriptions,
+                    },
+                )
+
                 setSnackbar({
                     open: true,
-                    message: 'Kriter güncellendi.',
+                    message: t.criteria.criterionUpdated,
                     severity: 'success',
                 })
             }
@@ -174,7 +262,10 @@ export default function CriteriaPage() {
             setCritDialogOpen(false)
             await loadData()
         } catch (err) {
-            showError(err, 'İşlem sırasında hata oluştu.')
+            showError(
+                err,
+                t.criteria.operationError,
+            )
         } finally {
             setSubmitting(false)
         }
@@ -184,16 +275,23 @@ export default function CriteriaPage() {
         if (!critDeleteTarget) return
 
         try {
-            await deleteCriterion(critDeleteTarget.id)
+            await deleteCriterion(
+                critDeleteTarget.id,
+            )
+
             setSnackbar({
                 open: true,
-                message: 'Kriter silindi.',
+                message: t.criteria.criterionDeleted,
                 severity: 'success',
             })
+
             setCritDeleteTarget(null)
             await loadData()
         } catch (err) {
-            showError(err, 'Kriter silinemedi.')
+            showError(
+                err,
+                t.criteria.criterionDeleteError,
+            )
         }
     }
 
@@ -201,7 +299,9 @@ export default function CriteriaPage() {
         <Box
             sx={{
                 width: '100%',
-                animation: 'criteriaPageEnter 280ms ease-out',
+                animation:
+                    'criteriaPageEnter 280ms ease-out',
+
                 '@keyframes criteriaPageEnter': {
                     from: {
                         opacity: 0,
@@ -214,6 +314,7 @@ export default function CriteriaPage() {
                 },
             }}
         >
+            {/* PAGE HEADER */}
             <Box
                 sx={{
                     display: 'flex',
@@ -257,7 +358,7 @@ export default function CriteriaPage() {
                                 lineHeight: 1.2,
                             }}
                         >
-                            Kriter Yönetimi
+                            {t.criteria.title}
                         </Typography>
 
                         <Typography
@@ -269,9 +370,7 @@ export default function CriteriaPage() {
                                 lineHeight: 1.5,
                             }}
                         >
-                            Performans kategorilerini,
-                            ağırlıklarını ve pozisyon bazlı
-                            değerlendirme kriterlerini yönetin.
+                            {t.criteria.description}
                         </Typography>
                     </Box>
                 </Box>
@@ -300,10 +399,11 @@ export default function CriteriaPage() {
                         },
                     }}
                 >
-                    Yeni Kategori
+                    {t.criteria.newCategory}
                 </Button>
             </Box>
 
+            {/* KPI CARDS */}
             <Box
                 sx={{
                     display: 'grid',
@@ -316,80 +416,111 @@ export default function CriteriaPage() {
                 }}
             >
                 {[
-                    ['Kategori', categories.length, 'Toplam kategori'],
-                    ['Aktif Kriter', activeCriteria.length, 'Yayında olan kriter'],
-                    ['Toplam Kriter', criteria.length, 'Tanımlı kriter'],
                     [
-                        'Aktif Ağırlık',
+                        t.criteria.category,
+                        categories.length,
+                        t.criteria.totalCategory,
+                    ],
+                    [
+                        t.criteria.activeCriteria,
+                        activeCriteria.length,
+                        t.criteria.publishedCriteria,
+                    ],
+                    [
+                        t.criteria.totalCriteria,
+                        criteria.length,
+                        t.criteria.definedCriteria,
+                    ],
+                    [
+                        t.criteria.activeWeight,
                         `%${totalWeight}`,
                         categoriesAtTarget
-                            ? 'Dağılım tamamlandı'
-                            : 'Dağılım %100 olmalı',
+                            ? t.criteria.distributionCompleted
+                            : t.criteria.distributionMustBe100,
                     ],
-                ].map(([label, value, caption], index) => (
-                    <Box
-                        key={String(label)}
-                        sx={{
-                            p: 1.8,
-                            border: '1px solid',
-                            borderColor: 'divider',
-                            borderRadius: 2.5,
-                            bgcolor: 'background.paper',
-                            transition:
-                                'transform 180ms ease, box-shadow 180ms ease',
-                            animation: `criteriaCardEnter 360ms ease-out ${index * 45}ms both`,
-                            '@keyframes criteriaCardEnter': {
-                                from: {
-                                    opacity: 0,
-                                    transform: 'translateY(5px)',
+                ].map(
+                    (
+                        [label, value, caption],
+                        index,
+                    ) => (
+                        <Box
+                            key={String(label)}
+                            sx={{
+                                p: 1.8,
+                                border: '1px solid',
+                                borderColor: 'divider',
+                                borderRadius: 2.5,
+                                bgcolor: 'background.paper',
+                                transition:
+                                    'transform 180ms ease, box-shadow 180ms ease',
+                                animation:
+                                    `criteriaCardEnter 360ms ease-out ${index * 45}ms both`,
+
+                                '@keyframes criteriaCardEnter':
+                                {
+                                    from: {
+                                        opacity: 0,
+                                        transform:
+                                            'translateY(5px)',
+                                    },
+                                    to: {
+                                        opacity: 1,
+                                        transform:
+                                            'translateY(0)',
+                                    },
                                 },
-                                to: {
-                                    opacity: 1,
-                                    transform: 'translateY(0)',
+
+                                '&:hover': {
+                                    transform:
+                                        'translateY(-2px)',
+                                    boxShadow:
+                                        '0 8px 24px rgba(0,0,0,0.06)',
                                 },
-                            },
-                            '&:hover': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 8px 24px rgba(0,0,0,0.06)',
-                            },
-                        }}
-                    >
-                        <Typography
-                            color="text.secondary"
-                            sx={{
-                                fontSize: 11.5,
-                                fontWeight: 700,
                             }}
                         >
-                            {label}
-                        </Typography>
-                        <Typography
-                            sx={{
-                                mt: 0.4,
-                                fontSize: 23,
-                                fontWeight: 850,
-                                letterSpacing: '-0.5px',
-                            }}
-                        >
-                            {value}
-                        </Typography>
-                        <Typography
-                            color="text.secondary"
-                            sx={{
-                                mt: 0.25,
-                                fontSize: 10.5,
-                            }}
-                        >
-                            {caption}
-                        </Typography>
-                    </Box>
-                ))}
+                            <Typography
+                                color="text.secondary"
+                                sx={{
+                                    fontSize: 11.5,
+                                    fontWeight: 700,
+                                }}
+                            >
+                                {label}
+                            </Typography>
+
+                            <Typography
+                                sx={{
+                                    mt: 0.4,
+                                    fontSize: 23,
+                                    fontWeight: 850,
+                                    letterSpacing: '-0.5px',
+                                }}
+                            >
+                                {value}
+                            </Typography>
+
+                            <Typography
+                                color="text.secondary"
+                                sx={{
+                                    mt: 0.25,
+                                    fontSize: 10.5,
+                                }}
+                            >
+                                {caption}
+                            </Typography>
+                        </Box>
+                    ),
+                )}
             </Box>
 
+            {/* WEIGHT DISTRIBUTION */}
             <Box
                 sx={{
                     mb: 2.5,
-                    p: { xs: 1.8, md: 2.2 },
+                    p: {
+                        xs: 1.8,
+                        md: 2.2,
+                    },
                     borderRadius: 2.5,
                     border: '1px solid',
                     borderColor: categoriesAtTarget
@@ -403,7 +534,8 @@ export default function CriteriaPage() {
                 <Box
                     sx={{
                         display: 'flex',
-                        justifyContent: 'space-between',
+                        justifyContent:
+                            'space-between',
                         gap: 2,
                         mb: 1,
                     }}
@@ -415,8 +547,9 @@ export default function CriteriaPage() {
                                 fontWeight: 800,
                             }}
                         >
-                            Kategori Ağırlık Dağılımı
+                            {t.criteria.weightDistribution}
                         </Typography>
+
                         <Typography
                             color="text.secondary"
                             sx={{
@@ -424,7 +557,7 @@ export default function CriteriaPage() {
                                 fontSize: 11,
                             }}
                         >
-                            Aktif kategorilerin toplam ağırlığı
+                            {t.criteria.activeCategoriesTotalWeight}
                         </Typography>
                     </Box>
 
@@ -443,8 +576,18 @@ export default function CriteriaPage() {
 
                 <LinearProgress
                     variant="determinate"
-                    value={Math.min(Math.max(totalWeight, 0), 100)}
-                    color={categoriesAtTarget ? 'success' : 'warning'}
+                    value={Math.min(
+                        Math.max(
+                            totalWeight,
+                            0,
+                        ),
+                        100,
+                    )}
+                    color={
+                        categoriesAtTarget
+                            ? 'success'
+                            : 'warning'
+                    }
                     sx={{
                         height: 7,
                         borderRadius: 5,
@@ -460,14 +603,17 @@ export default function CriteriaPage() {
                     }}
                 >
                     {categoriesAtTarget
-                        ? 'Ağırlık dağılımı hazır.'
-                        : 'Değerlendirme hesaplaması için toplam %100 olmalı.'}
+                        ? t.criteria.distributionReady
+                        : t.criteria.distributionMustBe100ForCalculation}
                 </Typography>
             </Box>
 
+            {/* CONTENT */}
             {loading ? (
                 <Box sx={{ py: 1 }}>
-                    <LinearProgress sx={{ borderRadius: 2 }} />
+                    <LinearProgress
+                        sx={{ borderRadius: 2 }}
+                    />
                 </Box>
             ) : categories.length === 0 ? (
                 <Box
@@ -480,390 +626,567 @@ export default function CriteriaPage() {
                         bgcolor: 'background.paper',
                     }}
                 >
-                    <Typography sx={{ fontWeight: 800 }}>
-                        Henüz kategori eklenmemiş.
+                    <Typography
+                        sx={{ fontWeight: 800 }}
+                    >
+                        {t.criteria.noCategory}
                     </Typography>
+
                     <Typography
                         color="text.secondary"
-                        sx={{ mt: 0.5, fontSize: 13 }}
+                        sx={{
+                            mt: 0.5,
+                            fontSize: 13,
+                        }}
                     >
-                        İlk performans kategorisini oluşturarak başlayabilirsiniz.
+                        {t.criteria.noCategoryDescription}
                     </Typography>
                 </Box>
             ) : (
                 <Stack spacing={1.25}>
-                    {categories.map((category, index) => {
-                        const categoryCriteria = criteria.filter(
-                            (c) => c.performanceCategoryId === category.id,
-                        )
-                        const activeInCategory = categoryCriteria.filter(
-                            (c) => c.isActive,
-                        ).length
+                    {categories.map(
+                        (category, index) => {
+                            const categoryCriteria =
+                                criteria.filter(
+                                    (c) =>
+                                        c.performanceCategoryId ===
+                                        category.id,
+                                )
 
-                        return (
-                            <Accordion
-                                key={category.id}
-                                defaultExpanded
-                                disableGutters
-                                sx={{
-                                    borderRadius: '12px !important',
-                                    '&:before': { display: 'none' },
-                                    border: '1px solid',
-                                    borderColor: 'divider',
-                                    bgcolor: 'background.paper',
-                                    overflow: 'hidden',
-                                    animation: `criteriaAccordionEnter 300ms ease-out ${index * 35}ms both`,
-                                    '@keyframes criteriaAccordionEnter': {
-                                        from: {
-                                            opacity: 0,
-                                            transform: 'translateY(5px)',
-                                        },
-                                        to: {
-                                            opacity: 1,
-                                            transform: 'translateY(0)',
-                                        },
-                                    },
-                                }}
-                            >
-                                <AccordionSummary
-                                    expandIcon={<ExpandMore />}
+                            const activeInCategory =
+                                categoryCriteria.filter(
+                                    (c) =>
+                                        c.isActive,
+                                ).length
+
+                            return (
+                                <Accordion
+                                    key={
+                                        category.id
+                                    }
+                                    defaultExpanded
+                                    disableGutters
                                     sx={{
-                                        px: { xs: 1.8, md: 2.2 },
-                                        minHeight: 64,
-                                        '&.Mui-expanded': {
-                                            minHeight: 64,
+                                        borderRadius:
+                                            '12px !important',
+                                        '&:before':
+                                        {
+                                            display:
+                                                'none',
                                         },
-                                        '& .MuiAccordionSummary-content': {
-                                            my: 1.1,
-                                        },
-                                        '& .MuiAccordionSummary-content.Mui-expanded': {
-                                            my: 1.1,
+                                        border: '1px solid',
+                                        borderColor:
+                                            'divider',
+                                        bgcolor:
+                                            'background.paper',
+                                        overflow:
+                                            'hidden',
+                                        animation:
+                                            `criteriaAccordionEnter 300ms ease-out ${index * 35}ms both`,
+
+                                        '@keyframes criteriaAccordionEnter':
+                                        {
+                                            from: {
+                                                opacity: 0,
+                                                transform:
+                                                    'translateY(5px)',
+                                            },
+                                            to: {
+                                                opacity: 1,
+                                                transform:
+                                                    'translateY(0)',
+                                            },
                                         },
                                     }}
                                 >
-                                    <Box
+                                    <AccordionSummary
+                                        expandIcon={
+                                            <ExpandMore />
+                                        }
                                         sx={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            width: '100%',
-                                            gap: 1.25,
-                                            minWidth: 0,
+                                            px: {
+                                                xs: 1.8,
+                                                md: 2.2,
+                                            },
+                                            minHeight: 64,
+
+                                            '&.Mui-expanded':
+                                            {
+                                                minHeight: 64,
+                                            },
+
+                                            '& .MuiAccordionSummary-content':
+                                            {
+                                                my: 1.1,
+                                            },
+
+                                            '& .MuiAccordionSummary-content.Mui-expanded':
+                                            {
+                                                my: 1.1,
+                                            },
                                         }}
                                     >
                                         <Box
                                             sx={{
-                                                width: 36,
-                                                height: 36,
-                                                borderRadius: 1.8,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                bgcolor: 'rgba(245,179,1,0.12)',
-                                                color: '#C68E00',
-                                                fontSize: 12,
-                                                fontWeight: 850,
-                                                flexShrink: 0,
+                                                display:
+                                                    'flex',
+                                                alignItems:
+                                                    'center',
+                                                width:
+                                                    '100%',
+                                                gap: 1.25,
+                                                minWidth: 0,
                                             }}
                                         >
-                                            {String(index + 1).padStart(2, '0')}
-                                        </Box>
-
-                                        <Box sx={{ minWidth: 0 }}>
-                                            <Typography
-                                                noWrap
+                                            <Box
                                                 sx={{
-                                                    fontWeight: 800,
-                                                    fontSize: 14,
+                                                    width: 36,
+                                                    height: 36,
+                                                    borderRadius: 1.8,
+                                                    display:
+                                                        'flex',
+                                                    alignItems:
+                                                        'center',
+                                                    justifyContent:
+                                                        'center',
+                                                    bgcolor:
+                                                        'rgba(245,179,1,0.12)',
+                                                    color:
+                                                        '#C68E00',
+                                                    fontSize: 12,
+                                                    fontWeight: 850,
+                                                    flexShrink: 0,
                                                 }}
                                             >
-                                                {category.name}
-                                            </Typography>
-                                            <Typography
-                                                color="text.secondary"
+                                                {String(
+                                                    index + 1,
+                                                ).padStart(
+                                                    2,
+                                                    '0',
+                                                )}
+                                            </Box>
+
+                                            <Box
                                                 sx={{
-                                                    fontSize: 10.5,
-                                                    mt: 0.15,
+                                                    minWidth: 0,
                                                 }}
                                             >
-                                                {activeInCategory} aktif kriter · {categoryCriteria.length} toplam kriter
-                                            </Typography>
-                                        </Box>
+                                                <Typography
+                                                    noWrap
+                                                    sx={{
+                                                        fontWeight: 800,
+                                                        fontSize: 14,
+                                                    }}
+                                                >
+                                                    {category.name}
+                                                </Typography>
 
-                                        <Chip
-                                            size="small"
-                                            label={`%${category.weight}`}
-                                            sx={{
-                                                ml: 'auto',
-                                                fontWeight: 800,
-                                                bgcolor: 'rgba(245,179,1,0.10)',
-                                                color: '#9A6D00',
-                                            }}
-                                        />
+                                                <Typography
+                                                    color="text.secondary"
+                                                    sx={{
+                                                        fontSize: 10.5,
+                                                        mt: 0.15,
+                                                    }}
+                                                >
+                                                    {activeInCategory}{' '}
+                                                    {t.criteria.activeCriteriaCount}{' '}
+                                                    ·{' '}
+                                                    {
+                                                        categoryCriteria.length
+                                                    }{' '}
+                                                    {t.criteria.totalCriteriaCount}
+                                                </Typography>
+                                            </Box>
 
-                                        {!category.isActive && (
                                             <Chip
                                                 size="small"
-                                                label="Pasif"
-                                                sx={{ fontWeight: 700 }}
+                                                label={`%${category.weight}`}
+                                                sx={{
+                                                    ml: 'auto',
+                                                    fontWeight: 800,
+                                                    bgcolor:
+                                                        'rgba(245,179,1,0.10)',
+                                                    color:
+                                                        '#9A6D00',
+                                                }}
                                             />
-                                        )}
 
-                                        <Box
-                                            sx={{
-                                                display: 'flex',
-                                                gap: 0.25,
-                                                ml: 0.25,
-                                            }}
-                                            onClick={(e) => e.stopPropagation()}
-                                        >
-                                            <Tooltip title="Kategoriyi düzenle">
-                                                <IconButton
+                                            {!category.isActive && (
+                                                <Chip
                                                     size="small"
-                                                    onClick={() => {
-                                                        setCatMode('edit')
-                                                        setSelectedCategory(category)
-                                                        setCatDialogOpen(true)
-                                                    }}
-                                                    sx={{
-                                                        '&:hover': {
-                                                            bgcolor:
-                                                                'rgba(245,179,1,0.10)',
-                                                        },
-                                                    }}
-                                                >
-                                                    <Edit fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
-
-                                            <Tooltip title="Kategoriyi sil">
-                                                <IconButton
-                                                    size="small"
-                                                    onClick={() =>
-                                                        setCatDeleteTarget(category)
+                                                    label={
+                                                        t.criteria.inactive
                                                     }
                                                     sx={{
-                                                        '&:hover': {
-                                                            bgcolor:
-                                                                'rgba(211,47,47,0.08)',
-                                                            color: 'error.main',
-                                                        },
+                                                        fontWeight: 700,
                                                     }}
-                                                >
-                                                    <Delete fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </Box>
-                                    </Box>
-                                </AccordionSummary>
+                                                />
+                                            )}
 
-                                <AccordionDetails
-                                    sx={{
-                                        px: { xs: 1.8, md: 2.2 },
-                                        pt: 0,
-                                        pb: 2,
-                                        borderTop: '1px solid',
-                                        borderColor: 'divider',
-                                    }}
-                                >
-                                    <Box
+                                            <Box
+                                                sx={{
+                                                    display:
+                                                        'flex',
+                                                    gap: 0.25,
+                                                    ml: 0.25,
+                                                }}
+                                                onClick={(e) =>
+                                                    e.stopPropagation()
+                                                }
+                                            >
+                                                <Tooltip
+                                                    title={
+                                                        t.criteria.editCategory
+                                                    }
+                                                >
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={() => {
+                                                            setCatMode(
+                                                                'edit',
+                                                            )
+                                                            setSelectedCategory(
+                                                                category,
+                                                            )
+                                                            setCatDialogOpen(
+                                                                true,
+                                                            )
+                                                        }}
+                                                        sx={{
+                                                            '&:hover':
+                                                            {
+                                                                bgcolor:
+                                                                    'rgba(245,179,1,0.10)',
+                                                            },
+                                                        }}
+                                                    >
+                                                        <Edit fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
+
+                                                <Tooltip
+                                                    title={
+                                                        t.criteria.deleteCategory
+                                                    }
+                                                >
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={() =>
+                                                            setCatDeleteTarget(
+                                                                category,
+                                                            )
+                                                        }
+                                                        sx={{
+                                                            '&:hover':
+                                                            {
+                                                                bgcolor:
+                                                                    'rgba(211,47,47,0.08)',
+                                                                color:
+                                                                    'error.main',
+                                                            },
+                                                        }}
+                                                    >
+                                                        <Delete fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Box>
+                                        </Box>
+                                    </AccordionSummary>
+
+                                    <AccordionDetails
                                         sx={{
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            gap: 1,
-                                            py: 1.5,
-                                            flexWrap: 'wrap',
+                                            px: {
+                                                xs: 1.8,
+                                                md: 2.2,
+                                            },
+                                            pt: 0,
+                                            pb: 2,
+                                            borderTop:
+                                                '1px solid',
+                                            borderColor:
+                                                'divider',
                                         }}
                                     >
-                                        <Typography
-                                            color="text.secondary"
-                                            sx={{ fontSize: 11.5 }}
-                                        >
-                                            Bu kategori altında değerlendirilecek kriterleri yönetin.
-                                        </Typography>
-
-                                        <Button
-                                            size="small"
-                                            startIcon={<Add />}
-                                            onClick={() => {
-                                                setCritMode('create')
-                                                setSelectedCriterion(null)
-                                                setPrefillCategoryId(category.id)
-                                                setCritDialogOpen(true)
-                                            }}
-                                            sx={{
-                                                borderRadius: 1.8,
-                                                fontWeight: 800,
-                                                color: '#9A6D00',
-                                                '&:hover': {
-                                                    bgcolor:
-                                                        'rgba(245,179,1,0.08)',
-                                                },
-                                            }}
-                                        >
-                                            Kriter Ekle
-                                        </Button>
-                                    </Box>
-
-                                    {categoryCriteria.length === 0 ? (
                                         <Box
                                             sx={{
-                                                py: 2.5,
-                                                px: 2,
-                                                border: '1px dashed',
-                                                borderColor: 'divider',
-                                                borderRadius: 2,
-                                                textAlign: 'center',
+                                                display:
+                                                    'flex',
+                                                justifyContent:
+                                                    'space-between',
+                                                alignItems:
+                                                    'center',
+                                                gap: 1,
+                                                py: 1.5,
+                                                flexWrap:
+                                                    'wrap',
                                             }}
                                         >
-                                            <Typography
-                                                sx={{
-                                                    fontSize: 12.5,
-                                                    fontWeight: 700,
-                                                }}
-                                            >
-                                                Bu kategoride henüz kriter yok.
-                                            </Typography>
                                             <Typography
                                                 color="text.secondary"
                                                 sx={{
-                                                    fontSize: 11,
-                                                    mt: 0.3,
+                                                    fontSize: 11.5,
                                                 }}
                                             >
-                                                Yukarıdaki “Kriter Ekle” butonunu kullanabilirsiniz.
+                                                {
+                                                    t.criteria
+                                                        .categoryCriteriaDescription
+                                                }
                                             </Typography>
+
+                                            <Button
+                                                size="small"
+                                                startIcon={
+                                                    <Add />
+                                                }
+                                                onClick={() => {
+                                                    setCritMode(
+                                                        'create',
+                                                    )
+                                                    setSelectedCriterion(
+                                                        null,
+                                                    )
+                                                    setPrefillCategoryId(
+                                                        category.id,
+                                                    )
+                                                    setCritDialogOpen(
+                                                        true,
+                                                    )
+                                                }}
+                                                sx={{
+                                                    borderRadius: 1.8,
+                                                    fontWeight: 800,
+                                                    color:
+                                                        '#9A6D00',
+
+                                                    '&:hover':
+                                                    {
+                                                        bgcolor:
+                                                            'rgba(245,179,1,0.08)',
+                                                    },
+                                                }}
+                                            >
+                                                {
+                                                    t.criteria
+                                                        .addCriterion
+                                                }
+                                            </Button>
                                         </Box>
-                                    ) : (
-                                        <Stack spacing={1}>
-                                            {categoryCriteria.map((criterion) => (
-                                                <Box
-                                                    key={criterion.id}
+
+                                        {categoryCriteria.length ===
+                                            0 ? (
+                                            <Box
+                                                sx={{
+                                                    py: 2.5,
+                                                    px: 2,
+                                                    border: '1px dashed',
+                                                    borderColor:
+                                                        'divider',
+                                                    borderRadius: 2,
+                                                    textAlign:
+                                                        'center',
+                                                }}
+                                            >
+                                                <Typography
                                                     sx={{
-                                                        p: 1.5,
-                                                        borderRadius: 2,
-                                                        border: '1px solid',
-                                                        borderColor: 'divider',
-                                                        bgcolor: 'background.default',
-                                                        display: 'flex',
-                                                        alignItems: {
-                                                            xs: 'flex-start',
-                                                            md: 'center',
-                                                        },
-                                                        justifyContent:
-                                                            'space-between',
-                                                        gap: 1.5,
-                                                        transition:
-                                                            'border-color 180ms ease, transform 180ms ease',
-                                                        '&:hover': {
-                                                            borderColor:
-                                                                'rgba(245,179,1,0.45)',
-                                                            transform:
-                                                                'translateX(2px)',
-                                                        },
+                                                        fontSize: 12.5,
+                                                        fontWeight: 700,
                                                     }}
                                                 >
-                                                    <Box sx={{ minWidth: 0 }}>
+                                                    {
+                                                        t.criteria
+                                                            .noCriteria
+                                                    }
+                                                </Typography>
+
+                                                <Typography
+                                                    color="text.secondary"
+                                                    sx={{
+                                                        fontSize: 11,
+                                                        mt: 0.3,
+                                                    }}
+                                                >
+                                                    {
+                                                        t.criteria
+                                                            .noCriteriaDescription
+                                                    }
+                                                </Typography>
+                                            </Box>
+                                        ) : (
+                                            <Stack spacing={1}>
+                                                {categoryCriteria.map(
+                                                    (
+                                                        criterion,
+                                                    ) => (
                                                         <Box
+                                                            key={
+                                                                criterion.id
+                                                            }
                                                             sx={{
-                                                                display: 'flex',
+                                                                p: 1.5,
+                                                                borderRadius: 2,
+                                                                border: '1px solid',
+                                                                borderColor:
+                                                                    'divider',
+                                                                bgcolor:
+                                                                    'background.default',
+                                                                display:
+                                                                    'flex',
                                                                 alignItems:
-                                                                    'center',
-                                                                gap: 0.8,
-                                                                flexWrap:
-                                                                    'wrap',
+                                                                {
+                                                                    xs: 'flex-start',
+                                                                    md: 'center',
+                                                                },
+                                                                justifyContent:
+                                                                    'space-between',
+                                                                gap: 1.5,
+                                                                transition:
+                                                                    'border-color 180ms ease, transform 180ms ease',
+
+                                                                '&:hover':
+                                                                {
+                                                                    borderColor:
+                                                                        'rgba(245,179,1,0.45)',
+                                                                    transform:
+                                                                        'translateX(2px)',
+                                                                },
                                                             }}
                                                         >
-                                                            <Typography
+                                                            <Box
                                                                 sx={{
-                                                                    fontWeight: 750,
-                                                                    fontSize: 13,
+                                                                    minWidth: 0,
                                                                 }}
                                                             >
-                                                                {criterion.name}
-                                                            </Typography>
+                                                                <Box
+                                                                    sx={{
+                                                                        display:
+                                                                            'flex',
+                                                                        alignItems:
+                                                                            'center',
+                                                                        gap: 0.8,
+                                                                        flexWrap:
+                                                                            'wrap',
+                                                                    }}
+                                                                >
+                                                                    <Typography
+                                                                        sx={{
+                                                                            fontWeight: 750,
+                                                                            fontSize: 13,
+                                                                        }}
+                                                                    >
+                                                                        {
+                                                                            criterion.name
+                                                                        }
+                                                                    </Typography>
 
-                                                            {!criterion.isActive && (
-                                                                <Chip
-                                                                    size="small"
-                                                                    label="Pasif"
-                                                                />
-                                                            )}
+                                                                    {!criterion.isActive && (
+                                                                        <Chip
+                                                                            size="small"
+                                                                            label={
+                                                                                t.criteria
+                                                                                    .inactive
+                                                                            }
+                                                                        />
+                                                                    )}
+                                                                </Box>
+
+                                                                <Typography
+                                                                    color="text.secondary"
+                                                                    sx={{
+                                                                        fontSize: 11,
+                                                                        mt: 0.45,
+                                                                    }}
+                                                                >
+                                                                    {
+                                                                        criterion
+                                                                            .jobPositionDescriptions
+                                                                            .length
+                                                                    }{' '}
+                                                                    {
+                                                                        t.criteria
+                                                                            .criteriaDescriptionCount
+                                                                    }
+                                                                </Typography>
+                                                            </Box>
+
+                                                            <Box
+                                                                sx={{
+                                                                    display:
+                                                                        'flex',
+                                                                    gap: 0.25,
+                                                                    flexShrink: 0,
+                                                                }}
+                                                            >
+                                                                <Tooltip
+                                                                    title={
+                                                                        t.criteria
+                                                                            .editCriterion
+                                                                    }
+                                                                >
+                                                                    <IconButton
+                                                                        size="small"
+                                                                        onClick={() => {
+                                                                            setCritMode(
+                                                                                'edit',
+                                                                            )
+                                                                            setSelectedCriterion(
+                                                                                criterion,
+                                                                            )
+                                                                            setPrefillCategoryId(
+                                                                                criterion.performanceCategoryId,
+                                                                            )
+                                                                            setCritDialogOpen(
+                                                                                true,
+                                                                            )
+                                                                        }}
+                                                                    >
+                                                                        <Edit fontSize="small" />
+                                                                    </IconButton>
+                                                                </Tooltip>
+
+                                                                <Tooltip
+                                                                    title={
+                                                                        t.criteria
+                                                                            .deleteCriterion
+                                                                    }
+                                                                >
+                                                                    <IconButton
+                                                                        size="small"
+                                                                        onClick={() =>
+                                                                            setCritDeleteTarget(
+                                                                                criterion,
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <Delete fontSize="small" />
+                                                                    </IconButton>
+                                                                </Tooltip>
+                                                            </Box>
                                                         </Box>
-
-                                                        <Typography
-                                                            color="text.secondary"
-                                                            sx={{
-                                                                fontSize: 11,
-                                                                mt: 0.45,
-                                                            }}
-                                                        >
-                                                            {criterion.jobPositionDescriptions.length} pozisyon için açıklama tanımlı
-                                                        </Typography>
-                                                    </Box>
-
-                                                    <Box
-                                                        sx={{
-                                                            display: 'flex',
-                                                            gap: 0.25,
-                                                            flexShrink: 0,
-                                                        }}
-                                                    >
-                                                        <Tooltip title="Kriteri düzenle">
-                                                            <IconButton
-                                                                size="small"
-                                                                onClick={() => {
-                                                                    setCritMode(
-                                                                        'edit',
-                                                                    )
-                                                                    setSelectedCriterion(
-                                                                        criterion,
-                                                                    )
-                                                                    setPrefillCategoryId(
-                                                                        criterion.performanceCategoryId,
-                                                                    )
-                                                                    setCritDialogOpen(
-                                                                        true,
-                                                                    )
-                                                                }}
-                                                            >
-                                                                <Edit fontSize="small" />
-                                                            </IconButton>
-                                                        </Tooltip>
-
-                                                        <Tooltip title="Kriteri sil">
-                                                            <IconButton
-                                                                size="small"
-                                                                onClick={() =>
-                                                                    setCritDeleteTarget(
-                                                                        criterion,
-                                                                    )
-                                                                }
-                                                            >
-                                                                <Delete fontSize="small" />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    </Box>
-                                                </Box>
-                                            ))}
-                                        </Stack>
-                                    )}
-                                </AccordionDetails>
-                            </Accordion>
-                        )
-                    })}
+                                                    ),
+                                                )}
+                                            </Stack>
+                                        )}
+                                    </AccordionDetails>
+                                </Accordion>
+                            )
+                        },
+                    )}
                 </Stack>
             )}
 
+            {/* CATEGORY DIALOG */}
             <CategoryFormDialog
                 open={catDialogOpen}
                 mode={catMode}
                 initialData={selectedCategory}
                 submitting={submitting}
                 onSubmit={handleCategorySubmit}
-                onClose={() => setCatDialogOpen(false)}
+                onClose={() =>
+                    setCatDialogOpen(false)
+                }
             />
 
+            {/* CRITERION DIALOG */}
             <CriterionFormDialog
                 open={critDialogOpen}
                 mode={critMode}
@@ -873,30 +1196,58 @@ export default function CriteriaPage() {
                 categoryId={prefillCategoryId}
                 submitting={submitting}
                 onSubmit={handleCriterionSubmit}
-                onClose={() => setCritDialogOpen(false)}
+                onClose={() =>
+                    setCritDialogOpen(false)
+                }
             />
 
+            {/* CATEGORY DELETE */}
             <ConfirmDialog
                 open={!!catDeleteTarget}
-                title="Kategoriyi Sil"
-                description={`"${catDeleteTarget?.name}" kategorisini silmek istediğine emin misin? İçindeki kriterler etkilenebilir.`}
-                onConfirm={handleDeleteCategory}
-                onCancel={() => setCatDeleteTarget(null)}
+                title={
+                    t.criteria.deleteCategoryTitle
+                }
+                description={
+                    language === 'tr'
+                        ? `"${catDeleteTarget?.name}" kategorisini silmek istediğine emin misin? İçindeki kriterler etkilenebilir.`
+                        : `Are you sure you want to delete the "${catDeleteTarget?.name}" category? The criteria inside it may be affected.`
+                }
+                onConfirm={
+                    handleDeleteCategory
+                }
+                onCancel={() =>
+                    setCatDeleteTarget(null)
+                }
             />
 
+            {/* CRITERION DELETE */}
             <ConfirmDialog
                 open={!!critDeleteTarget}
-                title="Kriteri Sil"
-                description={`"${critDeleteTarget?.name}" kriterini silmek istediğine emin misin?`}
-                onConfirm={handleDeleteCriterion}
-                onCancel={() => setCritDeleteTarget(null)}
+                title={
+                    t.criteria.deleteCriterionTitle
+                }
+                description={
+                    language === 'tr'
+                        ? `"${critDeleteTarget?.name}" kriterini silmek istediğine emin misin?`
+                        : `Are you sure you want to delete the "${critDeleteTarget?.name}" criterion?`
+                }
+                onConfirm={
+                    handleDeleteCriterion
+                }
+                onCancel={() =>
+                    setCritDeleteTarget(null)
+                }
             />
 
+            {/* SNACKBAR */}
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={4000}
                 onClose={() =>
-                    setSnackbar((s) => ({ ...s, open: false }))
+                    setSnackbar((s) => ({
+                        ...s,
+                        open: false,
+                    }))
                 }
                 anchorOrigin={{
                     vertical: 'bottom',
@@ -904,9 +1255,13 @@ export default function CriteriaPage() {
                 }}
             >
                 <Alert
-                    severity={snackbar.severity}
+                    severity={
+                        snackbar.severity
+                    }
                     variant="filled"
-                    sx={{ borderRadius: 2 }}
+                    sx={{
+                        borderRadius: 2,
+                    }}
                 >
                     {snackbar.message}
                 </Alert>
