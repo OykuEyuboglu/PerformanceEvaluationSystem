@@ -24,28 +24,55 @@ import {
 import { login } from '../authApi'
 import { useAuthStore } from '../../../store/authStore'
 import Logo from '../../../shared/components/logo'
+import { useLanguage } from '../../../shared/i18n/LanguageContext'
 
-const loginSchema = z.object({
-    email: z
-        .string()
-        .min(1, 'Email boş olamaz.')
-        .email('Geçerli bir e-posta adresi girin'),
+type LoginFormValues = {
+    email: string
+    password: string
+}
 
-    password: z
-        .string()
-        .min(1, 'Şifre boş olamaz.'),
-})
+const getLoginSchema = (language: 'tr' | 'en') =>
+    z.object({
+        email: z
+            .string()
+            .min(
+                1,
+                language === 'tr'
+                    ? 'E-posta boş olamaz.'
+                    : 'Email is required.'
+            )
+            .email(
+                language === 'tr'
+                    ? 'Geçerli bir e-posta adresi girin.'
+                    : 'Please enter a valid email address.'
+            ),
 
-type LoginFormValues = z.infer<typeof loginSchema>
+        password: z
+            .string()
+            .min(
+                1,
+                language === 'tr'
+                    ? 'Şifre boş olamaz.'
+                    : 'Password is required.'
+            ),
+    })
 
 export default function LoginPage() {
     const navigate = useNavigate()
 
     const setAuth = useAuthStore((s) => s.login)
-    const sessionExpired = useAuthStore((s) => s.sessionExpired)
-    const clearSessionExpired = useAuthStore((s) => s.clearSessionExpired)
+    const sessionExpired = useAuthStore(
+        (s) => s.sessionExpired
+    )
+    const clearSessionExpired = useAuthStore(
+        (s) => s.clearSessionExpired
+    )
 
-    const [serverError, setServerError] = useState<string | null>(null)
+    const { language, setLanguage } = useLanguage()
+
+    const [serverError, setServerError] = useState<string | null>(
+        null
+    )
     const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
 
@@ -54,7 +81,7 @@ export default function LoginPage() {
         handleSubmit,
         formState: { errors },
     } = useForm<LoginFormValues>({
-        resolver: zodResolver(loginSchema),
+        resolver: zodResolver(getLoginSchema(language)),
     })
 
     const onSubmit = async (values: LoginFormValues) => {
@@ -69,7 +96,9 @@ export default function LoginPage() {
         } catch (err: any) {
             setServerError(
                 err?.response?.data?.message ??
-                'E-posta veya şifre hatalı.'
+                (language === 'tr'
+                    ? 'E-posta veya şifre hatalı.'
+                    : 'Incorrect email or password.')
             )
         } finally {
             setLoading(false)
@@ -104,6 +133,93 @@ export default function LoginPage() {
 
     return (
         <>
+            {/* LANGUAGE SWITCHER */}
+            <Box
+                sx={{
+                    position: 'fixed',
+                    top: 20,
+                    right: 24,
+                    zIndex: 10,
+                    display: 'flex',
+                    alignItems: 'center',
+                    border: '1px solid #D8D8D8',
+                    borderRadius: 2,
+                    overflow: 'hidden',
+                    bgcolor: '#FFFFFF',
+                    boxShadow:
+                        '0 2px 8px rgba(0,0,0,0.06)',
+                }}
+            >
+                <Button
+                    onClick={() => setLanguage('tr')}
+                    size="small"
+                    sx={{
+                        minWidth: 40,
+                        px: 1,
+                        py: 0.5,
+                        fontSize: 11,
+                        fontWeight:
+                            language === 'tr'
+                                ? 800
+                                : 500,
+                        color:
+                            language === 'tr'
+                                ? '#111111'
+                                : '#777777',
+                        bgcolor:
+                            language === 'tr'
+                                ? 'rgba(245,179,1,0.18)'
+                                : 'transparent',
+                        borderRadius: 0,
+                        '&:hover': {
+                            bgcolor:
+                                'rgba(245,179,1,0.10)',
+                        },
+                    }}
+                >
+                    TR
+                </Button>
+
+                <Box
+                    sx={{
+                        width: '1px',
+                        height: 18,
+                        bgcolor: '#D8D8D8',
+                    }}
+                />
+
+                <Button
+                    onClick={() => setLanguage('en')}
+                    size="small"
+                    sx={{
+                        minWidth: 40,
+                        px: 1,
+                        py: 0.5,
+                        fontSize: 11,
+                        fontWeight:
+                            language === 'en'
+                                ? 800
+                                : 500,
+                        color:
+                            language === 'en'
+                                ? '#111111'
+                                : '#777777',
+                        bgcolor:
+                            language === 'en'
+                                ? 'rgba(245,179,1,0.18)'
+                                : 'transparent',
+                        borderRadius: 0,
+                        '&:hover': {
+                            bgcolor:
+                                'rgba(245,179,1,0.10)',
+                        },
+                    }}
+                >
+                    EN
+                </Button>
+            </Box>
+
+            {/* SESSION EXPIRED */}
             <Snackbar
                 open={sessionExpired}
                 autoHideDuration={5000}
@@ -125,23 +241,33 @@ export default function LoginPage() {
                         fontWeight: 600,
                     }}
                 >
-                    Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.
+                    {language === 'tr'
+                        ? 'Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.'
+                        : 'Your session has expired. Please log in again.'}
                 </Alert>
             </Snackbar>
 
-            <Grid container sx={{ minHeight: '100vh' }}>
-
+            <Grid
+                container
+                sx={{ minHeight: '100vh' }}
+            >
                 {/* SOL PANEL - MARKA */}
                 <Grid
                     size={{ xs: 12, md: 6 }}
                     sx={{
-                        display: { xs: 'none', md: 'flex' },
+                        display: {
+                            xs: 'none',
+                            md: 'flex',
+                        },
                         flexDirection: 'column',
                         justifyContent: 'space-between',
                         bgcolor: '#111111',
                         position: 'relative',
                         overflow: 'hidden',
-                        p: { md: 5, lg: 6 },
+                        p: {
+                            md: 5,
+                            lg: 6,
+                        },
                     }}
                 >
                     <Box
@@ -163,7 +289,8 @@ export default function LoginPage() {
                             width: 320,
                             height: 320,
                             borderRadius: '50%',
-                            border: '1px solid rgba(245,179,1,0.25)',
+                            border:
+                                '1px solid rgba(245,179,1,0.25)',
                             bottom: -100,
                             left: -100,
                         }}
@@ -191,49 +318,81 @@ export default function LoginPage() {
                                 maxWidth: 480,
                             }}
                         >
-                            Performansı{' '}
-                            <Box
-                                component="span"
-                                sx={{
-                                    color: '#F5B301',
-                                }}
-                            >
-                                ölçün
-                            </Box>
-                            , potansiyeli{' '}
-                            <Box
-                                component="span"
-                                sx={{
-                                    color: '#F5B301',
-                                }}
-                            >
-                                büyütün
-                            </Box>
-                            .
+                            {language === 'tr' ? (
+                                <>
+                                    Performansı{' '}
+                                    <Box
+                                        component="span"
+                                        sx={{
+                                            color: '#F5B301',
+                                        }}
+                                    >
+                                        ölçün
+                                    </Box>
+                                    , potansiyeli{' '}
+                                    <Box
+                                        component="span"
+                                        sx={{
+                                            color: '#F5B301',
+                                        }}
+                                    >
+                                        büyütün
+                                    </Box>
+                                    .
+                                </>
+                            ) : (
+                                <>
+                                    Measure{' '}
+                                    <Box
+                                        component="span"
+                                        sx={{
+                                            color: '#F5B301',
+                                        }}
+                                    >
+                                        performance
+                                    </Box>
+                                    , unlock{' '}
+                                    <Box
+                                        component="span"
+                                        sx={{
+                                            color: '#F5B301',
+                                        }}
+                                    >
+                                        potential
+                                    </Box>
+                                    .
+                                </>
+                            )}
                         </Typography>
 
                         <Typography
                             variant="body1"
                             sx={{
-                                color: 'rgba(255,255,255,0.6)',
+                                color:
+                                    'rgba(255,255,255,0.6)',
                                 maxWidth: 420,
                                 lineHeight: 1.6,
                             }}
                         >
-                            IT departmanı için objektif, şeffaf ve kriter
-                            bazlı performans değerlendirme platformu.
+                            {language === 'tr'
+                                ? 'IT departmanı için objektif, şeffaf ve kriter bazlı performans değerlendirme platformu.'
+                                : 'An objective, transparent and criteria-based performance evaluation platform for IT departments.'}
                         </Typography>
                     </Box>
 
-                    {/* Footer */}
+                    {/* FOOTER */}
                     <Typography
                         variant="caption"
                         sx={{
-                            color: 'rgba(255,255,255,0.35)',
+                            color:
+                                'rgba(255,255,255,0.35)',
                         }}
                     >
-                        © {new Date().getFullYear()} VakıfBank 360 · Tüm
-                        hakları saklıdır
+                        © {new Date().getFullYear()}{' '}
+                        VakıfBank 360 ·{' '}
+                        {language === 'tr'
+                            ? 'Tüm hakları saklıdır'
+                            : 'All rights reserved'}
                     </Typography>
                 </Grid>
 
@@ -245,7 +404,6 @@ export default function LoginPage() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         bgcolor: '#FAFAF8',
-
                         p: {
                             xs: 3,
                             md: 4,
@@ -258,7 +416,7 @@ export default function LoginPage() {
                             maxWidth: 420,
                         }}
                     >
-                        {/* Mobil Logo */}
+                        {/* MOBİL LOGO */}
                         <Box
                             sx={{
                                 display: {
@@ -272,7 +430,7 @@ export default function LoginPage() {
                             <Logo variant="dark" />
                         </Box>
 
-                        {/* Başlık */}
+                        {/* BAŞLIK */}
                         <Typography
                             variant="h5"
                             sx={{
@@ -281,10 +439,12 @@ export default function LoginPage() {
                                 mb: 0.5,
                             }}
                         >
-                            Hoş geldiniz
+                            {language === 'tr'
+                                ? 'Hoş geldiniz'
+                                : 'Welcome'}
                         </Typography>
 
-                        {/* Açıklama */}
+                        {/* AÇIKLAMA */}
                         <Typography
                             variant="body2"
                             sx={{
@@ -292,7 +452,9 @@ export default function LoginPage() {
                                 mb: 3,
                             }}
                         >
-                            Devam etmek için hesabınıza giriş yapın
+                            {language === 'tr'
+                                ? 'Devam etmek için hesabınıza giriş yapın'
+                                : 'Sign in to continue'}
                         </Typography>
 
                         {serverError && (
@@ -315,7 +477,11 @@ export default function LoginPage() {
                         >
                             {/* E-POSTA */}
                             <TextField
-                                label="E-posta"
+                                label={
+                                    language === 'tr'
+                                        ? 'E-posta'
+                                        : 'Email'
+                                }
                                 fullWidth
                                 autoComplete="email"
                                 sx={{
@@ -337,12 +503,18 @@ export default function LoginPage() {
                                 }}
                                 {...register('email')}
                                 error={!!errors.email}
-                                helperText={errors.email?.message}
+                                helperText={
+                                    errors.email?.message
+                                }
                             />
 
                             {/* ŞİFRE */}
                             <TextField
-                                label="Şifre"
+                                label={
+                                    language === 'tr'
+                                        ? 'Şifre'
+                                        : 'Password'
+                                }
                                 type={
                                     showPassword
                                         ? 'text'
@@ -387,7 +559,9 @@ export default function LoginPage() {
                                 }}
                                 {...register('password')}
                                 error={!!errors.password}
-                                helperText={errors.password?.message}
+                                helperText={
+                                    errors.password?.message
+                                }
                             />
 
                             {/* GİRİŞ BUTONU */}
@@ -411,8 +585,10 @@ export default function LoginPage() {
                                             color: '#111111',
                                         }}
                                     />
-                                ) : (
+                                ) : language === 'tr' ? (
                                     'Giriş Yap'
+                                ) : (
+                                    'Sign In'
                                 )}
                             </Button>
                         </Box>

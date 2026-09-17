@@ -57,12 +57,8 @@ import type { EvaluationDto } from '../types'
 import type { EvaluationPeriod } from '../../evaluationPeriods/types'
 
 import EvaluationDetailDialog from '../components/EvaluationDetailDialog'
-
-const STATUS_LABELS: Record<string, string> = {
-    Submitted: 'Gönderildi',
-    Approved: 'Onaylandı',
-}
-
+import { useLanguage } from '../../../shared/i18n/LanguageContext'
+import { translations } from '../../../shared/i18n/translations'
 
 const STATUS_COLORS: Record<
     string,
@@ -191,6 +187,8 @@ function KpiCard({
 
 export default function EvaluationsPage() {
     const [searchParams] = useSearchParams()
+    const { language } = useLanguage()
+    const t = translations[language]
 
     const [evaluations, setEvaluations] =
         useState<EvaluationDto[]>([])
@@ -267,7 +265,7 @@ export default function EvaluationsPage() {
         } catch {
             setSnackbar({
                 open: true,
-                message: 'Detay yüklenemedi.',
+                message: t.evaluation.loadDetailError,
                 severity: 'error',
             })
         }
@@ -301,7 +299,7 @@ export default function EvaluationsPage() {
 
             setSnackbar({
                 open: true,
-                message: `${approvedCount} değerlendirme onaylandı.`,
+                message: `${approvedCount} ${t.evaluation.approvedCountSuffix}`,
                 severity: 'success',
             })
 
@@ -318,7 +316,7 @@ export default function EvaluationsPage() {
         } catch {
             setSnackbar({
                 open: true,
-                message: 'Toplu onaylama sırasında hata oluştu.',
+                message: t.evaluation.bulkApproveError,
                 severity: 'error',
             })
         } finally {
@@ -344,7 +342,7 @@ export default function EvaluationsPage() {
             setSelected(updated)
         } catch (error) {
             console.error(
-                'Değerlendirme onaylanamadı:',
+                t.evaluation.approveErrorConsole,
                 error
             )
         } finally {
@@ -423,7 +421,7 @@ export default function EvaluationsPage() {
         () => [
             {
                 field: 'employeeName',
-                headerName: 'Çalışan',
+                headerName: t.evaluation.employee,
                 flex: 1.15,
                 minWidth: 190,
                 renderCell: (
@@ -476,14 +474,14 @@ export default function EvaluationsPage() {
 
             {
                 field: 'evaluatorName',
-                headerName: 'Değerlendiren',
+                headerName: t.evaluation.evaluator,
                 flex: 1.1,
                 minWidth: 180,
             },
 
             {
                 field: 'evaluationPeriodName',
-                headerName: 'Dönem',
+                headerName: t.evaluation.periodShort,
                 flex: 1.15,
                 minWidth: 170,
                 renderCell: (params) => (
@@ -500,7 +498,7 @@ export default function EvaluationsPage() {
 
             {
                 field: 'totalScore',
-                headerName: 'Toplam Skor',
+                headerName: t.evaluation.totalScore,
                 flex: 0.8,
                 minWidth: 125,
                 renderCell: (params) => {
@@ -555,17 +553,18 @@ export default function EvaluationsPage() {
 
             {
                 field: 'status',
-                headerName: 'Durum',
+                headerName: t.evaluation.status,
                 flex: 0.85,
                 minWidth: 125,
                 renderCell: (params) => (
                     <Chip
                         size="small"
                         label={
-                            STATUS_LABELS[
-                            params.value
-                            ] ??
-                            params.value
+                            params.value === 'Submitted'
+                                ? t.evaluation.submitted
+                                : params.value === 'Approved'
+                                    ? t.evaluation.approved
+                                    : params.value
                         }
                         color={
                             STATUS_COLORS[
@@ -589,7 +588,7 @@ export default function EvaluationsPage() {
 
             {
                 field: 'createdAt',
-                headerName: 'Tarih',
+                headerName: t.evaluation.date,
                 flex: 0.85,
                 minWidth: 115,
                 valueFormatter: (value) =>
@@ -597,7 +596,7 @@ export default function EvaluationsPage() {
                         ? new Date(
                             value
                         ).toLocaleDateString(
-                            'tr-TR'
+                            language === 'tr' ? 'tr-TR' : 'en-US'
                         )
                         : '-',
             },
@@ -610,7 +609,7 @@ export default function EvaluationsPage() {
                 filterable: false,
                 disableColumnMenu: true,
                 renderCell: (params) => (
-                    <Tooltip title="Detayları görüntüle">
+                    <Tooltip title={t.evaluation.viewDetails}>
                         <IconButton
                             size="small"
                             onClick={(event) => {
@@ -634,7 +633,7 @@ export default function EvaluationsPage() {
                 ),
             },
         ],
-        [handleRowClick]
+        [handleRowClick, language]
     )
 
     return (
@@ -706,7 +705,7 @@ export default function EvaluationsPage() {
                                         -0.35,
                                 }}
                             >
-                                Değerlendirmeler
+                                {t.evaluation.title}
                             </Typography>
 
                             <Typography
@@ -716,9 +715,7 @@ export default function EvaluationsPage() {
                                     fontSize: 13.5,
                                 }}
                             >
-                                Sistemdeki performans
-                                değerlendirmelerini
-                                görüntüle ve incele.
+                                {t.evaluation.description}
                             </Typography>
                         </Box>
                     </Box>
@@ -727,7 +724,7 @@ export default function EvaluationsPage() {
                 <TextField
                     select
                     size="small"
-                    label="Değerlendirme Dönemi"
+                    label={t.evaluation.period}
                     value={periodFilter}
                     onChange={(e) =>
                         setPeriodFilter(
@@ -746,7 +743,7 @@ export default function EvaluationsPage() {
                     }}
                 >
                     <MenuItem value="all">
-                        Tüm Dönemler
+                        {t.evaluation.allPeriods}
                     </MenuItem>
 
                     {periods.map((period) => (
@@ -773,27 +770,27 @@ export default function EvaluationsPage() {
                 }}
             >
                 <KpiCard
-                    label="Toplam Değerlendirme"
+                    label={t.evaluation.totalEvaluations}
                     value={stats.total}
-                    caption="Seçili filtre kapsamındaki kayıtlar"
+                    caption={t.evaluation.filteredRecords}
                     icon={
                         <AssessmentOutlined fontSize="small" />
                     }
                 />
 
                 <KpiCard
-                    label="Ortalama Skor"
+                    label={t.evaluation.averageScore}
                     value={`${stats.average.toFixed(
                         2
                     )} / 5`}
-                    caption="Değerlendirmelerin genel ortalaması"
+                    caption={t.evaluation.overallAverage}
                     icon={
                         <TrendingUpOutlined fontSize="small" />
                     }
                 />
 
                 <KpiCard
-                    label="Onaylanan"
+                    label={t.evaluation.approved}
                     value={stats.approved}
                     caption={`${stats.total
                         ? Math.round(
@@ -802,7 +799,7 @@ export default function EvaluationsPage() {
                             100
                         )
                         : 0
-                        }% onay oranı`
+                        }% ${t.evaluation.approvalRate}`
                     }
                     icon={
                         <CheckCircleOutlined fontSize="small" />
@@ -844,7 +841,7 @@ export default function EvaluationsPage() {
                                 fontSize: 14.5,
                             }}
                         >
-                            Değerlendirme Kayıtları
+                            {t.evaluation.recordsTitle}
                         </Typography>
 
                         <Typography
@@ -855,7 +852,7 @@ export default function EvaluationsPage() {
                             }}
                         >
                             {filtered.length}{' '}
-                            kayıt listeleniyor
+                            {t.evaluation.recordsListed}
                         </Typography>
                     </Box>
 
@@ -867,7 +864,7 @@ export default function EvaluationsPage() {
                                 e.target.value
                             )
                         }
-                        placeholder="Çalışan, değerlendirici veya dönem ara..."
+                        placeholder={t.evaluation.searchPlaceholder}
                         sx={{
                             width: {
                                 xs: '100%',
@@ -913,8 +910,8 @@ export default function EvaluationsPage() {
                             sx={{ borderRadius: 2, flexShrink: 0 }}
                         >
                             {bulkApproving
-                                ? 'Onaylanıyor...'
-                                : `Seçilenleri Onayla (${selectedSubmittedCount})`}
+                                ? t.evaluation.approving
+                                : `${t.evaluation.approveSelected} (${selectedSubmittedCount})`}
                         </Button>
                     )}
                 </Box>
@@ -954,16 +951,16 @@ export default function EvaluationsPage() {
                     }}
                     localeText={{
                         noRowsLabel:
-                            'Gösterilecek değerlendirme bulunamadı.',
+                            t.evaluation.gridNoRows,
                         noResultsOverlayLabel:
-                            'Sonuç bulunamadı.',
+                            t.evaluation.gridNoResults,
 
                         footerRowSelected:
                             (count) =>
-                                `${count.toLocaleString()} satır seçildi`,
+                                `${count.toLocaleString()} ${t.evaluation.gridRowSelected}`,
 
                         footerTotalRows:
-                            'Toplam satır:',
+                            t.evaluation.gridTotalRows,
 
                         footerTotalVisibleRows:
                             (
@@ -973,99 +970,99 @@ export default function EvaluationsPage() {
                                 `${visibleCount.toLocaleString()} / ${totalCount.toLocaleString()}`,
 
                         columnMenuLabel:
-                            'Sütun menüsü',
+                            t.evaluation.gridColumnMenu,
                         columnMenuShowColumns:
-                            'Sütunları göster',
+                            t.evaluation.gridShowColumns,
                         columnMenuManageColumns:
-                            'Sütunları yönet',
+                            t.evaluation.gridManageColumns,
                         columnMenuFilter:
-                            'Filtrele',
+                            t.evaluation.gridFilter,
                         columnMenuHideColumn:
-                            'Sütunu gizle',
+                            t.evaluation.gridHideColumn,
                         columnMenuUnsort:
-                            'Sıralamayı kaldır',
+                            t.evaluation.gridUnsort,
                         columnMenuSortAsc:
-                            'Artan sırala',
+                            t.evaluation.gridSortAsc,
                         columnMenuSortDesc:
-                            'Azalan sırala',
+                            t.evaluation.gridSortDesc,
 
                         filterPanelAddFilter:
-                            'Filtre ekle',
+                            t.evaluation.gridAddFilter,
                         filterPanelDeleteIconLabel:
-                            'Sil',
+                            t.evaluation.gridDelete,
                         filterPanelColumn:
-                            'Sütun',
+                            t.evaluation.gridColumn,
                         filterPanelInputLabel:
-                            'Değer',
+                            t.evaluation.gridValue,
                         filterPanelInputPlaceholder:
-                            'Filtre değeri',
+                            t.evaluation.gridFilterValue,
 
                         filterOperatorContains:
-                            'içeriyor',
+                            t.evaluation.gridContains,
                         filterOperatorEquals:
-                            'eşittir',
+                            t.evaluation.gridEquals,
                         filterOperatorStartsWith:
-                            'ile başlar',
+                            t.evaluation.gridStartsWith,
                         filterOperatorEndsWith:
-                            'ile biter',
+                            t.evaluation.gridEndsWith,
                         filterOperatorIs:
-                            'eşittir',
+                            t.evaluation.gridEquals,
                         filterOperatorNot:
-                            'eşit değildir',
+                            t.evaluation.gridNotEqual,
                         filterOperatorAfter:
-                            'sonra',
+                            t.evaluation.gridAfter,
                         filterOperatorOnOrAfter:
-                            'sonra veya eşit',
+                            t.evaluation.gridAfterOrEqual,
                         filterOperatorBefore:
-                            'önce',
+                            t.evaluation.gridBefore,
                         filterOperatorOnOrBefore:
-                            'önce veya eşit',
+                            t.evaluation.gridBeforeOrEqual,
                         filterOperatorIsEmpty:
-                            'boş',
+                            t.evaluation.gridEmpty,
                         filterOperatorIsNotEmpty:
-                            'boş değil',
+                            t.evaluation.gridNotEmpty,
                         filterOperatorIsAnyOf:
-                            'şunlardan biri',
+                            t.evaluation.gridAnyOf,
 
                         columnHeaderSortIconLabel:
-                            'Sıralamak için tıklayın',
+                            t.evaluation.gridSortHint,
 
                         checkboxSelectionHeaderName:
-                            'Seç',
+                            t.evaluation.gridSelect,
                         checkboxSelectionSelectAllRows:
-                            'Tüm satırları seç',
+                            t.evaluation.gridSelectAll,
                         checkboxSelectionUnselectAllRows:
-                            'Tüm satırların seçimini kaldır',
+                            t.evaluation.gridUnselectAll,
 
                         toolbarExport:
-                            'Dışa aktar',
+                            t.evaluation.gridExport,
                         toolbarExportCSV:
-                            'CSV olarak dışa aktar',
+                            t.evaluation.gridExportCsv,
                         toolbarExportPrint:
-                            'Yazdır',
+                            t.evaluation.gridPrint,
                         toolbarColumns:
-                            'Sütunlar',
+                            t.evaluation.gridColumns,
                         toolbarFilters:
-                            'Filtreler',
+                            t.evaluation.gridFilters,
                         toolbarDensity:
-                            'Satır yoğunluğu',
+                            t.evaluation.gridDensity,
                         toolbarDensityLabel:
-                            'Satır yoğunluğu',
+                            t.evaluation.gridDensity,
                         toolbarDensityCompact:
-                            'Sıkışık',
+                            t.evaluation.gridCompact,
                         toolbarDensityStandard:
-                            'Standart',
+                            t.evaluation.gridStandard,
                         toolbarDensityComfortable:
-                            'Rahat',
+                            t.evaluation.gridComfortable,
 
                         filterPanelOperator:
-                            'Operatör',
+                            t.evaluation.gridOperator,
                         filterPanelLogicOperator:
-                            'Mantıksal operatör',
+                            t.evaluation.gridLogicOperator,
                         filterPanelOperatorAnd:
-                            'Ve',
+                            t.evaluation.gridAnd,
                         filterPanelOperatorOr:
-                            'Veya',
+                            t.evaluation.gridOr,
                     }}
                     sx={{
                         border: 'none',
@@ -1136,13 +1133,16 @@ export default function EvaluationsPage() {
                 maxWidth="xs"
                 fullWidth
             >
-                <DialogTitle>Değerlendirmeleri Onayla</DialogTitle>
+                <DialogTitle>{t.evaluation.bulkDialogTitle}</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        Seçilen {selectedSubmittedCount} değerlendirmeyi onaylamak
-                        istediğinize emin misiniz? Bu işlem sonrasında
-                        değerlendirmelerin durumu <strong>Onaylandı</strong> olarak
-                        değiştirilecektir.
+                        {
+                            t.evaluation.bulkDialogDescription
+                                .replace(
+                                    '{count}',
+                                    String(selectedSubmittedCount),
+                                )
+                        }
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
@@ -1150,7 +1150,7 @@ export default function EvaluationsPage() {
                         onClick={() => setBulkApproveDialogOpen(false)}
                         disabled={bulkApproving}
                     >
-                        Vazgeç
+                        {t.evaluation.cancel}
                     </Button>
                     <Button
                         variant="contained"
@@ -1165,7 +1165,7 @@ export default function EvaluationsPage() {
                             )
                         }
                     >
-                        {bulkApproving ? 'Onaylanıyor...' : 'Onayla'}
+                        {bulkApproving ? t.evaluation.approving : t.evaluation.approve}
                     </Button>
                 </DialogActions>
             </Dialog>

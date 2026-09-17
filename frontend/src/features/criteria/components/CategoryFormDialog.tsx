@@ -2,6 +2,10 @@
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+
+import { useLanguage } from '../../../shared/i18n/LanguageContext'
+import { translations } from '../../../shared/i18n/translations'
+
 import {
     Dialog,
     DialogTitle,
@@ -16,18 +20,8 @@ import {
     Typography,
     InputAdornment,
 } from '@mui/material'
+
 import type { PerformanceCategoryDto } from '../types'
-
-const schema = z.object({
-    name: z.string().min(2, 'Kategori adı en az 2 karakter olmalı'),
-    weight: z
-        .number()
-        .min(0.01, 'Ağırlık 0’dan büyük olmalı')
-        .max(100, 'Ağırlık 100’ü geçemez'),
-    isActive: z.boolean(),
-})
-
-export type CategoryFormValues = z.infer<typeof schema>
 
 interface CategoryFormDialogProps {
     open: boolean
@@ -38,6 +32,37 @@ interface CategoryFormDialogProps {
     onClose: () => void
 }
 
+const getCategorySchema = (language: 'tr' | 'en') =>
+    z.object({
+        name: z.string().min(
+            2,
+            language === 'tr'
+                ? 'Kategori adı en az 2 karakter olmalı'
+                : 'Category name must be at least 2 characters',
+        ),
+
+        weight: z
+            .number()
+            .min(
+                0.01,
+                language === 'tr'
+                    ? 'Ağırlık 0’dan büyük olmalı'
+                    : 'Weight must be greater than 0',
+            )
+            .max(
+                100,
+                language === 'tr'
+                    ? 'Ağırlık 100’ü geçemez'
+                    : 'Weight cannot exceed 100',
+            ),
+
+        isActive: z.boolean(),
+    })
+
+export type CategoryFormValues = z.infer<
+    ReturnType<typeof getCategorySchema>
+>
+
 export default function CategoryFormDialog({
     open,
     mode,
@@ -46,13 +71,16 @@ export default function CategoryFormDialog({
     onSubmit,
     onClose,
 }: CategoryFormDialogProps) {
+    const { language } = useLanguage()
+    const t = translations[language]
+
     const {
         control,
         handleSubmit,
         reset,
         formState: { errors },
     } = useForm<CategoryFormValues>({
-        resolver: zodResolver(schema),
+        resolver: zodResolver(getCategorySchema(language)),
         defaultValues: {
             name: '',
             weight: 0,
@@ -91,7 +119,8 @@ export default function CategoryFormDialog({
                         overflow: 'hidden',
                         border: '1px solid',
                         borderColor: 'divider',
-                        boxShadow: '0 24px 70px rgba(0,0,0,0.16)',
+                        boxShadow:
+                            '0 24px 70px rgba(0,0,0,0.16)',
                         animation:
                             'categoryDialogEnter 240ms ease-out',
                         '@keyframes categoryDialogEnter': {
@@ -118,21 +147,38 @@ export default function CategoryFormDialog({
                     borderColor: 'divider',
                 }}
             >
-                <Typography sx={{ fontWeight: 850, fontSize: 18 }}>
+                <Typography
+                    sx={{
+                        fontWeight: 850,
+                        fontSize: 18,
+                    }}
+                >
                     {mode === 'create'
-                        ? 'Yeni Kategori'
-                        : 'Kategoriyi Düzenle'}
+                        ? t.categoryForm.createTitle
+                        : t.categoryForm.editTitle}
                 </Typography>
+
                 <Typography
                     color="text.secondary"
-                    sx={{ fontSize: 11.5, mt: 0.25 }}
+                    sx={{
+                        fontSize: 11.5,
+                        mt: 0.25,
+                    }}
                 >
-                    Performans değerlendirmesindeki ana kategori ve ağırlığını tanımlayın.
+                    {t.categoryForm.description}
                 </Typography>
             </DialogTitle>
 
-            <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-                <DialogContent sx={{ px: 3, py: 2.5 }}>
+            <Box
+                component="form"
+                onSubmit={handleSubmit(onSubmit)}
+            >
+                <DialogContent
+                    sx={{
+                        px: 3,
+                        py: 2.5,
+                    }}
+                >
                     <Stack spacing={2.1}>
                         <Controller
                             name="name"
@@ -140,11 +186,15 @@ export default function CategoryFormDialog({
                             render={({ field }) => (
                                 <TextField
                                     {...field}
-                                    label="Kategori Adı"
+                                    label={
+                                        t.categoryForm.categoryName
+                                    }
                                     fullWidth
                                     size="small"
                                     error={!!errors.name}
-                                    helperText={errors.name?.message}
+                                    helperText={
+                                        errors.name?.message
+                                    }
                                     sx={categoryFieldSx}
                                 />
                             )}
@@ -157,12 +207,16 @@ export default function CategoryFormDialog({
                                 <TextField
                                     {...field}
                                     type="number"
-                                    label="Ağırlık"
+                                    label={
+                                        t.categoryForm.weight
+                                    }
                                     fullWidth
                                     size="small"
                                     onChange={(e) =>
                                         field.onChange(
-                                            Number(e.target.value),
+                                            Number(
+                                                e.target.value,
+                                            ),
                                         )
                                     }
                                     error={!!errors.weight}
@@ -188,7 +242,8 @@ export default function CategoryFormDialog({
                                 sx={{
                                     display: 'flex',
                                     alignItems: 'center',
-                                    justifyContent: 'space-between',
+                                    justifyContent:
+                                        'space-between',
                                     p: 1.4,
                                     borderRadius: 2,
                                     bgcolor: 'action.hover',
@@ -203,8 +258,12 @@ export default function CategoryFormDialog({
                                             fontWeight: 750,
                                         }}
                                     >
-                                        Kategori Durumu
+                                        {
+                                            t.categoryForm
+                                                .categoryStatus
+                                        }
                                     </Typography>
+
                                     <Typography
                                         color="text.secondary"
                                         sx={{
@@ -212,7 +271,10 @@ export default function CategoryFormDialog({
                                             mt: 0.2,
                                         }}
                                     >
-                                        Pasif kategoriler yeni değerlendirmelerde kullanılmaz.
+                                        {
+                                            t.categoryForm
+                                                .statusDescription
+                                        }
                                     </Typography>
                                 </Box>
 
@@ -224,7 +286,9 @@ export default function CategoryFormDialog({
                                             sx={{ m: 0 }}
                                             control={
                                                 <Switch
-                                                    checked={field.value}
+                                                    checked={
+                                                        field.value
+                                                    }
                                                     onChange={
                                                         field.onChange
                                                     }
@@ -233,8 +297,10 @@ export default function CategoryFormDialog({
                                             }
                                             label={
                                                 field.value
-                                                    ? 'Aktif'
-                                                    : 'Pasif'
+                                                    ? t.categoryForm
+                                                        .active
+                                                    : t.categoryForm
+                                                        .inactive
                                             }
                                         />
                                     )}
@@ -256,10 +322,14 @@ export default function CategoryFormDialog({
                     <Button
                         onClick={onClose}
                         color="inherit"
-                        sx={{ borderRadius: 2, fontWeight: 700 }}
+                        sx={{
+                            borderRadius: 2,
+                            fontWeight: 700,
+                        }}
                     >
-                        Vazgeç
+                        {t.categoryForm.cancel}
                     </Button>
+
                     <Button
                         type="submit"
                         variant="contained"
@@ -271,16 +341,17 @@ export default function CategoryFormDialog({
                             color: '#111',
                             fontWeight: 800,
                             boxShadow: 'none',
+
                             '&:hover': {
                                 bgcolor: '#E0A300',
                             },
                         }}
                     >
                         {submitting
-                            ? 'Kaydediliyor...'
+                            ? t.categoryForm.saving
                             : mode === 'create'
-                                ? 'Oluştur'
-                                : 'Kaydet'}
+                                ? t.categoryForm.create
+                                : t.categoryForm.save}
                     </Button>
                 </DialogActions>
             </Box>
@@ -293,6 +364,7 @@ const categoryFieldSx = {
         borderRadius: 2,
         fontSize: 13,
     },
+
     '& .MuiInputLabel-root': {
         fontSize: 13,
     },

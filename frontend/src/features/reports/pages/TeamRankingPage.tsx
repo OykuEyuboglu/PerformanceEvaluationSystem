@@ -30,6 +30,8 @@ import { getEvaluationPeriods } from '../../evaluationPeriods/evaluationPeriodsA
 import { getTeamRanking, exportTeamRankingExcel, type EmployeeRanking } from '../../dashboard/dashboardApi'
 import type { EvaluationPeriod } from '../../evaluationPeriods/types'
 import { getDefaultPeriod } from '../../../shared/utils/period'
+import { useLanguage } from '../../../shared/i18n/LanguageContext'
+import { translations } from '../../../shared/i18n/translations'
 
 const isActivePeriod = (period: EvaluationPeriod) => {
     const today = new Date()
@@ -48,6 +50,8 @@ const rankColor = (rank: number) =>
     rank === 1 ? '#F5B301' : rank === 2 ? '#B0B0B0' : rank === 3 ? '#B87333' : undefined
 
 export default function TeamRankingPage() {
+    const { language } = useLanguage()
+    const t = translations[language]
     const [periods, setPeriods] = useState<EvaluationPeriod[]>([])
     const [selectedPeriodId, setSelectedPeriodId] = useState<number | ''>('')
     const [ranking, setRanking] = useState<EmployeeRanking[]>([])
@@ -93,16 +97,16 @@ export default function TeamRankingPage() {
     const selectedPeriod = periods.find((p) => p.id === selectedPeriodId)
 
     const filteredRanking = useMemo(() => {
-        const query = search.trim().toLocaleLowerCase('tr-TR')
+        const query = search.trim().toLocaleLowerCase(language === 'tr' ? 'tr-TR' : 'en-US')
         const data = ranking.filter((item) =>
             !query ||
-            item.employeeName.toLocaleLowerCase('tr-TR').includes(query) ||
-            (item.jobPositionName || '').toLocaleLowerCase('tr-TR').includes(query)
+            item.employeeName.toLocaleLowerCase(language === 'tr' ? 'tr-TR' : 'en-US').includes(query) ||
+            (item.jobPositionName || '').toLocaleLowerCase(language === 'tr' ? 'tr-TR' : 'en-US').includes(query)
         )
 
         return [...data].sort((a, b) => {
             let result = 0
-            if (sortKey === 'employeeName') result = a.employeeName.localeCompare(b.employeeName, 'tr')
+            if (sortKey === 'employeeName') result = a.employeeName.localeCompare(b.employeeName, language === 'tr' ? 'tr' : 'en')
             else if (sortKey === 'averageScore') result = a.averageScore - b.averageScore
             else if (sortKey === 'evaluationCount') result = a.evaluationCount - b.evaluationCount
             else result = a.rank - b.rank
@@ -146,7 +150,7 @@ export default function TeamRankingPage() {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 2, mb: 3, flexWrap: 'wrap' }}>
                 <Box>
                     <Button component={RouterLink} to="/dashboard" startIcon={<ArrowBack />} size="small" sx={{ mb: 1 }}>
-                        Dashboard
+                        {t.teamRanking.dashboard}
                     </Button>
                     <Box
                         sx={{
@@ -169,11 +173,11 @@ export default function TeamRankingPage() {
                                 letterSpacing: '-.35px',
                             }}
                         >
-                            Ekip Sıralaması
+                            {t.teamRanking.title}
                         </Typography>
                     </Box>
                     <Typography color="text.secondary" sx={{ mt: .5, fontSize: 14 }}>
-                        Seçilen dönemdeki ekip performansını karşılaştır ve sonuçları incele.
+                        {t.teamRanking.description}
                     </Typography>
                 </Box>
 
@@ -181,7 +185,7 @@ export default function TeamRankingPage() {
                     <TextField
                         select
                         size="small"
-                        label="Değerlendirme Dönemi"
+                        label={t.teamRanking.evaluationPeriod}
                         value={selectedPeriodId}
                         onChange={(e) => setSelectedPeriodId(Number(e.target.value))}
                         sx={{ width: { xs: 220, sm: 450 } }}
@@ -191,7 +195,7 @@ export default function TeamRankingPage() {
                             <MenuItem key={period.id} value={period.id}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                     {period.name}
-                                    {isActivePeriod(period) && <Chip label="Aktif" size="small" color="success" />}
+                                    {isActivePeriod(period) && <Chip label={t.teamRanking.active} size="small" color="success" />}
                                 </Box>
                             </MenuItem>
                         ))}
@@ -204,29 +208,29 @@ export default function TeamRankingPage() {
                         disabled={exporting || selectedPeriodId === ''}
                         sx={{ minHeight: 40, borderRadius: 2, fontWeight: 750 }}
                     >
-                        {exporting ? 'Hazırlanıyor...' : 'Excel'}
+                        {exporting ? t.teamRanking.preparing : t.teamRanking.excel}
                     </Button>
                 </Box>
             </Box>
 
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 2, mb: 2 }}>
                 <Paper elevation={0} sx={{ p: 2.2, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
-                    <Typography color="text.secondary" sx={{ fontSize: 10.5, fontWeight: 800 }}>DEĞERLENDİRİLEN</Typography>
+                    <Typography color="text.secondary" sx={{ fontSize: 10.5, fontWeight: 800 }}>{t.teamRanking.evaluated}</Typography>
                     <Typography sx={{ fontSize: 28, fontWeight: 900, mt: .5 }}>{ranking.length}</Typography>
-                    <Typography color="text.secondary" sx={{ fontSize: 11.5 }}>çalışan</Typography>
+                    <Typography color="text.secondary" sx={{ fontSize: 11.5 }}>{t.teamRanking.employee}</Typography>
                 </Paper>
                 <Paper elevation={0} sx={{ p: 2.2, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
-                    <Typography color="text.secondary" sx={{ fontSize: 10.5, fontWeight: 800 }}>EKİP ORTALAMASI</Typography>
+                    <Typography color="text.secondary" sx={{ fontSize: 10.5, fontWeight: 800 }}>{t.teamRanking.teamAverage}</Typography>
                     <Typography sx={{ fontSize: 28, fontWeight: 900, mt: .5 }}>{average ? average.toFixed(2) : '—'}</Typography>
                     <Typography color="text.secondary" sx={{ fontSize: 11.5 }}>/ 5</Typography>
                 </Paper>
                 <Paper elevation={0} sx={{ p: 2.2, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
-                    <Typography color="text.secondary" sx={{ fontSize: 10.5, fontWeight: 800 }}>DÖNEM</Typography>
+                    <Typography color="text.secondary" sx={{ fontSize: 10.5, fontWeight: 800 }}>{t.teamRanking.period}</Typography>
                     <Typography sx={{ fontSize: 18, fontWeight: 900, mt: .9, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {selectedPeriod?.name || '—'}
                     </Typography>
                     <Typography color="text.secondary" sx={{ fontSize: 11.5 }}>
-                        {selectedPeriod ? `${new Date(selectedPeriod.startDate).toLocaleDateString('tr-TR')} – ${new Date(selectedPeriod.endDate).toLocaleDateString('tr-TR')}` : ''}
+                        {selectedPeriod ? `${new Date(selectedPeriod.startDate).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US')} – ${new Date(selectedPeriod.endDate).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US')}` : ''}
                     </Typography>
                 </Paper>
             </Box>
@@ -236,8 +240,8 @@ export default function TeamRankingPage() {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                         <EmojiEvents sx={{ color: 'primary.main' }} />
                         <Box>
-                            <Typography sx={{ fontWeight: 800, fontSize: 16 }}>İlk 3</Typography>
-                            <Typography color="text.secondary" sx={{ fontSize: 12 }}>Seçilen dönemin en yüksek skorları.</Typography>
+                            <Typography sx={{ fontWeight: 800, fontSize: 16 }}>{t.teamRanking.topThree}</Typography>
+                            <Typography color="text.secondary" sx={{ fontSize: 12 }}>{t.teamRanking.topThreeDescription}</Typography>
                         </Box>
                     </Box>
 
@@ -264,7 +268,7 @@ export default function TeamRankingPage() {
                                     <Typography sx={{ fontWeight: 800, fontSize: 13.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                         {item.employeeName}
                                     </Typography>
-                                    <Typography color="text.secondary" sx={{ fontSize: 11.5 }}>#{item.rank} · {item.jobPositionName || 'Pozisyon belirtilmemiş'}</Typography>
+                                    <Typography color="text.secondary" sx={{ fontSize: 11.5 }}>#{item.rank} · {item.jobPositionName || '{t.teamRanking.positionNotSpecified}'}</Typography>
                                 </Box>
                                 <Typography sx={{ fontWeight: 900, fontSize: 17 }}>{item.averageScore.toFixed(2)}</Typography>
                             </Box>
@@ -278,15 +282,15 @@ export default function TeamRankingPage() {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Insights sx={{ color: 'primary.main' }} />
                         <Box>
-                            <Typography sx={{ fontWeight: 800, fontSize: 16 }}>Performans Sıralaması</Typography>
-                            <Typography color="text.secondary" sx={{ fontSize: 12 }}>Detaylı sonuç tablosu.</Typography>
+                            <Typography sx={{ fontWeight: 800, fontSize: 16 }}>{t.teamRanking.performanceRanking}</Typography>
+                            <Typography color="text.secondary" sx={{ fontSize: 12 }}>{t.teamRanking.detailedResults}</Typography>
                         </Box>
                     </Box>
                     <TextField
                         size="small"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Çalışan veya pozisyon ara..."
+                        placeholder={t.teamRanking.searchPlaceholder}
                         sx={{ width: { xs: '100%', sm: 280 } }}
                         slotProps={{
                             input: {
@@ -302,9 +306,9 @@ export default function TeamRankingPage() {
                     <Box sx={{ display: 'grid', placeItems: 'center', py: 8 }}><CircularProgress /></Box>
                 ) : filteredRanking.length === 0 ? (
                     <Box sx={{ p: 5, textAlign: 'center' }}>
-                        <Typography sx={{ fontWeight: 800 }}>Sonuç bulunamadı.</Typography>
+                        <Typography sx={{ fontWeight: 800 }}>{t.teamRanking.noResults}</Typography>
                         <Typography color="text.secondary" sx={{ fontSize: 13, mt: .5 }}>
-                            Seçilen dönem veya arama kriteri için gösterilecek kayıt yok.
+                            {t.teamRanking.noResultsDescription}
                         </Typography>
                     </Box>
                 ) : (
@@ -314,23 +318,23 @@ export default function TeamRankingPage() {
                                 <TableRow>
                                     <TableCell sx={{ fontWeight: 800 }}>
                                         <TableSortLabel active={sortKey === 'rank'} direction={sortKey === 'rank' ? order : 'asc'} onClick={() => requestSort('rank')}>
-                                            Sıra
+                                            {t.teamRanking.rank}
                                         </TableSortLabel>
                                     </TableCell>
                                     <TableCell sx={{ fontWeight: 800 }}>
                                         <TableSortLabel active={sortKey === 'employeeName'} direction={sortKey === 'employeeName' ? order : 'asc'} onClick={() => requestSort('employeeName')}>
-                                            Çalışan
+                                            {t.teamRanking.employee}
                                         </TableSortLabel>
                                     </TableCell>
-                                    <TableCell sx={{ fontWeight: 800 }}>Pozisyon</TableCell>
+                                    <TableCell sx={{ fontWeight: 800 }}>{t.teamRanking.position}</TableCell>
                                     <TableCell sx={{ fontWeight: 800 }}>
                                         <TableSortLabel active={sortKey === 'averageScore'} direction={sortKey === 'averageScore' ? order : 'desc'} onClick={() => requestSort('averageScore')}>
-                                            Ortalama
+                                            {t.teamRanking.average}
                                         </TableSortLabel>
                                     </TableCell>
                                     <TableCell sx={{ fontWeight: 800 }}>
                                         <TableSortLabel active={sortKey === 'evaluationCount'} direction={sortKey === 'evaluationCount' ? order : 'desc'} onClick={() => requestSort('evaluationCount')}>
-                                            Değerlendirme
+                                            {t.teamRanking.evaluation}
                                         </TableSortLabel>
                                     </TableCell>
                                 </TableRow>
@@ -346,10 +350,11 @@ export default function TeamRankingPage() {
                                         </TableCell>
                                         <TableCell>
                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
-                                                <Avatar sx={{ width: 32, height: 32, bgcolor: (theme) =>
-                                                theme.palette.mode === 'dark'
-                                                    ? theme.palette.avatar.dark
-                                                        : theme.palette.avatar.light, fontSize: 12, fontWeight: 800
+                                                <Avatar sx={{
+                                                    width: 32, height: 32, bgcolor: (theme) =>
+                                                        theme.palette.mode === 'dark'
+                                                            ? theme.palette.avatar.dark
+                                                            : theme.palette.avatar.light, fontSize: 12, fontWeight: 800
                                                 }}>
                                                     {item.employeeName.charAt(0).toUpperCase()}
                                                 </Avatar>

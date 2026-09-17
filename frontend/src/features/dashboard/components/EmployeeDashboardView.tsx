@@ -21,12 +21,16 @@ import { Link as RouterLink } from 'react-router-dom'
 
 import { getMyEvaluations } from '../../evaluations/evaluationsApi'
 import type { EvaluationDto } from '../../evaluations/types'
+import { useLanguage } from '../../../shared/i18n/LanguageContext'
+import { translations } from '../../../shared/i18n/translations'
 
 export default function EmployeeDashboardView({
     firstName,
 }: {
     firstName?: string
 }) {
+    const { language } = useLanguage()
+    const t = translations[language]
     const [evaluations, setEvaluations] = useState<EvaluationDto[]>([])
     const [loading, setLoading] = useState(true)
 
@@ -65,32 +69,20 @@ export default function EmployeeDashboardView({
     )
 
     const performanceLabel = useMemo(() => {
-        if (score >= 4.5) return 'Mükemmel Performans'
-        if (score >= 4) return 'Çok İyi Performans'
-        if (score >= 3) return 'İyi Performans'
-        if (score >= 2) return 'Gelişime Açık'
-        return 'Gelişim Gerekiyor'
-    }, [score])
+        if (score >= 4.5) return t.employeeDashboard.excellent
+        if (score >= 4) return t.employeeDashboard.veryGood
+        if (score >= 3) return t.employeeDashboard.good
+        if (score >= 2) return t.employeeDashboard.developing
+        return t.employeeDashboard.needsDevelopment
+    }, [score, t])
 
     const performanceDescription = useMemo(() => {
-        if (score >= 4.5) {
-            return 'Performansın hedeflerin üzerinde. Başarılı çalışmalarını sürdürmeye devam et.'
-        }
-
-        if (score >= 4) {
-            return 'Performansın oldukça güçlü. Başarılı sonuçlarını korumaya devam et.'
-        }
-
-        if (score >= 3) {
-            return 'Performansın iyi seviyede. Gelişim alanlarına odaklanarak daha ileriye taşıyabilirsin.'
-        }
-
-        if (score >= 2) {
-            return 'Performansını geliştirmek için belirlenen gelişim alanlarına odaklanabilirsin.'
-        }
-
-        return 'Performansını geliştirmek için gelişim alanlarına odaklanman faydalı olacaktır.'
-    }, [score])
+        if (score >= 4.5) return t.employeeDashboard.excellentDescription
+        if (score >= 4) return t.employeeDashboard.veryGoodDescription
+        if (score >= 3) return t.employeeDashboard.goodDescription
+        if (score >= 2) return t.employeeDashboard.developingDescription
+        return t.employeeDashboard.needsDevelopmentDescription
+    }, [score, t])
 
     const history = useMemo(() => {
         return [...evaluations].reverse().slice(-5)
@@ -158,16 +150,16 @@ export default function EmployeeDashboardView({
     ])
 
     const trendDirection = useMemo(() => {
-        if (history.length < 2) return 'Stabil'
+        if (history.length < 2) return 'stable'
 
         const first = history[0].totalScore
         const last =
             history[history.length - 1].totalScore
 
-        if (last > first) return 'Yükselen trend'
-        if (last < first) return 'Düşen trend'
+        if (last > first) return 'rising'
+        if (last < first) return 'falling'
 
-        return 'Stabil'
+        return 'stable'
     }, [history])
 
     return (
@@ -196,7 +188,7 @@ export default function EmployeeDashboardView({
                             letterSpacing: '-0.3px',
                         }}
                     >
-                        Hoş geldin, {firstName || 'Çalışan'}
+                        {t.employeeDashboard.welcome}, {firstName || t.employeeDashboard.employee}
                     </Typography>
 
                     <Typography
@@ -206,7 +198,7 @@ export default function EmployeeDashboardView({
                             fontSize: 14.5,
                         }}
                     >
-                        Performansını incele, gelişimini takip et.
+                        {t.employeeDashboard.description}
                     </Typography>
                 </Box>
 
@@ -286,7 +278,7 @@ export default function EmployeeDashboardView({
                             mb: 0.8,
                         }}
                     >
-                        Henüz değerlendirme bulunmuyor
+                        {t.employeeDashboard.noEvaluations}
                     </Typography>
 
                     <Typography
@@ -298,9 +290,7 @@ export default function EmployeeDashboardView({
                             lineHeight: 1.6,
                         }}
                     >
-                        Performans değerlendirmen tamamlandığında
-                        sonuçların ve performans geçmişin burada
-                        görüntülenecek.
+                        {t.employeeDashboard.noEvaluationsDescription}
                     </Typography>
                 </Paper>
             ) : (
@@ -370,7 +360,7 @@ export default function EmployeeDashboardView({
                                                 letterSpacing: 0.7,
                                             }}
                                         >
-                                            SON PERFORMANS SONUCUN
+                                            {t.employeeDashboard.latestResult}
                                         </Typography>
 
                                         <Typography
@@ -468,7 +458,7 @@ export default function EmployeeDashboardView({
                                                     'text.secondary',
                                             }}
                                         >
-                                            PERFORMANS SKORU
+                                            {t.employeeDashboard.performanceScore}
                                         </Typography>
 
                                         <Typography
@@ -537,7 +527,7 @@ export default function EmployeeDashboardView({
                                         letterSpacing: 0.6,
                                     }}
                                 >
-                                    DEĞERLENDİRME DÖNEMİ
+                                    {t.employeeDashboard.evaluationPeriodUpper}
                                 </Typography>
 
                                 <Typography
@@ -592,7 +582,7 @@ export default function EmployeeDashboardView({
                                                     'text.secondary',
                                             }}
                                         >
-                                            Durum
+                                            {t.employeeDashboard.status}
                                         </Typography>
 
                                         <Typography
@@ -601,8 +591,7 @@ export default function EmployeeDashboardView({
                                                 fontWeight: 700,
                                             }}
                                         >
-                                            Değerlendirme
-                                            tamamlandı
+                                            {t.employeeDashboard.evaluationCompleted}
                                         </Typography>
                                     </Box>
                                 </Box>
@@ -671,7 +660,7 @@ export default function EmployeeDashboardView({
                                             fontWeight: 700,
                                         }}
                                     >
-                                        GENEL ORTALAMA
+                                        {t.employeeDashboard.overallAverage}
                                     </Typography>
 
                                     <Typography
@@ -747,7 +736,7 @@ export default function EmployeeDashboardView({
                                             fontWeight: 700,
                                         }}
                                     >
-                                        DEĞERLENDİRME
+                                        {t.employeeDashboard.evaluation}
                                     </Typography>
 
                                     <Typography
@@ -812,7 +801,7 @@ export default function EmployeeDashboardView({
                                             fontWeight: 700,
                                         }}
                                     >
-                                        SONUÇ
+                                        {t.employeeDashboard.result}
                                     </Typography>
 
                                     <Typography
@@ -872,7 +861,7 @@ export default function EmployeeDashboardView({
                                             fontWeight: 800,
                                         }}
                                     >
-                                        Performans Trendi
+                                        {t.employeeDashboard.performanceTrend}
                                     </Typography>
 
                                     <Typography
@@ -882,8 +871,7 @@ export default function EmployeeDashboardView({
                                             mt: 0.35,
                                         }}
                                     >
-                                        Son değerlendirmelerindeki
-                                        performans değişimi.
+                                        {t.employeeDashboard.performanceTrendDescription}
                                     </Typography>
                                 </Box>
 
@@ -951,7 +939,7 @@ export default function EmployeeDashboardView({
                                             mt: 0.5,
                                         }}
                                     >
-                                        İlk performans değerlendirmen
+                                        {t.employeeDashboard.firstEvaluation}
                                     </Typography>
                                 </Box>
                             ) : (
@@ -1311,16 +1299,20 @@ export default function EmployeeDashboardView({
                                             fontSize: 11,
                                         }}
                                     >
-                                        {history.length}{' '}
-                                        değerlendirme
-                                        üzerinden
-                                        performans değişimi
+                                        {t.employeeDashboard.trendFooter.replace(
+                                            '{count}',
+                                            String(history.length)
+                                        )}
                                     </Typography>
 
                                     <Chip
                                         size="small"
                                         label={
-                                            trendDirection
+                                            trendDirection === 'rising'
+                                                ? t.employeeDashboard.risingTrend
+                                                : trendDirection === 'falling'
+                                                    ? t.employeeDashboard.fallingTrend
+                                                    : t.employeeDashboard.stable
                                         }
                                         sx={{
                                             height: 25,
@@ -1365,7 +1357,7 @@ export default function EmployeeDashboardView({
                                             fontWeight: 800,
                                         }}
                                     >
-                                        Sonuçların
+                                        {t.employeeDashboard.results}
                                     </Typography>
 
                                     <Typography
@@ -1375,7 +1367,7 @@ export default function EmployeeDashboardView({
                                             mt: 0.3,
                                         }}
                                     >
-                                        Son değerlendirmelerin
+                                        {t.employeeDashboard.recentEvaluations}
                                     </Typography>
                                 </Box>
 
@@ -1492,7 +1484,7 @@ export default function EmployeeDashboardView({
                                     fontWeight: 700,
                                 }}
                             >
-                                Tüm Geçmişimi Gör
+                                {t.employeeDashboard.viewAllHistory}
                             </Button>
                         </Paper>
                     </Box>

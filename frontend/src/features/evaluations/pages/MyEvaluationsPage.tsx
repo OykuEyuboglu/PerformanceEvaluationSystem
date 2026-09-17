@@ -13,16 +13,13 @@ import { LineChart } from '@mui/x-charts/LineChart'
 import { getMyEvaluations } from '../evaluationsApi'
 import type { EvaluationDto } from '../types'
 import EvaluationDetailDialog from '../components/EvaluationDetailDialog'
+import { useLanguage } from '../../../shared/i18n/LanguageContext'
+import { translations } from '../../../shared/i18n/translations'
 
 import {
     Search,
     TrendingUp,
 } from '@mui/icons-material'
-
-const STATUS_LABELS: Record<string, string> = {
-    Submitted: 'Gönderildi',
-    Approved: 'Onaylandı',
-}
 
 const STATUS_COLORS: Record<
     string,
@@ -33,6 +30,8 @@ const STATUS_COLORS: Record<
 }
 
 export default function MyEvaluationsPage() {
+    const { language } = useLanguage()
+    const t = translations[language]
     const [evaluations, setEvaluations] = useState<EvaluationDto[]>([])
     const [loading, setLoading] = useState(true)
     const [selected, setSelected] =
@@ -44,7 +43,7 @@ export default function MyEvaluationsPage() {
     const historyRowsPerPage = 5
 
     const filteredHistory = useMemo(() => {
-        const search = historySearch.trim().toLocaleLowerCase('tr-TR')
+        const search = historySearch.trim().toLocaleLowerCase(language === 'tr' ? 'tr-TR' : 'en-US')
 
         return [...evaluations]
             .sort(
@@ -153,7 +152,7 @@ export default function MyEvaluationsPage() {
                             letterSpacing: '-0.3px',
                         }}
                     >
-                        Performansım
+                        {t.myEvaluations.title}
                     </Typography>
                 </Box>
 
@@ -164,7 +163,7 @@ export default function MyEvaluationsPage() {
                         fontSize: 14.5,
                     }}
                 >
-                    Geçmiş değerlendirmelerin ve puan gelişimin.
+                    {t.myEvaluations.description}
                 </Typography>
             </Box>
 
@@ -183,7 +182,7 @@ export default function MyEvaluationsPage() {
                         color="text.secondary"
                         sx={{ fontSize: 14 }}
                     >
-                        Henüz bir değerlendirmen bulunmuyor.
+                        {t.myEvaluations.noEvaluations}
                     </Typography>
                 </Paper>
             ) : (
@@ -221,7 +220,7 @@ export default function MyEvaluationsPage() {
                                         fontSize: 16,
                                     }}
                                 >
-                                    Puan Gelişimi
+                                    {t.myEvaluations.scoreProgress}
                                 </Typography>
 
                                 <Typography
@@ -231,8 +230,7 @@ export default function MyEvaluationsPage() {
                                         mt: 0.35,
                                     }}
                                 >
-                                    Değerlendirmelerindeki performans
-                                    değişimini takip et.
+                                    {t.myEvaluations.scoreProgressDescription}
                                 </Typography>
                             </Box>
 
@@ -305,7 +303,7 @@ export default function MyEvaluationsPage() {
                                             (evaluation) =>
                                                 evaluation.totalScore
                                         ),
-                                        label: 'Toplam Skor',
+                                        label: t.myEvaluations.totalScore,
                                         color: '#F5B301',
                                         curve: 'monotoneX',
                                         showMark: true,
@@ -381,7 +379,7 @@ export default function MyEvaluationsPage() {
                                         fontSize: 16,
                                     }}
                                 >
-                                    Değerlendirme Geçmişi
+                                    {t.myEvaluations.historyTitle}
                                 </Typography>
 
                                 <Typography
@@ -391,7 +389,7 @@ export default function MyEvaluationsPage() {
                                         mt: 0.3,
                                     }}
                                 >
-                                    Geçmiş performans sonuçların.
+                                    {t.myEvaluations.historyDescription}
                                 </Typography>
                             </Box>
 
@@ -426,7 +424,7 @@ export default function MyEvaluationsPage() {
                                 onChange={(event) =>
                                     setHistorySearch(event.target.value)
                                 }
-                                placeholder="Dönem veya değerlendirici ara..."
+                                placeholder={t.myEvaluations.searchPlaceholder}
                                 slotProps={{
                                     input: {
                                         startAdornment: (
@@ -500,12 +498,12 @@ export default function MyEvaluationsPage() {
                                                 whiteSpace: 'nowrap',
                                             }}
                                         >
-                                            Değerlendiren:{' '}
+                                            {t.myEvaluations.evaluator}:{' '}
                                             {evaluation.evaluatorName}
                                             {' · '}
                                             {new Date(
                                                 evaluation.createdAt
-                                            ).toLocaleDateString('tr-TR')}
+                                            ).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US')}
                                         </Typography>
                                     </Box>
 
@@ -524,9 +522,11 @@ export default function MyEvaluationsPage() {
                                         <Chip
                                             size="small"
                                             label={
-                                                STATUS_LABELS[
-                                                evaluation.status
-                                                ] ?? evaluation.status
+                                                evaluation.status === 'Submitted'
+                                                    ? t.myEvaluations.submitted
+                                                    : evaluation.status === 'Approved'
+                                                        ? t.myEvaluations.approved
+                                                        : evaluation.status
                                             }
                                             color={
                                                 STATUS_COLORS[
@@ -577,7 +577,7 @@ export default function MyEvaluationsPage() {
                                         fontSize: 14,
                                     }}
                                 >
-                                    Değerlendirme bulunamadı
+                                    {t.myEvaluations.noSearchResults}
                                 </Typography>
 
                                 <Typography
@@ -587,7 +587,7 @@ export default function MyEvaluationsPage() {
                                         mt: 0.5,
                                     }}
                                 >
-                                    Arama kriterini değiştirerek tekrar deneyebilirsin.
+                                    {t.myEvaluations.noSearchResultsDescription}
                                 </Typography>
                             </Box>
                         )}
@@ -616,7 +616,7 @@ export default function MyEvaluationsPage() {
                                         },
                                     }}
                                 >
-                                    {filteredHistory.length} değerlendirme
+                                    {filteredHistory.length} {t.myEvaluations.evaluations}
                                 </Typography>
 
                                 <Pagination
