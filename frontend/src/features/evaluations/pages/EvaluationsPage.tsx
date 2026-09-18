@@ -103,11 +103,12 @@ function KpiCard({
         <Paper
             elevation={0}
             sx={{
-                p: 2.25,
+                p: { xs: 1.35, sm: 1.75, md: 2 },
                 border: '1px solid',
                 borderColor: 'divider',
                 borderRadius: 3,
                 minWidth: 0,
+                minHeight: { xs: 110, sm: 125 },
                 height: '100%',
                 transition:
                     'transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease',
@@ -125,16 +126,16 @@ function KpiCard({
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'flex-start',
-                    gap: 2,
+                    gap: { xs: 1, sm: 1.5 },
                 }}
             >
                 <Box sx={{ minWidth: 0 }}>
                     <Typography
                         sx={{
-                            fontSize: 12.5,
+                            fontSize: { xs: 10.5, sm: 11.5 },
                             color: 'text.secondary',
                             fontWeight: 600,
-                            mb: 0.8,
+                            mb: 0.55,
                         }}
                     >
                         {label}
@@ -142,10 +143,7 @@ function KpiCard({
 
                     <Typography
                         sx={{
-                            fontSize: {
-                                xs: 24,
-                                sm: 27,
-                            },
+                            fontSize: { xs: 21, sm: 25 },
                             lineHeight: 1,
                             fontWeight: 800,
                             letterSpacing: -0.5,
@@ -156,8 +154,8 @@ function KpiCard({
 
                     <Typography
                         sx={{
-                            mt: 0.8,
-                            fontSize: 11.5,
+                            mt: 0.55,
+                            fontSize: { xs: 9.5, sm: 10.5 },
                             color: 'text.secondary',
                         }}
                     >
@@ -167,8 +165,8 @@ function KpiCard({
 
                 <Box
                     sx={{
-                        width: 40,
-                        height: 40,
+                        width: { xs: 32, sm: 36 },
+                        height: { xs: 32, sm: 36 },
                         flexShrink: 0,
                         borderRadius: 2,
                         display: 'grid',
@@ -761,11 +759,11 @@ export default function EvaluationsPage() {
                 sx={{
                     display: 'grid',
                     gridTemplateColumns: {
-                        xs: '1fr',
-                        sm: 'repeat(2, 1fr)',
-                        lg: 'repeat(4, 1fr)',
+                        xs: 'repeat(2, minmax(0, 1fr))',
+                        sm: 'repeat(2, minmax(0, 1fr))',
+                        lg: 'repeat(4, minmax(0, 1fr))',
                     },
-                    gap: 1.75,
+                    gap: { xs: 1.25, sm: 1.75 },
                     mb: 2.5,
                 }}
             >
