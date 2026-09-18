@@ -108,7 +108,6 @@ describe('CriterionFormDialog', () => {
         expect(screen.getByText(/kriter durumu/i)).toBeInTheDocument()
         expect(screen.getByText('Aktif')).toBeInTheDocument()
 
-        // Mevcut pozisyon için açıklama alanı otomatik render edilmeli.
         expect(
             screen.getByLabelText(/yazılım geliştirici için açıklama/i)
         ).toHaveValue('Kodun okunabilirliği ve test kapsamı.')

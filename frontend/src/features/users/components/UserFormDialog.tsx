@@ -286,7 +286,6 @@ export default function UserFormDialog({
                 }
             }}
         >
-            {/* HEADER */}
             <DialogTitle
                 sx={{
                     px: { xs: 2.5, sm: 3 },
@@ -367,7 +366,6 @@ export default function UserFormDialog({
                     }}
                 >
                     <Stack spacing={2.25}>
-                        {/* PERSONAL INFORMATION */}
                         <SectionTitle
                             icon={<PersonOutlined />}
                             title={
@@ -431,7 +429,6 @@ export default function UserFormDialog({
                             />
                         </Stack>
 
-                        {/* ACCOUNT */}
                         <SectionTitle
                             icon={<LockOutlined />}
                             title={
@@ -591,7 +588,6 @@ export default function UserFormDialog({
                             </Box>
                         )}
 
-                        {/* ORGANIZATION */}
                         <SectionTitle
                             icon={
                                 <BusinessOutlined />
@@ -787,7 +783,6 @@ export default function UserFormDialog({
                             )}
                         />
 
-                        {/* STATUS */}
                         {mode === 'edit' && (
                             <>
                                 <Divider />

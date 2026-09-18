@@ -35,7 +35,6 @@ public class AuthServiceTests
     [Fact]
     public async Task LoginAsync_DogruBilgilerle_GirisBasariliOlmali()
     {
-        // Arrange
         var request = new LoginRequestDto
         {
             Email = "deniz@example.com",
@@ -82,10 +81,8 @@ public class AuthServiceTests
             .Setup(x => x.Map<UserDto>(user))
             .Returns(userDto);
 
-        // Act
         var result = await _authService.LoginAsync(request);
 
-        // Assert
         Assert.NotNull(result);
         Assert.Equal("test-jwt-token", result.Token);
         Assert.Equal(expiresAt, result.ExpiresAt);
@@ -114,7 +111,6 @@ public class AuthServiceTests
     [Fact]
     public async Task LoginAsync_KullaniciBulunamazsa_UnauthorizedAccessExceptionFirlatmali()
     {
-        // Arrange
         var request = new LoginRequestDto
         {
             Email = "notfound@example.com",
@@ -125,11 +121,9 @@ public class AuthServiceTests
             .Setup(x => x.GetByEmailAsync(request.Email))
             .ReturnsAsync((User?)null);
 
-        // Act
         var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _authService.LoginAsync(request));
 
-        // Assert
         Assert.Equal(
             "Email veya şifre hatalı.",
             exception.Message);
@@ -150,7 +144,6 @@ public class AuthServiceTests
     [Fact]
     public async Task LoginAsync_KullaniciPasifse_UnauthorizedAccessExceptionFirlatmali()
     {
-        // Arrange
         var request = new LoginRequestDto
         {
             Email = "inactive@example.com",
@@ -173,11 +166,9 @@ public class AuthServiceTests
             .Setup(x => x.GetByEmailAsync(request.Email))
             .ReturnsAsync(user);
 
-        // Act
         var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _authService.LoginAsync(request));
 
-        // Assert
         Assert.Equal(
             "Kullanıcı hesabı pasif durumda.",
             exception.Message);
@@ -198,7 +189,6 @@ public class AuthServiceTests
     [Fact]
     public async Task LoginAsync_YanlisSifre_UnauthorizedAccessExceptionFirlatmali()
     {
-        // Arrange
         var request = new LoginRequestDto
         {
             Email = "deniz@example.com",
@@ -225,11 +215,9 @@ public class AuthServiceTests
             .Setup(x => x.Verify(request.Password, user.PasswordHash))
             .Returns(false);
 
-        // Act
         var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _authService.LoginAsync(request));
 
-        // Assert
         Assert.Equal(
             "Email veya şifre hatalı.",
             exception.Message);
@@ -246,7 +234,6 @@ public class AuthServiceTests
     [Fact]
     public async Task LoginAsync_SifreDogrulama_IcinDogruBilgileriKullanmali()
     {
-        // Arrange
         var request = new LoginRequestDto
         {
             Email = "employee@example.com",
@@ -281,10 +268,8 @@ public class AuthServiceTests
             .Setup(x => x.Map<UserDto>(user))
             .Returns(new UserDto());
 
-        // Act
         await _authService.LoginAsync(request);
 
-        // Assert
         _passwordHasherMock.Verify(
             x => x.Verify(
                 request.Password,
@@ -295,7 +280,6 @@ public class AuthServiceTests
     [Fact]
     public async Task LoginAsync_TokenUretirken_DogruKullaniciGonderilmeli()
     {
-        // Arrange
         var request = new LoginRequestDto
         {
             Email = "evaluator@example.com",

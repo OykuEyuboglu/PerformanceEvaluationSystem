@@ -20,10 +20,6 @@ import {
 import type { EvaluationPeriod } from '../../evaluationPeriods/types'
 import type { EmployeeRanking } from '../../dashboard/dashboardApi'
 
-/* -------------------------------------------------------------------------- */
-/* ICON MOCKS                                                                 */
-/* -------------------------------------------------------------------------- */
-
 vi.mock('@mui/icons-material', () => ({
     ArrowBack: () => <span data-testid="arrow-back-icon" />,
     Download: () => <span data-testid="download-icon" />,
@@ -31,10 +27,6 @@ vi.mock('@mui/icons-material', () => ({
     EmojiEvents: () => <span data-testid="emoji-events-icon" />,
     Insights: () => <span data-testid="insights-icon" />,
 }))
-
-/* -------------------------------------------------------------------------- */
-/* API MOCKS                                                                  */
-/* -------------------------------------------------------------------------- */
 
 vi.mock('../../evaluationPeriods/evaluationPeriodsApi', () => ({
     getEvaluationPeriods: vi.fn(),
@@ -49,10 +41,6 @@ const mockedGetEvaluationPeriods = vi.mocked(getEvaluationPeriods)
 const mockedGetTeamRanking = vi.mocked(getTeamRanking)
 const mockedExportTeamRankingExcel = vi.mocked(exportTeamRankingExcel)
 
-/* -------------------------------------------------------------------------- */
-/* TEST THEME                                                                 */
-/* -------------------------------------------------------------------------- */
-
 const testTheme = createTheme()
 
 Object.assign(testTheme.palette, {
@@ -61,10 +49,6 @@ Object.assign(testTheme.palette, {
         dark: '#C68E00',
     },
 })
-
-/* -------------------------------------------------------------------------- */
-/* TEST DATA                                                                  */
-/* -------------------------------------------------------------------------- */
 
 const mockPeriods: EvaluationPeriod[] = [
     {
@@ -132,10 +116,6 @@ const mockSecondPeriodRanking: EmployeeRanking[] = [
     },
 ]
 
-/* -------------------------------------------------------------------------- */
-/* HELPERS                                                                    */
-/* -------------------------------------------------------------------------- */
-
 function renderPage() {
     return render(
         <MemoryRouter>
@@ -183,10 +163,6 @@ async function selectPeriod(periodName: string) {
     fireEvent.click(option)
 }
 
-/* -------------------------------------------------------------------------- */
-/* TESTS                                                                      */
-/* -------------------------------------------------------------------------- */
-
 describe('TeamRankingPage', () => {
     beforeEach(() => {
         vi.clearAllMocks()
@@ -203,10 +179,6 @@ describe('TeamRankingPage', () => {
 
         mockedExportTeamRankingExcel.mockResolvedValue(undefined)
     })
-
-    /* ====================================================================== */
-    /* INITIAL LOAD                                                           */
-    /* ====================================================================== */
 
     it('sayfa başlığını göstermeli', async () => {
         renderPage()
@@ -261,10 +233,6 @@ describe('TeamRankingPage', () => {
             mockedGetTeamRanking,
         ).toHaveBeenCalledWith(1)
     })
-
-    /* ====================================================================== */
-    /* RANKING DATA                                                           */
-    /* ====================================================================== */
 
     it('çalışanları listelemeli', async () => {
         renderPage()
@@ -325,10 +293,6 @@ describe('TeamRankingPage', () => {
         ).toBeInTheDocument()
     })
 
-    /* ====================================================================== */
-    /* TOP 3                                                                  */
-    /* ====================================================================== */
-
     it('İlk 3 bölümünü göstermeli', async () => {
         renderPage()
 
@@ -360,10 +324,6 @@ describe('TeamRankingPage', () => {
             screen.getAllByText('Zeynep Çelik'),
         ).toHaveLength(1)
     })
-
-    /* ====================================================================== */
-    /* KPI                                                                     */
-    /* ====================================================================== */
 
     it('değerlendirilen çalışan sayısını göstermeli', async () => {
         renderPage()
@@ -412,10 +372,6 @@ describe('TeamRankingPage', () => {
             screen.getAllByText('2026 Q3').length,
         ).toBeGreaterThan(0)
     })
-
-    /* ====================================================================== */
-    /* SEARCH                                                                  */
-    /* ====================================================================== */
 
     it('arama alanını göstermeli', async () => {
         renderPage()
@@ -531,10 +487,6 @@ describe('TeamRankingPage', () => {
         ).toBeInTheDocument()
     })
 
-    /* ====================================================================== */
-    /* PERIOD                                                                  */
-    /* ====================================================================== */
-
     it('dönem değiştirildiğinde yeni ranking yüklemeli', async () => {
         renderPage()
 
@@ -555,10 +507,6 @@ describe('TeamRankingPage', () => {
         expect(rows[0]).toHaveTextContent('QA Engineer')
         expect(rows[0]).toHaveTextContent('4.90 / 5')
     })
-
-    /* ====================================================================== */
-    /* SORTING                                                                 */
-    /* ====================================================================== */
 
     it('sıra kolonuna tıklanınca azalan sıralamaya geçmeli', async () => {
         renderPage()
@@ -792,10 +740,6 @@ describe('TeamRankingPage', () => {
         })
     })
 
-    /* ====================================================================== */
-    /* EXPORT                                                                  */
-    /* ====================================================================== */
-
     it('Excel butonunu göstermeli', async () => {
         renderPage()
 
@@ -897,10 +841,6 @@ describe('TeamRankingPage', () => {
             expect(button).not.toBeDisabled()
         })
     })
-
-    /* ====================================================================== */
-    /* EMPTY / ERROR                                                           */
-    /* ====================================================================== */
 
     it('ranking boş geldiğinde sonuç bulunamadı mesajı göstermeli', async () => {
         mockedGetTeamRanking.mockResolvedValueOnce([])

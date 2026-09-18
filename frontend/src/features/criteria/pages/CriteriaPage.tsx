@@ -314,8 +314,7 @@ export default function CriteriaPage() {
                 },
             }}
         >
-            {/* PAGE HEADER */}
-            <Box
+             <Box
                 sx={{
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -403,8 +402,7 @@ export default function CriteriaPage() {
                 </Button>
             </Box>
 
-            {/* KPI CARDS */}
-            <Box
+             <Box
                 sx={{
                     display: 'grid',
                     gridTemplateColumns: {
@@ -513,8 +511,7 @@ export default function CriteriaPage() {
                 )}
             </Box>
 
-            {/* WEIGHT DISTRIBUTION */}
-            <Box
+             <Box
                 sx={{
                     mb: 2.5,
                     p: {
@@ -608,7 +605,6 @@ export default function CriteriaPage() {
                 </Typography>
             </Box>
 
-            {/* CONTENT */}
             {loading ? (
                 <Box sx={{ py: 1 }}>
                     <LinearProgress
@@ -1174,7 +1170,6 @@ export default function CriteriaPage() {
                 </Stack>
             )}
 
-            {/* CATEGORY DIALOG */}
             <CategoryFormDialog
                 open={catDialogOpen}
                 mode={catMode}
@@ -1186,7 +1181,6 @@ export default function CriteriaPage() {
                 }
             />
 
-            {/* CRITERION DIALOG */}
             <CriterionFormDialog
                 open={critDialogOpen}
                 mode={critMode}
@@ -1201,7 +1195,6 @@ export default function CriteriaPage() {
                 }
             />
 
-            {/* CATEGORY DELETE */}
             <ConfirmDialog
                 open={!!catDeleteTarget}
                 title={
@@ -1220,7 +1213,6 @@ export default function CriteriaPage() {
                 }
             />
 
-            {/* CRITERION DELETE */}
             <ConfirmDialog
                 open={!!critDeleteTarget}
                 title={
@@ -1239,7 +1231,6 @@ export default function CriteriaPage() {
                 }
             />
 
-            {/* SNACKBAR */}
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={4000}

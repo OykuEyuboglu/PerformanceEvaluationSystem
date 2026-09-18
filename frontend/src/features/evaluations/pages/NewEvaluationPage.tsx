@@ -113,10 +113,9 @@ export default function NewEvaluationPage() {
                 getCategories(),
                 getCriteria(),
             ])
-
+            console.log('TEAM DATA NEW EVALUATION:', teamData)
             const now = new Date()
 
-            // Sadece şu anda aktif olan dönemler
             const activePeriods =
                 periodsData.filter((period) => {
                     const start =
@@ -345,7 +344,6 @@ export default function NewEvaluationPage() {
             return
         }
 
-        // Ek frontend güvenlik kontrolü
         if (
             completedEmployeeIds.includes(
                 selectedEmployee.employeeId
@@ -515,7 +513,6 @@ export default function NewEvaluationPage() {
                         overflow: 'hidden',
                     }}
                 >
-                    {/* Üst seçim alanı */}
                     <Box
                         sx={{
                             p: {
@@ -534,7 +531,6 @@ export default function NewEvaluationPage() {
                                 gap: 2,
                             }}
                         >
-                            {/* Dönem */}
                             <TextField
                                 select
                                 fullWidth
@@ -571,7 +567,6 @@ export default function NewEvaluationPage() {
                                 )}
                             </TextField>
 
-                            {/* Çalışan */}
                             <Autocomplete
                                 options={team}
                                 value={
@@ -759,7 +754,6 @@ export default function NewEvaluationPage() {
                             />
                         </Box>
 
-                        {/* İlerleme */}
                         <Box sx={{ mt: 2.25 }}>
                             <Box
                                 sx={{
@@ -827,7 +821,6 @@ export default function NewEvaluationPage() {
 
                     <Divider />
 
-                    {/* Dönem yok */}
                     {periods.length === 0 ? (
                         <Box
                             sx={{
@@ -983,7 +976,6 @@ export default function NewEvaluationPage() {
                                 },
                             }}
                         >
-                            {/* Seçilen çalışan özeti */}
                             <Box
                                 sx={{
                                     display: 'flex',
@@ -1052,7 +1044,6 @@ export default function NewEvaluationPage() {
                                 />
                             </Box>
 
-                            {/* Kriterler */}
                             {relevantCriteriaByCategory.map(
                                 ({
                                     category,
@@ -1200,7 +1191,6 @@ export default function NewEvaluationPage() {
                                 sx={{ my: 2 }}
                             />
 
-                            {/* Yorum */}
                             <TextField
                                 label={t.newEvaluation.commentOptional}
                                 multiline
@@ -1215,7 +1205,6 @@ export default function NewEvaluationPage() {
                                 sx={{ mb: 3 }}
                             />
 
-                            {/* Alt bölüm */}
                             <Box
                                 sx={{
                                     display: 'flex',

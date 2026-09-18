@@ -299,7 +299,6 @@ export default function EvaluationPeriodsPage() {
                 },
             }}
         >
-            {/* PAGE HEADER */}
             <Box
                 sx={{
                     display: 'flex',
@@ -393,7 +392,6 @@ export default function EvaluationPeriodsPage() {
                 </Button>
             </Box>
 
-            {/* KPI CARDS */}
             <Box
                 sx={{
                     display: 'grid',
@@ -523,7 +521,6 @@ export default function EvaluationPeriodsPage() {
                 )}
             </Box>
 
-            {/* CONTENT */}
             {loading ? (
                 <Box sx={{ py: 1 }}>
                     <LinearProgress
@@ -838,7 +835,6 @@ export default function EvaluationPeriodsPage() {
                 </Stack>
             )}
 
-            {/* FORM DIALOG */}
             <EvaluationPeriodFormDialog
                 open={dialogOpen}
                 mode={mode}
@@ -850,7 +846,6 @@ export default function EvaluationPeriodsPage() {
                 }
             />
 
-            {/* DELETE DIALOG */}
             <ConfirmDialog
                 open={!!deleteTarget}
                 title={
@@ -869,7 +864,6 @@ export default function EvaluationPeriodsPage() {
                 }
             />
 
-            {/* SNACKBAR */}
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={4000}

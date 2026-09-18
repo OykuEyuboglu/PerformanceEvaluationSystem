@@ -6,11 +6,6 @@ using System.Text.Json;
 
 namespace PerformanceEvaluation.IntegrationTests;
 
-// NOT: Skor hesaplama doğruluğu (ortalama, sıralama vb.) zaten
-// ReportServiceTests.cs içinde unit test seviyesinde kapsamlı şekilde
-// test ediliyor. Burada amaç uçların gerçekten HTTP üzerinden
-// erişilebilir olduğunu ve beklenen JSON şeklini (dizi) döndürdüğünü
-// doğrulamak - yetkilendirme matrisi AuthorizationTests.cs'te ayrıca var.
 public class ReportsControllerTests
     : IClassFixture<TestWebApplicationFactory>
 {

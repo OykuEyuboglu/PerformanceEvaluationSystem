@@ -143,7 +143,6 @@ export default function Header({
                     overflow: 'hidden',
                 }}
             >
-                {/* DESKTOP SIDEBAR TOGGLE */}
                 <IconButton
                     id="sidebar-toggle"
                     onClick={onToggleSidebar}
@@ -169,7 +168,6 @@ export default function Header({
                     )}
                 </IconButton>
 
-                {/* MOBILE SIDEBAR TOGGLE */}
                 <IconButton
                     onClick={
                         onOpenMobileSidebar
@@ -198,7 +196,6 @@ export default function Header({
                     <MenuIcon />
                 </IconButton>
 
-                {/* LOGO */}
                 <Box
                     sx={{
                         display: 'flex',
@@ -229,7 +226,6 @@ export default function Header({
                     />
                 </Box>
 
-                {/* RIGHT SIDE */}
                 <Box
                     sx={{
                         ml: 'auto',
@@ -246,7 +242,6 @@ export default function Header({
                         flexShrink: 0,
                     }}
                 >
-                    {/* LANGUAGE */}
                     <Box
                         sx={{
                             display: 'flex',
@@ -378,7 +373,6 @@ export default function Header({
                         </Button>
                     </Box>
 
-                    {/* THEME TOGGLE */}
                     <IconButton
                         onClick={onToggleTheme}
                         sx={{
@@ -402,7 +396,6 @@ export default function Header({
                         )}
                     </IconButton>
 
-                    {/* USER */}
                     <IconButton
                         onClick={
                             handleProfileClick
@@ -467,7 +460,6 @@ export default function Header({
                         </Avatar>
                     </IconButton>
 
-                    {/* USER DROPDOWN */}
                     <Menu
                         id="profile-menu"
                         anchorEl={
@@ -516,7 +508,7 @@ export default function Header({
                                 {user?.lastName}
                             </Typography>
 
-                            {user?.jobPositionName && (
+                            {(user?.jobPositionName || user?.role === 'Admin') && (
                                 <Typography
                                     color="text.secondary"
                                     sx={{

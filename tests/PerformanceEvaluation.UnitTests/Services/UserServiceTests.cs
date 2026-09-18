@@ -25,10 +25,6 @@ public class UserServiceTests
             _mapper.Object);
     }
 
-    // ---------------------------------------------------------
-    // HELPERS
-    // ---------------------------------------------------------
-
     private static User BuildUser(
         int id = 1,
         string email = "test@example.com",
@@ -80,10 +76,6 @@ public class UserServiceTests
             .Returns(new UserDto());
     }
 
-    // ---------------------------------------------------------
-    // GET ALL
-    // ---------------------------------------------------------
-
     [Fact]
     public async Task GetAllAsync_KullanicilarVarsa_TumunuDondurmeli()
     {
@@ -102,10 +94,6 @@ public class UserServiceTests
         result.Should().HaveCount(2);
         _userRepository.Verify(r => r.GetAllAsync(), Times.Once);
     }
-
-    // ---------------------------------------------------------
-    // GET BY ID
-    // ---------------------------------------------------------
 
     [Fact]
     public async Task GetByIdAsync_KullaniciVarsa_KullaniciyiDondurmeli()
@@ -135,10 +123,6 @@ public class UserServiceTests
 
         await act.Should().ThrowAsync<KeyNotFoundException>();
     }
-
-    // ---------------------------------------------------------
-    // CREATE - SUCCESS
-    // ---------------------------------------------------------
 
     [Fact]
     public async Task CreateAsync_GecerliVerilerle_KullaniciOlusturmali()
@@ -220,15 +204,9 @@ public class UserServiceTests
 
         await _sut.CreateAsync(dto, createdBy: 1);
 
-        // Türkçe kültürde 'ı' -> 'I' değil 'İ' değil özel kurallara tabidir;
-        // burada asıl kontrol ettiğimiz: trim + upper uygulanmış olması.
         capturedUser!.FirstName.Should().Be("IŞIK");
         capturedUser.LastName.Should().Be("GÜNEŞ");
     }
-
-    // ---------------------------------------------------------
-    // CREATE - VALIDATION
-    // ---------------------------------------------------------
 
     [Fact]
     public async Task CreateAsync_EmailZatenKayitliysa_InvalidOperationExceptionFirlatmali()
@@ -245,10 +223,6 @@ public class UserServiceTests
 
         _userRepository.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Never);
     }
-
-    // ---------------------------------------------------------
-    // UPDATE (FULL)
-    // ---------------------------------------------------------
 
     [Fact]
     public async Task UpdateAsync_KullaniciVarsa_TumAlanlariGuncellemeli()
@@ -278,7 +252,6 @@ public class UserServiceTests
         await _sut.UpdateAsync(3, dto);
 
         existingUser.FirstName.Should().Be("MEHMET");
-        // Türkçe kültürde küçük 'i' -> noktalı büyük 'İ' olur (I değil).
         existingUser.LastName.Should().Be("DEM\u0130R");
         existingUser.Role.Should().Be(UserRole.Evaluator);
         existingUser.DepartmentId.Should().Be(2);
@@ -310,10 +283,6 @@ public class UserServiceTests
         await act.Should().ThrowAsync<KeyNotFoundException>();
     }
 
-    // ---------------------------------------------------------
-    // PATCH (PARTIAL UPDATE)
-    // ---------------------------------------------------------
-
     [Fact]
     public async Task PatchAsync_SadeceIsActiveGonderilirse_SadeceOAlanGuncellenmeli()
     {
@@ -344,7 +313,6 @@ public class UserServiceTests
         await _sut.PatchAsync(7, dto);
 
         existingUser.IsActive.Should().BeFalse();
-        // Gönderilmeyen alanlar değişmemeli
         existingUser.FirstName.Should().Be("ORIJINAL");
         existingUser.LastName.Should().Be("SOYAD");
         existingUser.DepartmentId.Should().Be(1);
@@ -364,10 +332,6 @@ public class UserServiceTests
 
         await act.Should().ThrowAsync<KeyNotFoundException>();
     }
-
-    // ---------------------------------------------------------
-    // DELETE (SOFT DELETE)
-    // ---------------------------------------------------------
 
     [Fact]
     public async Task DeleteAsync_KullaniciVarsa_SoftDeleteYapmali()

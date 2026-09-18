@@ -30,13 +30,11 @@ function AppContent({
 }: AppProps) {
     return (
         <Routes>
-            {/* Login */}
             <Route
                 path="/login"
                 element={<LoginPage />}
             />
 
-            {/* Protected routes */}
             <Route element={<ProtectedRoute />}>
                 <Route
                     element={
@@ -46,13 +44,11 @@ function AppContent({
                         />
                     }
                 >
-                    {/* Dashboard */}
                     <Route
                         path="/dashboard"
                         element={<DashboardPage />}
                     />
 
-                    {/* Admin */}
                     <Route
                         element={
                             <ProtectedRoute
@@ -90,7 +86,6 @@ function AppContent({
                         />
                     </Route>
 
-                    {/* Evaluator */}
                     <Route
                         element={
                             <ProtectedRoute
@@ -113,7 +108,6 @@ function AppContent({
                         />
                     </Route>
 
-                    {/* Employee */}
                     <Route
                         element={
                             <ProtectedRoute
@@ -131,7 +125,6 @@ function AppContent({
                 </Route>
             </Route>
 
-            {/* Default */}
             <Route
                 path="/"
                 element={
@@ -142,7 +135,6 @@ function AppContent({
                 }
             />
 
-            {/* Unauthorized */}
             <Route
                 path="/unauthorized"
                 element={

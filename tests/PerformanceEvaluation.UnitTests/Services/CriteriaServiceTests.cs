@@ -33,14 +33,9 @@ public class CriteriaServiceTests
             _mapperMock.Object);
     }
 
-    // ---------------------------------------------------------
-    // CATEGORY - GET
-    // ---------------------------------------------------------
-
     [Fact]
     public async Task GetAllCategoriesAsync_KategorileriGetirmeli()
     {
-        // Arrange
         var categories = new List<PerformanceCategory>
         {
             new()
@@ -86,11 +81,9 @@ public class CriteriaServiceTests
                 x.Map<IEnumerable<PerformanceCategoryDto>>(categories))
             .Returns(categoryDtos);
 
-        // Act
         var result =
             await _service.GetAllCategoriesAsync();
 
-        // Assert
         Assert.NotNull(result);
 
         var resultList = result.ToList();
@@ -112,14 +105,9 @@ public class CriteriaServiceTests
             Times.Once);
     }
 
-    // ---------------------------------------------------------
-    // CATEGORY - CREATE
-    // ---------------------------------------------------------
-
     [Fact]
     public async Task CreateCategoryAsync_GecerliKategoriOlusturmali()
     {
-        // Arrange
         var dto = new CreatePerformanceCategoryDto
         {
             Name = "Teknik Yetkinlik",
@@ -153,11 +141,9 @@ public class CriteriaServiceTests
                     It.IsAny<PerformanceCategory>()))
             .Returns(expectedDto);
 
-        // Act
         var result =
             await _service.CreateCategoryAsync(dto);
 
-        // Assert
         Assert.NotNull(result);
         Assert.Equal("Teknik Yetkinlik", result.Name);
         Assert.Equal(40, result.Weight);
@@ -179,7 +165,6 @@ public class CriteriaServiceTests
     [Fact]
     public async Task CreateCategoryAsync_Agirlik100denBuyukse_HataFirlatmali()
     {
-        // Arrange
         var dto = new CreatePerformanceCategoryDto
         {
             Name = "Teknik",
@@ -190,12 +175,10 @@ public class CriteriaServiceTests
             .Setup(x => x.GetAllAsync())
             .ReturnsAsync(new List<PerformanceCategory>());
 
-        // Act
         var exception =
             await Assert.ThrowsAsync<InvalidOperationException>(
                 () => _service.CreateCategoryAsync(dto));
 
-        // Assert
         Assert.Equal(
             "Kategori ağırlığı 0 ile 100 arasında olmalıdır.",
             exception.Message);
@@ -213,7 +196,6 @@ public class CriteriaServiceTests
     [Fact]
     public async Task CreateCategoryAsync_AgirlikNegatifse_HataFirlatmali()
     {
-        // Arrange
         var dto = new CreatePerformanceCategoryDto
         {
             Name = "Teknik",
@@ -224,12 +206,10 @@ public class CriteriaServiceTests
             .Setup(x => x.GetAllAsync())
             .ReturnsAsync(new List<PerformanceCategory>());
 
-        // Act
         var exception =
             await Assert.ThrowsAsync<InvalidOperationException>(
                 () => _service.CreateCategoryAsync(dto));
 
-        // Assert
         Assert.Equal(
             "Kategori ağırlığı 0 ile 100 arasında olmalıdır.",
             exception.Message);
@@ -243,7 +223,6 @@ public class CriteriaServiceTests
     [Fact]
     public async Task CreateCategoryAsync_AktifKategoriToplami100uGecerse_HataFirlatmali()
     {
-        // Arrange
         var existingCategories = new List<PerformanceCategory>
         {
             new()
@@ -272,12 +251,10 @@ public class CriteriaServiceTests
             .Setup(x => x.GetAllAsync())
             .ReturnsAsync(existingCategories);
 
-        // Act
         var exception =
             await Assert.ThrowsAsync<InvalidOperationException>(
                 () => _service.CreateCategoryAsync(dto));
 
-        // Assert
         Assert.Equal(
             "Aktif kategori ağırlıklarının toplamı 100'ü geçemez.",
             exception.Message);
@@ -291,7 +268,6 @@ public class CriteriaServiceTests
     [Fact]
     public async Task CreateCategoryAsync_PasifKategorileriToplamaDahilEtmemeli()
     {
-        // Arrange
         var existingCategories = new List<PerformanceCategory>
         {
             new()
@@ -341,11 +317,9 @@ public class CriteriaServiceTests
                 IsActive = true
             });
 
-        // Act
         var result =
             await _service.CreateCategoryAsync(dto);
 
-        // Assert
         Assert.NotNull(result);
         Assert.Equal(30, result.Weight);
 
@@ -357,14 +331,10 @@ public class CriteriaServiceTests
             Times.Once);
     }
 
-    // ---------------------------------------------------------
-    // CATEGORY - UPDATE
-    // ---------------------------------------------------------
 
     [Fact]
     public async Task UpdateCategoryAsync_KategoriBulunamazsa_KeyNotFoundExceptionFirlatmali()
     {
-        // Arrange
         _categoryRepositoryMock
             .Setup(x => x.GetByIdAsync(99))
             .ReturnsAsync((PerformanceCategory?)null);
@@ -376,12 +346,10 @@ public class CriteriaServiceTests
             IsActive = true
         };
 
-        // Act
         var exception =
             await Assert.ThrowsAsync<KeyNotFoundException>(
                 () => _service.UpdateCategoryAsync(99, dto));
 
-        // Assert
         Assert.Equal(
             "Ana başlık bulunamadı.",
             exception.Message);
@@ -390,7 +358,6 @@ public class CriteriaServiceTests
     [Fact]
     public async Task UpdateCategoryAsync_AktifKategori_Guncellenmeli()
     {
-        // Arrange
         var category = new PerformanceCategory
         {
             Id = 1,
@@ -432,11 +399,9 @@ public class CriteriaServiceTests
                 IsActive = true
             });
 
-        // Act
         var result =
             await _service.UpdateCategoryAsync(1, dto);
 
-        // Assert
         Assert.Equal("Yeni", category.Name);
         Assert.Equal(50, category.Weight);
         Assert.True(category.IsActive);
@@ -455,7 +420,6 @@ public class CriteriaServiceTests
     [Fact]
     public async Task UpdateCategoryAsync_PasifYapilirken_AgirlikKontroluYapilmamali()
     {
-        // Arrange
         var category = new PerformanceCategory
         {
             Id = 1,
@@ -490,11 +454,9 @@ public class CriteriaServiceTests
                 IsActive = false
             });
 
-        // Act
         var result =
             await _service.UpdateCategoryAsync(1, dto);
 
-        // Assert
         Assert.Equal(150, category.Weight);
         Assert.False(category.IsActive);
         Assert.False(result.IsActive);
@@ -512,14 +474,10 @@ public class CriteriaServiceTests
             Times.Once);
     }
 
-    // ---------------------------------------------------------
-    // CRITERION - GET
-    // ---------------------------------------------------------
 
     [Fact]
     public async Task GetAllCriteriaAsync_KriterleriGetirmeli()
     {
-        // Arrange
         var criteria = new List<PerformanceCriterion>
         {
             new()
@@ -564,11 +522,9 @@ public class CriteriaServiceTests
                 x.Map<IEnumerable<PerformanceCriterionDto>>(criteria))
             .Returns(criterionDtos);
 
-        // Act
         var result =
             await _service.GetAllCriteriaAsync();
 
-        // Assert
         var resultList = result.ToList();
 
         Assert.Equal(2, resultList.Count);
@@ -581,14 +537,9 @@ public class CriteriaServiceTests
             Times.Once);
     }
 
-    // ---------------------------------------------------------
-    // CRITERION - CREATE
-    // ---------------------------------------------------------
-
     [Fact]
     public async Task CreateCriterionAsync_GecerliKriterOlusturmali()
     {
-        // Arrange
         var dto = new CreatePerformanceCriterionDto
         {
             Name = "Kod Kalitesi",
@@ -653,11 +604,9 @@ public class CriteriaServiceTests
                 x.Map<PerformanceCriterionDto>(createdCriterion))
             .Returns(expectedDto);
 
-        // Act
         var result =
             await _service.CreateCriterionAsync(dto);
 
-        // Assert
         Assert.NotNull(result);
         Assert.Equal(100, result.Id);
         Assert.Equal("Kod Kalitesi", result.Name);
@@ -686,7 +635,6 @@ public class CriteriaServiceTests
     [Fact]
     public async Task CreateCriterionAsync_KategoriBulunamazsa_KeyNotFoundExceptionFirlatmali()
     {
-        // Arrange
         var dto = new CreatePerformanceCriterionDto
         {
             Name = "Kod Kalitesi",
@@ -697,12 +645,11 @@ public class CriteriaServiceTests
             .Setup(x => x.GetByIdAsync(99))
             .ReturnsAsync((PerformanceCategory?)null);
 
-        // Act
         var exception =
             await Assert.ThrowsAsync<KeyNotFoundException>(
                 () => _service.CreateCriterionAsync(dto));
 
-        // Assert
+ 
         Assert.Equal(
             "Ana başlık bulunamadı.",
             exception.Message);
@@ -713,14 +660,9 @@ public class CriteriaServiceTests
             Times.Never);
     }
 
-    // ---------------------------------------------------------
-    // CRITERION - UPDATE
-    // ---------------------------------------------------------
-
     [Fact]
     public async Task UpdateCriterionAsync_KriterBulunamazsa_KeyNotFoundExceptionFirlatmali()
     {
-        // Arrange
         _criterionRepositoryMock
             .Setup(x => x.GetByIdWithDescriptionsAsync(99))
             .ReturnsAsync((PerformanceCriterion?)null);
@@ -731,12 +673,10 @@ public class CriteriaServiceTests
             IsActive = true
         };
 
-        // Act
         var exception =
             await Assert.ThrowsAsync<KeyNotFoundException>(
                 () => _service.UpdateCriterionAsync(99, dto));
 
-        // Assert
         Assert.Equal(
             "Kriter bulunamadı.",
             exception.Message);
@@ -745,7 +685,6 @@ public class CriteriaServiceTests
     [Fact]
     public async Task UpdateCriterionAsync_KriterVeAciklamalarGuncellenmeli()
     {
-        // Arrange
         var criterion = new PerformanceCriterion
         {
             Id = 1,
@@ -806,11 +745,9 @@ public class CriteriaServiceTests
                 PerformanceCategoryId = 1
             });
 
-        // Act
         var result =
             await _service.UpdateCriterionAsync(1, dto);
 
-        // Assert
         Assert.Equal(
             "Yeni Kriter",
             criterion.Name);
@@ -846,14 +783,9 @@ public class CriteriaServiceTests
             result.Name);
     }
 
-    // ---------------------------------------------------------
-    // CATEGORY - DELETE
-    // ---------------------------------------------------------
-
     [Fact]
     public async Task DeleteCategoryAsync_KategoriSilinebiliyorsa_Silmeli()
     {
-        // Arrange
         var category = new PerformanceCategory
         {
             Id = 1,
@@ -875,10 +807,8 @@ public class CriteriaServiceTests
             .Setup(x => x.SaveChangesAsync())
             .ReturnsAsync(true);
 
-        // Act
         await _service.DeleteCategoryAsync(1);
 
-        // Assert
         _categoryRepositoryMock.Verify(
             x => x.Remove(category),
             Times.Once);
@@ -891,17 +821,14 @@ public class CriteriaServiceTests
     [Fact]
     public async Task DeleteCategoryAsync_KategoriBulunamazsa_KeyNotFoundExceptionFirlatmali()
     {
-        // Arrange
         _categoryRepositoryMock
             .Setup(x => x.GetByIdAsync(99))
             .ReturnsAsync((PerformanceCategory?)null);
 
-        // Act
         var exception =
             await Assert.ThrowsAsync<KeyNotFoundException>(
                 () => _service.DeleteCategoryAsync(99));
 
-        // Assert
         Assert.Equal(
             "Ana başlık bulunamadı.",
             exception.Message);
@@ -914,7 +841,6 @@ public class CriteriaServiceTests
     [Fact]
     public async Task DeleteCategoryAsync_BagliKriterVarsa_Silinmemeli()
     {
-        // Arrange
         var category = new PerformanceCategory
         {
             Id = 1,
@@ -939,12 +865,10 @@ public class CriteriaServiceTests
                 It.IsAny<Expression<Func<PerformanceCriterion, bool>>>()))
             .ReturnsAsync(new[] { criterion });
 
-        // Act
         var exception =
             await Assert.ThrowsAsync<InvalidOperationException>(
                 () => _service.DeleteCategoryAsync(1));
 
-        // Assert
         Assert.Equal(
             "Bu ana başlığa bağlı kriterler bulunduğu için silinemez.",
             exception.Message);
@@ -958,14 +882,9 @@ public class CriteriaServiceTests
             Times.Never);
     }
 
-    // ---------------------------------------------------------
-    // CRITERION - DELETE
-    // ---------------------------------------------------------
-
     [Fact]
     public async Task DeleteCriterionAsync_KullanilmamisKriteriSilmeli()
     {
-        // Arrange
         var criterion = new PerformanceCriterion
         {
             Id = 1,
@@ -985,10 +904,8 @@ public class CriteriaServiceTests
             .Setup(x => x.SaveChangesAsync())
             .ReturnsAsync(true);
 
-        // Act
         await _service.DeleteCriterionAsync(1);
 
-        // Assert
         _criterionRepositoryMock.Verify(
             x => x.Remove(criterion),
             Times.Once);
@@ -1001,17 +918,14 @@ public class CriteriaServiceTests
     [Fact]
     public async Task DeleteCriterionAsync_KriterBulunamazsa_KeyNotFoundExceptionFirlatmali()
     {
-        // Arrange
         _criterionRepositoryMock
             .Setup(x => x.GetByIdWithDescriptionsAsync(99))
             .ReturnsAsync((PerformanceCriterion?)null);
 
-        // Act
         var exception =
             await Assert.ThrowsAsync<KeyNotFoundException>(
                 () => _service.DeleteCriterionAsync(99));
 
-        // Assert
         Assert.Equal(
             "Kriter bulunamadı.",
             exception.Message);
@@ -1024,7 +938,6 @@ public class CriteriaServiceTests
     [Fact]
     public async Task DeleteCriterionAsync_DegerlendirmedeKullanilmissa_Silinmemeli()
     {
-        // Arrange
         var criterion = new PerformanceCriterion
         {
             Id = 1,
@@ -1040,12 +953,10 @@ public class CriteriaServiceTests
             .Setup(x => x.HasEvaluationDetailsAsync(1))
             .ReturnsAsync(true);
 
-        // Act
         var exception =
             await Assert.ThrowsAsync<InvalidOperationException>(
                 () => _service.DeleteCriterionAsync(1));
 
-        // Assert
         Assert.Equal(
             "Değerlendirmelerde kullanılmış kriter silinemez.",
             exception.Message);

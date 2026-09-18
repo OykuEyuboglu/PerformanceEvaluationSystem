@@ -22,10 +22,6 @@ public class ReportServiceTests
             _userRepository.Object);
     }
 
-    // ---------------------------------------------------------
-    // HELPERS
-    // ---------------------------------------------------------
-
     private static User BuildEmployee(
         int id,
         string firstName = "AYSE",
@@ -72,10 +68,6 @@ public class ReportServiceTests
                 },
                 "Test"));
     }
-
-    // ===========================================================
-    // DEPARTMENT RANKING
-    // ===========================================================
 
     [Fact]
     public async Task GetDepartmentRankingAsync_TekCalisanTekDegerlendirme_OrtalamaSkorDogruOlmali()
@@ -221,10 +213,6 @@ public class ReportServiceTests
 
         result[0].DepartmentName.Should().Be("Belirtilmemiş");
     }
-
-    // ===========================================================
-    // TEAM RANKING
-    // ===========================================================
 
     [Fact]
     public async Task GetTeamRankingAsync_SadeceEvaluatoreAtanmisCalisanlariIcermeli()

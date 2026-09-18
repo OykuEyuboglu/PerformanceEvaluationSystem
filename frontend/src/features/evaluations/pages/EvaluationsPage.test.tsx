@@ -19,10 +19,6 @@ import { MemoryRouter } from 'react-router-dom'
 
 import EvaluationsPage from './EvaluationsPage'
 
-/* -------------------------------------------------------------------------- */
-/* MUI ICONS MOCK                                                             */
-/* -------------------------------------------------------------------------- */
-
 vi.mock('@mui/icons-material', () => ({
     Search: () => (
         <span data-testid="search-icon" />
@@ -45,10 +41,6 @@ vi.mock('@mui/icons-material', () => ({
     ),
 }))
 
-/* -------------------------------------------------------------------------- */
-/* API MOCKS                                                                  */
-/* -------------------------------------------------------------------------- */
-
 vi.mock('../evaluationsApi', () => ({
     getAllEvaluations: vi.fn(),
     approveEvaluation: vi.fn(),
@@ -62,10 +54,6 @@ vi.mock(
         getEvaluationPeriods: vi.fn(),
     }),
 )
-
-/* -------------------------------------------------------------------------- */
-/* DETAIL DIALOG MOCK                                                         */
-/* -------------------------------------------------------------------------- */
 
 vi.mock(
     '../components/EvaluationDetailDialog',
@@ -123,10 +111,6 @@ vi.mock(
         },
     }),
 )
-
-/* -------------------------------------------------------------------------- */
-/* DATA GRID MOCK                                                             */
-/* -------------------------------------------------------------------------- */
 
 vi.mock('@mui/x-data-grid', () => ({
     DataGrid: ({
@@ -276,10 +260,6 @@ vi.mock('@mui/x-data-grid', () => ({
     }),
 }))
 
-/* -------------------------------------------------------------------------- */
-/* IMPORT MOCKED FUNCTIONS                                                    */
-/* -------------------------------------------------------------------------- */
-
 import {
     getAllEvaluations,
     approveEvaluation,
@@ -305,10 +285,6 @@ const mockedGetById =
 
 const mockedGetPeriods =
     vi.mocked(getEvaluationPeriods)
-
-/* -------------------------------------------------------------------------- */
-/* TEST DATA                                                                  */
-/* -------------------------------------------------------------------------- */
 
 const periods = [
     {
@@ -366,10 +342,6 @@ const approvedEvaluation = {
         },
     ],
 }
-
-/* -------------------------------------------------------------------------- */
-/* HELPERS                                                                    */
-/* -------------------------------------------------------------------------- */
 
 function setupDefaultMocks() {
     mockedGetAll.mockResolvedValue([
@@ -432,12 +404,6 @@ function findRowContaining(
     return row as HTMLElement
 }
 
-/**
- * MUI TextField select için güvenilir seçim helper'ı.
- *
- * user.click yerine mouseDown kullanıyoruz çünkü
- * MUI Select dropdown'ını bu event ile açıyor.
- */
 async function selectPeriod(
     periodName: string,
 ) {
@@ -468,19 +434,11 @@ async function selectPeriod(
     })
 }
 
-/* -------------------------------------------------------------------------- */
-/* TESTS                                                                      */
-/* -------------------------------------------------------------------------- */
-
 describe('EvaluationsPage', () => {
     beforeEach(() => {
         vi.clearAllMocks()
         setupDefaultMocks()
     })
-
-    /* ====================================================================== */
-    /* INITIAL LOAD                                                           */
-    /* ====================================================================== */
 
     it('değerlendirmeleri ve dönemleri yükleyip listelemeli', async () => {
         renderPage()
@@ -514,10 +472,6 @@ describe('EvaluationsPage', () => {
         ).toHaveBeenCalledTimes(1)
     })
 
-    /* ====================================================================== */
-    /* KPI                                                                     */
-    /* ====================================================================== */
-
     it('KPI kartlarını doğru hesaplamalı', async () => {
         renderPage()
 
@@ -543,10 +497,6 @@ describe('EvaluationsPage', () => {
             ),
         ).toBeInTheDocument()
     })
-
-    /* ====================================================================== */
-    /* SEARCH                                                                  */
-    /* ====================================================================== */
 
     it('arama kutusu çalışan adına göre filtrelemeli', async () => {
         const user =
@@ -706,10 +656,6 @@ describe('EvaluationsPage', () => {
         })
     })
 
-    /* ====================================================================== */
-    /* PERIOD                                                                  */
-    /* ====================================================================== */
-
     it('dönem filtresi seçilince sadece o döneme ait kayıtları göstermeli', async () => {
         renderPage()
 
@@ -803,10 +749,6 @@ describe('EvaluationsPage', () => {
             ),
         ).toBeInTheDocument()
     })
-
-    /* ====================================================================== */
-    /* DETAIL                                                                  */
-    /* ====================================================================== */
 
     it('satıra tıklayınca detay dialogu açılmalı', async () => {
         const user =
@@ -976,10 +918,6 @@ describe('EvaluationsPage', () => {
         ).not.toBeInTheDocument()
     })
 
-    /* ====================================================================== */
-    /* SELECTION                                                               */
-    /* ====================================================================== */
-
     it('gönderilmiş satır seçilince toplu onay butonu göstermeli', async () => {
         const user =
             userEvent.setup()
@@ -1071,10 +1009,6 @@ describe('EvaluationsPage', () => {
             ),
         ).toBeInTheDocument()
     })
-
-    /* ====================================================================== */
-    /* BULK APPROVAL                                                           */
-    /* ====================================================================== */
 
     it('toplu onay butonuna basınca confirmation dialogu açmalı', async () => {
         const user =
@@ -1263,10 +1197,6 @@ describe('EvaluationsPage', () => {
         ).toBeInTheDocument()
     })
 
-    /* ====================================================================== */
-    /* ERROR / EMPTY / LOADING                                                */
-    /* ====================================================================== */
-
     it('detay yüklenemezse hata mesajı göstermeli', async () => {
         mockedGetById.mockRejectedValueOnce(
             new Error(
@@ -1350,10 +1280,6 @@ describe('EvaluationsPage', () => {
         })
     })
 
-    /* ====================================================================== */
-    /* PERIOD KPI                                                              */
-    /* ====================================================================== */
-
     it('period filtresi değiştiğinde filtrelenmiş KPI değerlerini güncellemeli', async () => {
         renderPage()
 
@@ -1385,10 +1311,6 @@ describe('EvaluationsPage', () => {
             ).toBeInTheDocument()
         })
     })
-
-    /* ====================================================================== */
-    /* DATA DISPLAY                                                            */
-    /* ====================================================================== */
 
     it('değerlendirme kayıtlarında çalışan ve değerlendirici bilgilerini göstermeli', async () => {
         renderPage()

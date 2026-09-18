@@ -97,7 +97,6 @@ public class EvaluationService : IEvaluationService
                 "Değerlendirme dönemi aktif değil.");
         }
 
-        // Sadece aktif kriterler ve aktif kategoriler alınır.
         var criteria =
             (await _criterionRepository.GetActiveWithDescriptionsAsync())
             .Where(c => c.PerformanceCategory.IsActive)
@@ -173,8 +172,6 @@ public class EvaluationService : IEvaluationService
                 "Tüm aktif kriterler puanlanmalıdır.");
         }
 
-        // Ağırlıklı skor hesaplama:
-        // Kategori ağırlığı × kategori içindeki kriter puan ortalaması
         var detailsWithCategory = dto.Scores.Select(s =>
         {
             var criterion =

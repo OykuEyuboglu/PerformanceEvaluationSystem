@@ -349,7 +349,6 @@ export default function CriterionFormDialog({
                     }}
                 >
                     <Stack spacing={2.2}>
-                        {/* KRİTER ADI */}
                         <Controller
                             name="name"
                             control={control}
@@ -372,7 +371,6 @@ export default function CriterionFormDialog({
                             )}
                         />
 
-                        {/* ANA KATEGORİ */}
                         <TextField
                             label={
                                 t.criteriaForm
@@ -396,7 +394,6 @@ export default function CriterionFormDialog({
                             }
                         />
 
-                        {/* DURUM */}
                         {mode === 'edit' && (
                             <Box
                                 sx={{
@@ -476,7 +473,6 @@ export default function CriterionFormDialog({
 
                         <Divider />
 
-                        {/* UYGULAMA POZİSYONLARI */}
                         <Box>
                             <Typography
                                 sx={{
@@ -504,7 +500,6 @@ export default function CriterionFormDialog({
                             </Typography>
                         </Box>
 
-                        {/* POZİSYON SEÇİMİ */}
                         <Autocomplete
                             multiple
                             options={jobPositions}
@@ -597,7 +592,6 @@ export default function CriterionFormDialog({
                             )}
                         />
 
-                        {/* POZİSYON AÇIKLAMALARI */}
                         {fields.map(
                             (field, index) => {
                                 const position =
@@ -649,7 +643,6 @@ export default function CriterionFormDialog({
                     </Stack>
                 </DialogContent>
 
-                {/* BUTONLAR */}
                 <DialogActions
                     sx={{
                         px: {

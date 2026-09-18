@@ -21,10 +21,6 @@ public class EvaluationPeriodServiceTests
             _evaluationRepository.Object);
     }
 
-    // ---------------------------------------------------------
-    // HELPERS
-    // ---------------------------------------------------------
-
     private static EvaluationPeriod BuildPeriod(
         int id = 1,
         string name = "2026 Q1",
@@ -39,10 +35,6 @@ public class EvaluationPeriodServiceTests
             EndDate = end ?? new DateTime(2026, 3, 31)
         };
     }
-
-    // ---------------------------------------------------------
-    // GET ALL
-    // ---------------------------------------------------------
 
     [Fact]
     public async Task GetAllAsync_DonemlerVarsa_TumunuDondurmeli()
@@ -65,10 +57,6 @@ public class EvaluationPeriodServiceTests
             .Should()
             .Contain(new[] { "2026 Q1", "2026 Q2" });
     }
-
-    // ---------------------------------------------------------
-    // CREATE - SUCCESS
-    // ---------------------------------------------------------
 
     [Fact]
     public async Task CreateAsync_GecerliTarihlerle_DonemOlusturmali()
@@ -108,10 +96,6 @@ public class EvaluationPeriodServiceTests
             r => r.SaveChangesAsync(),
             Times.Once);
     }
-
-    // ---------------------------------------------------------
-    // CREATE - VALIDATION
-    // ---------------------------------------------------------
 
     [Fact]
     public async Task CreateAsync_BitisTarihiBaslangictanOnceyse_InvalidOperationExceptionFirlatmali()
@@ -158,10 +142,6 @@ public class EvaluationPeriodServiceTests
             .Should()
             .NotThrowAsync();
     }
-
-    // ---------------------------------------------------------
-    // UPDATE
-    // ---------------------------------------------------------
 
     [Fact]
     public async Task UpdateAsync_GecerliVerilerle_DonemiGuncellemeli()
@@ -237,10 +217,6 @@ public class EvaluationPeriodServiceTests
             .Should()
             .ThrowAsync<KeyNotFoundException>();
     }
-
-    // ---------------------------------------------------------
-    // DELETE
-    // ---------------------------------------------------------
 
     [Fact]
     public async Task DeleteAsync_BagliDegerlendirmeYoksa_DonemiSilmeli()

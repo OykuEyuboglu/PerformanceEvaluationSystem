@@ -19,10 +19,6 @@ public class ExportServiceTests
         _sut = new ExportService(_reportService.Object);
     }
 
-    // =========================================================
-    // HELPERS
-    // =========================================================
-
     private static EmployeeRankingDto BuildRanking(
         int rank,
         int employeeId,
@@ -61,24 +57,17 @@ public class ExportServiceTests
                 "Test"));
     }
 
-    // =========================================================
-    // DEPARTMENT RANKING EXPORT
-    // =========================================================
-
     [Fact]
     public async Task ExportDepartmentRankingToExcelAsync_ShouldCallReportServiceWithCorrectPeriodId()
     {
-        // Arrange
         const int evaluationPeriodId = 5;
 
         _reportService
             .Setup(x => x.GetDepartmentRankingAsync(evaluationPeriodId))
             .ReturnsAsync(new List<EmployeeRankingDto>());
 
-        // Act
         await _sut.ExportDepartmentRankingToExcelAsync(evaluationPeriodId);
 
-        // Assert
         _reportService.Verify(
             x => x.GetDepartmentRankingAsync(evaluationPeriodId),
             Times.Once);
@@ -87,16 +76,13 @@ public class ExportServiceTests
     [Fact]
     public async Task ExportDepartmentRankingToExcelAsync_ShouldReturnValidExcelFile()
     {
-        // Arrange
         _reportService
             .Setup(x => x.GetDepartmentRankingAsync(It.IsAny<int>()))
             .ReturnsAsync(new List<EmployeeRankingDto>());
 
-        // Act
         var result =
             await _sut.ExportDepartmentRankingToExcelAsync(1);
 
-        // Assert
         result.Should().NotBeNull();
         result.Should().NotBeEmpty();
 
@@ -109,16 +95,13 @@ public class ExportServiceTests
     [Fact]
     public async Task ExportDepartmentRankingToExcelAsync_ShouldCreateCorrectWorksheetAndHeaders()
     {
-        // Arrange
         _reportService
             .Setup(x => x.GetDepartmentRankingAsync(It.IsAny<int>()))
             .ReturnsAsync(new List<EmployeeRankingDto>());
 
-        // Act
         var result =
             await _sut.ExportDepartmentRankingToExcelAsync(1);
 
-        // Assert
         using var stream = new MemoryStream(result);
         using var workbook = new XLWorkbook(stream);
 
@@ -139,7 +122,6 @@ public class ExportServiceTests
     [Fact]
     public async Task ExportDepartmentRankingToExcelAsync_ShouldWriteRankingDataCorrectly()
     {
-        // Arrange
         var rankings = new List<EmployeeRankingDto>
         {
             BuildRanking(
@@ -165,17 +147,14 @@ public class ExportServiceTests
             .Setup(x => x.GetDepartmentRankingAsync(It.IsAny<int>()))
             .ReturnsAsync(rankings);
 
-        // Act
         var result =
             await _sut.ExportDepartmentRankingToExcelAsync(1);
 
-        // Assert
         using var stream = new MemoryStream(result);
         using var workbook = new XLWorkbook(stream);
 
         var worksheet = workbook.Worksheets.First();
 
-        // First employee
         worksheet.Cell(2, 1).GetValue<int>().Should().Be(1);
         worksheet.Cell(2, 2).GetString().Should().Be("Ayşe Yılmaz");
         worksheet.Cell(2, 3).GetString().Should().Be("IT");
@@ -183,7 +162,6 @@ public class ExportServiceTests
         worksheet.Cell(2, 5).GetValue<decimal>().Should().Be(4.75m);
         worksheet.Cell(2, 6).GetValue<int>().Should().Be(3);
 
-        // Second employee
         worksheet.Cell(3, 1).GetValue<int>().Should().Be(2);
         worksheet.Cell(3, 2).GetString().Should().Be("Mehmet Demir");
         worksheet.Cell(3, 3).GetString().Should().Be("İK");
@@ -191,14 +169,12 @@ public class ExportServiceTests
         worksheet.Cell(3, 5).GetValue<decimal>().Should().Be(4.10m);
         worksheet.Cell(3, 6).GetValue<int>().Should().Be(2);
 
-        // No third data row
         worksheet.Cell(4, 1).IsEmpty().Should().BeTrue();
     }
 
     [Fact]
     public async Task ExportDepartmentRankingToExcelAsync_ShouldWriteDashWhenJobPositionIsNull()
     {
-        // Arrange
         var rankings = new List<EmployeeRankingDto>
         {
             BuildRanking(
@@ -215,11 +191,9 @@ public class ExportServiceTests
             .Setup(x => x.GetDepartmentRankingAsync(It.IsAny<int>()))
             .ReturnsAsync(rankings);
 
-        // Act
         var result =
             await _sut.ExportDepartmentRankingToExcelAsync(1);
 
-        // Assert
         using var stream = new MemoryStream(result);
         using var workbook = new XLWorkbook(stream);
 
@@ -231,16 +205,13 @@ public class ExportServiceTests
     [Fact]
     public async Task ExportDepartmentRankingToExcelAsync_ShouldContainOnlyHeadersWhenThereIsNoData()
     {
-        // Arrange
         _reportService
             .Setup(x => x.GetDepartmentRankingAsync(It.IsAny<int>()))
             .ReturnsAsync(new List<EmployeeRankingDto>());
 
-        // Act
         var result =
             await _sut.ExportDepartmentRankingToExcelAsync(1);
 
-        // Assert
         using var stream = new MemoryStream(result);
         using var workbook = new XLWorkbook(stream);
 
@@ -256,14 +227,9 @@ public class ExportServiceTests
         worksheet.Cell(2, 1).IsEmpty().Should().BeTrue();
     }
 
-    // =========================================================
-    // TEAM RANKING EXPORT
-    // =========================================================
-
     [Fact]
     public async Task ExportTeamRankingToExcelAsync_ShouldCallReportServiceWithCorrectParameters()
     {
-        // Arrange
         var claims = CreateEvaluatorClaims(10);
         const int evaluationPeriodId = 7;
 
@@ -273,12 +239,10 @@ public class ExportServiceTests
                 evaluationPeriodId))
             .ReturnsAsync(new List<EmployeeRankingDto>());
 
-        // Act
         await _sut.ExportTeamRankingToExcelAsync(
             claims,
             evaluationPeriodId);
 
-        // Assert
         _reportService.Verify(
             x => x.GetTeamRankingAsync(
                 claims,
@@ -289,7 +253,6 @@ public class ExportServiceTests
     [Fact]
     public async Task ExportTeamRankingToExcelAsync_ShouldReturnValidExcelFile()
     {
-        // Arrange
         var claims = CreateEvaluatorClaims(10);
 
         _reportService
@@ -298,13 +261,11 @@ public class ExportServiceTests
                 It.IsAny<int>()))
             .ReturnsAsync(new List<EmployeeRankingDto>());
 
-        // Act
         var result =
             await _sut.ExportTeamRankingToExcelAsync(
                 claims,
                 1);
 
-        // Assert
         result.Should().NotBeNull();
         result.Should().NotBeEmpty();
 
@@ -317,7 +278,6 @@ public class ExportServiceTests
     [Fact]
     public async Task ExportTeamRankingToExcelAsync_ShouldCreateCorrectWorksheetAndHeaders()
     {
-        // Arrange
         var claims = CreateEvaluatorClaims(10);
 
         _reportService
@@ -326,13 +286,11 @@ public class ExportServiceTests
                 It.IsAny<int>()))
             .ReturnsAsync(new List<EmployeeRankingDto>());
 
-        // Act
         var result =
             await _sut.ExportTeamRankingToExcelAsync(
                 claims,
                 1);
 
-        // Assert
         using var stream = new MemoryStream(result);
         using var workbook = new XLWorkbook(stream);
 
@@ -353,7 +311,6 @@ public class ExportServiceTests
     [Fact]
     public async Task ExportTeamRankingToExcelAsync_ShouldWriteRankingDataCorrectly()
     {
-        // Arrange
         var claims = CreateEvaluatorClaims(10);
 
         var rankings = new List<EmployeeRankingDto>
@@ -374,13 +331,11 @@ public class ExportServiceTests
                 It.IsAny<int>()))
             .ReturnsAsync(rankings);
 
-        // Act
         var result =
             await _sut.ExportTeamRankingToExcelAsync(
                 claims,
                 1);
 
-        // Assert
         using var stream = new MemoryStream(result);
         using var workbook = new XLWorkbook(stream);
 
@@ -399,7 +354,6 @@ public class ExportServiceTests
     [Fact]
     public async Task ExportTeamRankingToExcelAsync_ShouldWriteDashWhenJobPositionIsNull()
     {
-        // Arrange
         var claims = CreateEvaluatorClaims(10);
 
         var rankings = new List<EmployeeRankingDto>
@@ -420,13 +374,11 @@ public class ExportServiceTests
                 It.IsAny<int>()))
             .ReturnsAsync(rankings);
 
-        // Act
         var result =
             await _sut.ExportTeamRankingToExcelAsync(
                 claims,
                 1);
 
-        // Assert
         using var stream = new MemoryStream(result);
         using var workbook = new XLWorkbook(stream);
 
@@ -438,7 +390,6 @@ public class ExportServiceTests
     [Fact]
     public async Task ExportTeamRankingToExcelAsync_ShouldContainOnlyHeadersWhenThereIsNoData()
     {
-        // Arrange
         var claims = CreateEvaluatorClaims(10);
 
         _reportService
@@ -447,13 +398,11 @@ public class ExportServiceTests
                 It.IsAny<int>()))
             .ReturnsAsync(new List<EmployeeRankingDto>());
 
-        // Act
         var result =
             await _sut.ExportTeamRankingToExcelAsync(
                 claims,
                 1);
 
-        // Assert
         using var stream = new MemoryStream(result);
         using var workbook = new XLWorkbook(stream);
 

@@ -602,7 +602,6 @@ export default function UsersPage() {
                 },
             }}
         >
-            {/* HEADER */}
             <Box
                 sx={{
                     display: 'flex',
@@ -692,7 +691,6 @@ export default function UsersPage() {
                 </Button>
             </Box>
 
-            {/* SUMMARY CARDS */}
             <Box
                 sx={{
                     display: 'grid',
@@ -750,7 +748,6 @@ export default function UsersPage() {
                 />
             </Box>
 
-            {/* TABLE CARD */}
             <Box
                 sx={{
                     bgcolor: 'background.paper',
@@ -774,7 +771,6 @@ export default function UsersPage() {
                     },
                 }}
             >
-                {/* TOOLBAR */}
                 <Box
                     sx={{
                         px: { xs: 2, md: 2.5 },
@@ -867,7 +863,6 @@ export default function UsersPage() {
                     </Typography>
                 </Box>
 
-                {/* ACTIVE FILTER */}
                 {filterModel.items.length > 0 && (
                     <Box
                         sx={{
@@ -988,7 +983,6 @@ export default function UsersPage() {
                 />
             </Box>
 
-            {/* FILTER POPOVER */}
             {filterOpen && (
                 <Box
                     sx={{
