@@ -1,9 +1,18 @@
 ﻿import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import {
+    render,
+    screen,
+    within,
+} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ComponentProps } from 'react'
-import UserFormDialog, { type UserFormValues } from './UserFormDialog'
+
+import UserFormDialog, {
+    type UserFormValues,
+} from './UserFormDialog'
+
 import { LanguageProvider } from '../../../shared/i18n/LanguageContext'
+
 import type { DepartmentDto } from '../../../shared/types/department'
 import type { JobPositionDto } from '../../../shared/types/jobPosition'
 import type { UserDto } from '../types'
@@ -33,10 +42,12 @@ const jobPositions: JobPositionDto[] = [
     {
         id: 1,
         name: 'Yazılım Geliştirici',
+        departmentId: 1,
     },
     {
         id: 2,
         name: 'Analist',
+        departmentId: 2,
     },
 ]
 
@@ -52,7 +63,9 @@ const existingUser: UserDto = {
 }
 
 function renderDialog(
-    overrides: Partial<ComponentProps<typeof UserFormDialog>> = {}
+    overrides: Partial<
+        ComponentProps<typeof UserFormDialog>
+    > = {}
 ) {
     const onSubmit = vi.fn()
     const onClose = vi.fn()
@@ -90,11 +103,16 @@ async function selectMuiOption(
 
     await user.click(combobox)
 
-    const listbox = await screen.findByRole('listbox')
+    const listbox = await screen.findByRole(
+        'listbox'
+    )
 
-    const option = within(listbox).getByRole('option', {
-        name: optionName,
-    })
+    const option = within(listbox).getByRole(
+        'option',
+        {
+            name: optionName,
+        }
+    )
 
     await user.click(option)
 }
@@ -136,7 +154,15 @@ describe('UserFormDialog', () => {
         ).toBeInTheDocument()
 
         expect(
-            screen.queryByText(/kullanıcı durumu/i)
+            screen.getByRole('combobox', {
+                name: /pozisyon/i,
+            })
+        ).toBeInTheDocument()
+
+        expect(
+            screen.queryByText(
+                /kullanıcı durumu/i
+            )
         ).not.toBeInTheDocument()
 
         expect(
@@ -169,7 +195,9 @@ describe('UserFormDialog', () => {
         ).toBeInTheDocument()
 
         expect(
-            screen.getByText(/kullanıcı durumu/i)
+            screen.getByText(
+                /kullanıcı durumu/i
+            )
         ).toBeInTheDocument()
 
         expect(
@@ -190,23 +218,33 @@ describe('UserFormDialog', () => {
         )
 
         expect(
-            await screen.findByText('Ad gereklidir')
+            await screen.findByText(
+                'Ad gereklidir'
+            )
         ).toBeInTheDocument()
 
         expect(
-            screen.getByText('Soyad gereklidir')
+            screen.getByText(
+                'Soyad gereklidir'
+            )
         ).toBeInTheDocument()
 
         expect(
-            screen.getByText('Email gereklidir')
+            screen.getByText(
+                'Email gereklidir'
+            )
         ).toBeInTheDocument()
 
         expect(
-            screen.getByText('Şifre gereklidir')
+            screen.getByText(
+                'Şifre gereklidir'
+            )
         ).toBeInTheDocument()
 
         expect(
-            screen.getByText('Departman seçin')
+            screen.getByText(
+                'Departman seçin'
+            )
         ).toBeInTheDocument()
 
         expect(onSubmit).not.toHaveBeenCalled()
@@ -293,17 +331,36 @@ describe('UserFormDialog', () => {
             })
         )
 
-        expect(onSubmit).toHaveBeenCalledTimes(1)
+        expect(
+            onSubmit
+        ).toHaveBeenCalledTimes(1)
 
         const submitted =
             onSubmit.mock.calls[0][0] as UserFormValues
 
-        expect(submitted.firstName).toBe('Mehmet')
-        expect(submitted.lastName).toBe('Demir')
-        expect(submitted.email).toBe('mehmet@example.com')
-        expect(submitted.password).toBe('Sifre123!')
-        expect(submitted.role).toBe('Evaluator')
-        expect(submitted.departmentId).toBe(1)
+        expect(
+            submitted.firstName
+        ).toBe('Mehmet')
+
+        expect(
+            submitted.lastName
+        ).toBe('Demir')
+
+        expect(
+            submitted.email
+        ).toBe('mehmet@example.com')
+
+        expect(
+            submitted.password
+        ).toBe('Sifre123!')
+
+        expect(
+            submitted.role
+        ).toBe('Evaluator')
+
+        expect(
+            submitted.departmentId
+        ).toBe(1)
     })
 
     it('vazgeç butonuna tıklanınca onClose çağrılmalı', async () => {
@@ -316,7 +373,9 @@ describe('UserFormDialog', () => {
             })
         )
 
-        expect(onClose).toHaveBeenCalledTimes(1)
+        expect(
+            onClose
+        ).toHaveBeenCalledTimes(1)
     })
 
     it('submitting=true iken kaydet butonu devre dışı olmalı ve metin değişmeli', () => {
@@ -324,11 +383,14 @@ describe('UserFormDialog', () => {
             submitting: true,
         })
 
-        const submitButton = screen.getByRole('button', {
-            name: /kaydediliyor/i,
-        })
+        const submitButton =
+            screen.getByRole('button', {
+                name: /kaydediliyor/i,
+            })
 
-        expect(submitButton).toBeDisabled()
+        expect(
+            submitButton
+        ).toBeDisabled()
     })
 
     it('open=false iken dialog içeriği görünmemeli', () => {
@@ -337,7 +399,9 @@ describe('UserFormDialog', () => {
         })
 
         expect(
-            screen.queryByText('Yeni Kullanıcı')
+            screen.queryByText(
+                'Yeni Kullanıcı'
+            )
         ).not.toBeInTheDocument()
     })
 })

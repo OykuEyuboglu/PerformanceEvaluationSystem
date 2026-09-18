@@ -10,8 +10,6 @@ import type {
     ReactElement,
     MouseEvent,
 } from 'react'
-import { getJobPositions } from '../../../shared/api/jobPositionsApi'
-import type { JobPositionDto } from '../../../shared/types/jobPosition'
 
 import {
     Box,
@@ -299,9 +297,6 @@ export default function EvaluatorEmployeesPage() {
         [allUsers],
     )
 
-    const [jobPositions, setJobPositions] =
-        useState<JobPositionDto[]>([])
-
     const employees = useMemo(
         () =>
             allUsers.filter(
@@ -343,6 +338,11 @@ export default function EvaluatorEmployeesPage() {
             .trim()
             .toLowerCase()
 
+        const evaluatorDepartment =
+            selectedEvaluator?.departmentName
+                ?.trim()
+                .toLowerCase() ?? ''
+
         return employees.filter((employee) => {
             const alreadyAssigned =
                 team.some(
@@ -353,14 +353,22 @@ export default function EvaluatorEmployeesPage() {
 
             if (alreadyAssigned) return false
 
+            const employeeDepartment =
+                employee.departmentName
+                    ?.trim()
+                    .toLowerCase() ?? ''
+
+            if (
+                !evaluatorDepartment ||
+                employeeDepartment !== evaluatorDepartment
+            ) {
+                return false
+            }
+
             if (!q) return true
 
             const fullName =
                 `${employee.firstName} ${employee.lastName}`.toLowerCase()
-
-            const department =
-                employee.departmentName
-                    ?.toLowerCase() ?? ''
 
             const jobPosition =
                 employee.jobPositionName
@@ -372,7 +380,6 @@ export default function EvaluatorEmployeesPage() {
 
             return (
                 fullName.includes(q) ||
-                department.includes(q) ||
                 jobPosition.includes(q) ||
                 email.includes(q)
             )
@@ -381,6 +388,7 @@ export default function EvaluatorEmployeesPage() {
         employees,
         team,
         employeeSearch,
+        selectedEvaluator,
     ])
 
     const enrichMember = (
@@ -395,14 +403,10 @@ export default function EvaluatorEmployeesPage() {
             setLoadingUsers(true)
           
             try {
-                const [usersData, positionsData] =
-                    await Promise.all([
-                        getUsers(),
-                        getJobPositions(),
-                    ])
+                const usersData = await getUsers()
 
                 setAllUsers(usersData)
-                setJobPositions(positionsData)
+
             } catch {
                 setSnackbar({
                     open: true,

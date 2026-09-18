@@ -27,7 +27,8 @@ namespace PerformanceEvaluation.Application.Services
                 .Select(p => new JobPositionDto
                 {
                     Id = p.Id,
-                    Name = p.Name
+                    Name = p.Name,
+                    DepartmentId = p.DepartmentId
                 });
         }
     }

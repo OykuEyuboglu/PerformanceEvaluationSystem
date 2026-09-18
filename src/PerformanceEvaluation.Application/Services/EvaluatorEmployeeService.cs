@@ -39,6 +39,10 @@ public class EvaluatorEmployeeService : IEvaluatorEmployeeService
             throw new InvalidOperationException(
                 "Seçilen kullanıcı Employee rolünde değil.");
 
+        if (evaluator.DepartmentId != employee.DepartmentId)
+            throw new InvalidOperationException(
+                "Evaluator yalnızca kendi departmanındaki çalışanlara atanabilir.");
+
         if (!evaluator.IsActive)
             throw new InvalidOperationException(
                 "Pasif bir Evaluator'a çalışan atanamaz.");

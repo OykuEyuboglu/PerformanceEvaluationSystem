@@ -1,5 +1,5 @@
-﻿
-export interface JobPositionDto {
+﻿export interface JobPositionDto {
     id: number
     name: string
+    departmentId: number
 }

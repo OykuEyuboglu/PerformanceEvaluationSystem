@@ -434,7 +434,6 @@ export const translations = {
             filteredRecords: 'Seçili filtre kapsamındaki kayıtlar',
             averageScore: 'Ortalama Skor',
             overallAverage: 'Değerlendirmelerin genel ortalaması',
-            approved: 'Onaylanan',
             approvalRate: 'onay oranı',
             recordsTitle: 'Değerlendirme Kayıtları',
             recordsListed: 'kayıt listeleniyor',

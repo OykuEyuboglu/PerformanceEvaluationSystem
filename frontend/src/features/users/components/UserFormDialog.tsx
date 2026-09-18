@@ -1,5 +1,5 @@
-﻿import { useEffect, useState, type ReactNode} from 'react'
-import { useForm, Controller } from 'react-hook-form'
+﻿import { useEffect, useState, type ReactNode } from 'react'
+import { useForm, Controller, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 
@@ -80,13 +80,19 @@ export default function UserFormDialog({
             .string()
             .trim()
             .min(1, 'Ad gereklidir')
-            .max(100, 'Ad maksimum 100 karakter olabilir'),
+            .max(
+                100,
+                'Ad maksimum 100 karakter olabilir'
+            ),
 
         lastName: z
             .string()
             .trim()
             .min(1, 'Soyad gereklidir')
-            .max(100, 'Soyad maksimum 100 karakter olabilir'),
+            .max(
+                100,
+                'Soyad maksimum 100 karakter olabilir'
+            ),
 
         role: z.enum([
             'Admin',
@@ -115,18 +121,37 @@ export default function UserFormDialog({
         email: z
             .string()
             .min(1, 'Email gereklidir')
-            .email('Geçerli bir email adresi giriniz')
-            .max(200, 'Email maksimum 200 karakter olabilir'),
-
+            .email(
+                'Geçerli bir email adresi giriniz'
+            )
+            .max(
+                200,
+                'Email maksimum 200 karakter olabilir'
+            ),
 
         password: z
             .string()
             .min(1, 'Şifre gereklidir')
-            .min(8, 'Şifre en az 8 karakter olmalı')
-            .max(256, 'Şifre maksimum 256 karakter olabilir')
-            .regex(/[A-Z]/, 'Şifre en az bir büyük harf içermeli')
-            .regex(/[a-z]/, 'Şifre en az bir küçük harf içermeli')
-            .regex(/[0-9]/, 'Şifre en az bir sayı içermeli')
+            .min(
+                8,
+                'Şifre en az 8 karakter olmalı'
+            )
+            .max(
+                256,
+                'Şifre maksimum 256 karakter olabilir'
+            )
+            .regex(
+                /[A-Z]/,
+                'Şifre en az bir büyük harf içermeli'
+            )
+            .regex(
+                /[a-z]/,
+                'Şifre en az bir küçük harf içermeli'
+            )
+            .regex(
+                /[0-9]/,
+                'Şifre en az bir sayı içermeli'
+            )
             .regex(
                 /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
                 'Şifre en az bir özel karakter içermeli'
@@ -137,23 +162,33 @@ export default function UserFormDialog({
         firstName: z
             .string()
             .min(1, 'Ad boş olamaz.')
-            .max(100, 'Ad maksimum 100 karakter olabilir.'),
+            .max(
+                100,
+                'Ad maksimum 100 karakter olabilir.'
+            ),
 
         lastName: z
             .string()
             .min(1, 'Soyad boş olamaz.')
-            .max(100, 'Soyad maksimum 100 karakter olabilir.'),
+            .max(
+                100,
+                'Soyad maksimum 100 karakter olabilir.'
+            ),
 
         role: z.enum(
             ['Admin', 'Evaluator', 'Employee'],
             {
-                message: 'Geçerli bir rol seçilmelidir.',
+                message:
+                    'Geçerli bir rol seçilmelidir.',
             }
         ),
 
         departmentId: z
             .number()
-            .gt(0, 'Departman seçilmelidir.'),
+            .gt(
+                0,
+                'Departman seçilmelidir.'
+            ),
 
         jobPositionId: z
             .number()
@@ -175,6 +210,7 @@ export default function UserFormDialog({
         control,
         handleSubmit,
         reset,
+        setValue,
         formState: { errors },
     } = useForm<UserFormValues>({
         resolver: zodResolver(schema),
@@ -190,32 +226,53 @@ export default function UserFormDialog({
         },
     })
 
+    const selectedDepartmentId = useWatch({
+        control,
+        name: 'departmentId',
+    })
+
+    const filteredJobPositions =
+        jobPositions.filter(
+            (position) =>
+                position.departmentId ===
+                selectedDepartmentId
+        )
+
     useEffect(() => {
         if (!open) return
 
         setShowPassword(false)
 
         if (mode === 'edit' && initialData) {
+            const departmentId =
+                departments.find(
+                    (department) =>
+                        department.name ===
+                        initialData.departmentName
+                )?.id ?? 0
+
+            const jobPositionId =
+                jobPositions.find(
+                    (position) =>
+                        position.name ===
+                        initialData.jobPositionName &&
+                        position.departmentId ===
+                        departmentId
+                )?.id ?? null
+
             reset({
-                firstName: initialData.firstName,
-                lastName: initialData.lastName,
+                firstName:
+                    initialData.firstName,
+                lastName:
+                    initialData.lastName,
                 email: initialData.email,
                 password: '',
                 role:
                     initialData.role as UserFormValues['role'],
-                departmentId:
-                    departments.find(
-                        (department) =>
-                            department.name ===
-                            initialData.departmentName
-                    )?.id ?? 0,
-                jobPositionId:
-                    jobPositions.find(
-                        (position) =>
-                            position.name ===
-                            initialData.jobPositionName
-                    )?.id ?? null,
-                isActive: initialData.isActive,
+                departmentId,
+                jobPositionId,
+                isActive:
+                    initialData.isActive,
             })
         } else {
             reset({
@@ -283,7 +340,7 @@ export default function UserFormDialog({
                             },
                         },
                     },
-                }
+                },
             }}
         >
             <DialogTitle
@@ -385,11 +442,14 @@ export default function UserFormDialog({
                             <Controller
                                 name="firstName"
                                 control={control}
-                                render={({ field }) => (
+                                render={({
+                                    field,
+                                }) => (
                                     <TextField
                                         {...field}
                                         label={
-                                            t.userForm.firstName
+                                            t.userForm
+                                                .firstName
                                         }
                                         fullWidth
                                         error={
@@ -408,11 +468,14 @@ export default function UserFormDialog({
                             <Controller
                                 name="lastName"
                                 control={control}
-                                render={({ field }) => (
+                                render={({
+                                    field,
+                                }) => (
                                     <TextField
                                         {...field}
                                         label={
-                                            t.userForm.lastName
+                                            t.userForm
+                                                .lastName
                                         }
                                         fullWidth
                                         error={
@@ -449,7 +512,8 @@ export default function UserFormDialog({
                                         <TextField
                                             {...field}
                                             label={
-                                                t.userForm.email
+                                                t.userForm
+                                                    .email
                                             }
                                             fullWidth
                                             size="small"
@@ -490,7 +554,8 @@ export default function UserFormDialog({
                                         <TextField
                                             {...field}
                                             label={
-                                                t.userForm.password
+                                                t.userForm
+                                                    .password
                                             }
                                             type={
                                                 showPassword
@@ -524,7 +589,10 @@ export default function UserFormDialog({
                                                             <IconButton
                                                                 size="small"
                                                                 onClick={() =>
-                                                                    setShowPassword((value) => !value)
+                                                                    setShowPassword(
+                                                                        (value) =>
+                                                                            !value
+                                                                    )
                                                                 }
                                                                 edge="end"
                                                             >
@@ -659,18 +727,36 @@ export default function UserFormDialog({
                                 }) => (
                                     <TextField
                                         {...field}
-                                        value={field.value === 0 ? '' : field.value ?? ''}
+                                        value={
+                                            field.value ===
+                                                0
+                                                ? ''
+                                                : field.value ??
+                                                ''
+                                        }
                                         onChange={(
                                             event
-                                        ) =>
-                                            field.onChange(
+                                        ) => {
+                                            const departmentId =
                                                 Number(
                                                     event
                                                         .target
                                                         .value
                                                 )
+
+                                            field.onChange(
+                                                departmentId
                                             )
-                                        }
+
+                                            setValue(
+                                                'jobPositionId',
+                                                null,
+                                                {
+                                                    shouldValidate:
+                                                        true,
+                                                }
+                                            )
+                                        }}
                                         select
                                         label={
                                             t.userForm
@@ -690,7 +776,8 @@ export default function UserFormDialog({
                                     >
                                         <MenuItem value="">
                                             {
-                                                t.userForm
+                                                t
+                                                    .userForm
                                                     .selectDepartment
                                             }
                                         </MenuItem>
@@ -721,10 +808,18 @@ export default function UserFormDialog({
                         <Controller
                             name="jobPositionId"
                             control={control}
-                            render={({ field }) => (
+                            render={({
+                                field,
+                            }) => (
                                 <TextField
                                     {...field}
-                                    value={field.value === 0 ? '' : field.value ?? ''}
+                                    value={
+                                        field.value ===
+                                            0
+                                            ? ''
+                                            : field.value ??
+                                            ''
+                                    }
                                     onChange={(
                                         event
                                     ) =>
@@ -741,6 +836,11 @@ export default function UserFormDialog({
                                         )
                                     }
                                     select
+                                    disabled={
+                                        !selectedDepartmentId ||
+                                        selectedDepartmentId ===
+                                        0
+                                    }
                                     label={
                                         t.userForm
                                             .position
@@ -755,13 +855,18 @@ export default function UserFormDialog({
                                     }}
                                 >
                                     <MenuItem value="">
-                                        {
-                                            t.userForm
-                                                .notSelected
-                                        }
+                                        {!selectedDepartmentId ||
+                                            selectedDepartmentId ===
+                                            0
+                                            ? language ===
+                                                'tr'
+                                                ? 'Önce departman seçin'
+                                                : 'Select a department first'
+                                            : t.userForm
+                                                .notSelected}
                                     </MenuItem>
 
-                                    {jobPositions.map(
+                                    {filteredJobPositions.map(
                                         (
                                             position
                                         ) => (
@@ -789,7 +894,8 @@ export default function UserFormDialog({
 
                                 <Box
                                     sx={{
-                                        display: 'flex',
+                                        display:
+                                            'flex',
                                         alignItems:
                                             'center',
                                         justifyContent:
@@ -972,8 +1078,8 @@ const fieldSx = {
         borderRadius: 2,
         fontSize: 13,
         fontWeight: 400,
-
     },
+
     '& .MuiInputLabel-root': {
         fontSize: 13,
     },
