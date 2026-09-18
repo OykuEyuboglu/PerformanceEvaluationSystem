@@ -32,10 +32,6 @@ public class EvaluationServiceTests
             _mapper.Object);
     }
 
-    // =========================================================
-    // HELPERS
-    // =========================================================
-
     private static ClaimsPrincipal EvaluatorClaims(int evaluatorId)
     {
         return new ClaimsPrincipal(
@@ -190,12 +186,10 @@ public class EvaluationServiceTests
                     period.Id))
             .ReturnsAsync(false);
 
-        // AddAsync() -> Task
         _evaluationRepository
             .Setup(r => r.AddAsync(It.IsAny<Evaluation>()))
             .Returns(Task.CompletedTask);
 
-        // SaveChangesAsync() -> Task<bool>
         _evaluationRepository
             .Setup(r => r.SaveChangesAsync())
             .ReturnsAsync(true);
@@ -222,10 +216,6 @@ public class EvaluationServiceTests
             Scores = scores.ToList()
         };
     }
-
-    // =========================================================
-    // CREATE - SUCCESS
-    // =========================================================
 
     [Fact]
     public async Task CreateAsync_GecerliVerilerle_DegerlendirmeOlusturmali()
@@ -288,10 +278,6 @@ public class EvaluationServiceTests
             .Should()
             .Be(4);
     }
-
-    // =========================================================
-    // AUTHORIZATION / EVALUATOR
-    // =========================================================
 
     [Fact]
     public async Task CreateAsync_EvaluatorBulunamazsa_UnauthorizedExceptionFirlatmali()
@@ -423,10 +409,6 @@ public class EvaluationServiceTests
             .WithMessage("*yetkiniz yok*");
     }
 
-    // =========================================================
-    // EMPLOYEE
-    // =========================================================
-
     [Fact]
     public async Task CreateAsync_PasifCalisan_Degerlendirilememeli()
     {
@@ -498,10 +480,6 @@ public class EvaluationServiceTests
             .WithMessage("*pozisyonu tanımlı olmadığı*");
     }
 
-    // =========================================================
-    // EVALUATION PERIOD
-    // =========================================================
-
     [Fact]
     public async Task CreateAsync_DegerlendirmeDonemiBulunamazsa_KeyNotFoundExceptionFirlatmali()
     {
@@ -561,10 +539,6 @@ public class EvaluationServiceTests
             .WithMessage("*dönemi aktif değil*");
     }
 
-    // =========================================================
-    // DUPLICATE EVALUATION
-    // =========================================================
-
     [Fact]
     public async Task CreateAsync_AyniCalisanAyniDonemdeDahaOnceDegerlendirilmisse_HataFirlatmali()
     {
@@ -600,10 +574,6 @@ public class EvaluationServiceTests
             .WithMessage("*zaten bir değerlendirme bulunmaktadır*");
     }
 
-    // =========================================================
-    // CATEGORY WEIGHTS
-    // =========================================================
-
     [Fact]
     public async Task CreateAsync_AktifKategoriAgirliklariYuzdeYuzDegilse_HataFirlatmali()
     {
@@ -637,10 +607,6 @@ public class EvaluationServiceTests
             .ThrowAsync<InvalidOperationException>()
             .WithMessage("*%100*");
     }
-
-    // =========================================================
-    // SCORE VALIDATION
-    // =========================================================
 
     [Fact]
     public async Task CreateAsync_SkorlarBosIse_HataFirlatmali()
@@ -744,10 +710,6 @@ public class EvaluationServiceTests
             .Should()
             .Be(score);
     }
-
-    // =========================================================
-    // CRITERION VALIDATION
-    // =========================================================
 
     [Fact]
     public async Task CreateAsync_AyniKriterBirdenFazlaPuanlanirsa_HataFirlatmali()
@@ -886,10 +848,6 @@ public class EvaluationServiceTests
             .WithMessage("*pozisyonuna ait aktif performans kriteri*");
     }
 
-    // =========================================================
-    // SCORE CALCULATION
-    // =========================================================
-
     [Fact]
     public async Task CreateAsync_TekKategoriTekKriter_SkorDogruHesaplanmali()
     {
@@ -1014,10 +972,6 @@ public class EvaluationServiceTests
             .Be(3.40m);
     }
 
-    // =========================================================
-    // APPROVE
-    // =========================================================
-
     [Fact]
     public async Task ApproveAsync_SubmittedDegerlendirmeyi_ApprovedYapmali()
     {
@@ -1098,10 +1052,6 @@ public class EvaluationServiceTests
             .ThrowAsync<KeyNotFoundException>()
             .WithMessage("*Değerlendirme bulunamadı*");
     }
-
-    // =========================================================
-    // BULK APPROVE
-    // =========================================================
 
     [Fact]
     public async Task ApproveManyAsync_SadeceSubmittedOlanlari_Onaylamali()

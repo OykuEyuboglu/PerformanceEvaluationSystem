@@ -34,7 +34,6 @@ export default function EmployeeDashboardView({
     const [evaluations, setEvaluations] = useState<EvaluationDto[]>([])
     const [loading, setLoading] = useState(true)
 
-    // Animated values
     const [animationProgress, setAnimationProgress] = useState(0)
     const [animatedScore, setAnimatedScore] = useState(0)
     const [animatedAverage, setAnimatedAverage] = useState(0)
@@ -99,7 +98,6 @@ export default function EmployeeDashboardView({
         )
     }, [evaluations])
 
-    // Dashboard animations
     useEffect(() => {
         if (!latest) {
             setAnimationProgress(0)
@@ -118,7 +116,6 @@ export default function EmployeeDashboardView({
             const elapsed = currentTime - startTime
             const progress = Math.min(elapsed / duration, 1)
 
-            // Smooth ease-out
             const easedProgress =
                 1 - Math.pow(1 - progress, 3)
 
@@ -169,7 +166,6 @@ export default function EmployeeDashboardView({
                 minWidth: 0,
             }}
         >
-            {/* HEADER */}
             <Box
                 sx={{
                     display: 'flex',
@@ -295,7 +291,6 @@ export default function EmployeeDashboardView({
                 </Paper>
             ) : (
                 <>
-                    {/* MAIN PERFORMANCE */}
                     <Paper
                         elevation={0}
                         sx={{
@@ -315,7 +310,6 @@ export default function EmployeeDashboardView({
                                 },
                             }}
                         >
-                            {/* SCORE */}
                             <Box
                                 sx={{
                                     p: {
@@ -440,7 +434,6 @@ export default function EmployeeDashboardView({
                                     {performanceDescription}
                                 </Typography>
 
-                                {/* PROGRESS */}
                                 <Box sx={{ mt: 2.5 }}>
                                     <Box
                                         sx={{
@@ -496,7 +489,6 @@ export default function EmployeeDashboardView({
                                 </Box>
                             </Box>
 
-                            {/* PERIOD */}
                             <Box
                                 sx={{
                                     p: {
@@ -599,7 +591,6 @@ export default function EmployeeDashboardView({
                         </Box>
                     </Paper>
 
-                    {/* STAT CARDS */}
                     <Box
                         sx={{
                             display: 'grid',
@@ -611,7 +602,6 @@ export default function EmployeeDashboardView({
                             mb: 2.5,
                         }}
                     >
-                        {/* AVERAGE */}
                         <Paper
                             elevation={0}
                             sx={{
@@ -691,7 +681,6 @@ export default function EmployeeDashboardView({
                             </Box>
                         </Paper>
 
-                        {/* COUNT */}
                         <Paper
                             elevation={0}
                             sx={{
@@ -760,7 +749,6 @@ export default function EmployeeDashboardView({
                             </Box>
                         </Paper>
 
-                        {/* PERFORMANCE */}
                         <Paper
                             elevation={0}
                             sx={{
@@ -830,7 +818,6 @@ export default function EmployeeDashboardView({
                         </Paper>
                     </Box>
 
-                    {/* TREND + HISTORY */}
                     <Box
                         sx={{
                             display: 'grid',
@@ -841,7 +828,6 @@ export default function EmployeeDashboardView({
                             gap: 2,
                         }}
                     >
-                        {/* PERFORMANCE TREND */}
                         <Paper
                             elevation={0}
                             sx={{
@@ -1001,7 +987,6 @@ export default function EmployeeDashboardView({
                                             </clipPath>
                                         </defs>
 
-                                        {/* GRID */}
                                         {[1, 2, 3, 4, 5].map(
                                             (value) => {
                                                 const y =
@@ -1045,9 +1030,7 @@ export default function EmployeeDashboardView({
                                             }
                                         )}
 
-                                        {/* ANIMATED CHART */}
                                         <g clipPath="url(#chartReveal)">
-                                            {/* AREA */}
                                             <polygon
                                                 points={`
                                                     55,220
@@ -1085,7 +1068,6 @@ export default function EmployeeDashboardView({
                                                 fill="url(#performanceArea)"
                                             />
 
-                                            {/* LINE */}
                                             {history.map(
                                                 (
                                                     evaluation,
@@ -1165,7 +1147,6 @@ export default function EmployeeDashboardView({
                                                 }
                                             )}
 
-                                            {/* POINTS */}
                                             {history.map(
                                                 (
                                                     evaluation,
@@ -1240,7 +1221,6 @@ export default function EmployeeDashboardView({
                                             )}
                                         </g>
 
-                                        {/* X AXIS */}
                                         {history.map(
                                             (
                                                 evaluation,
@@ -1287,7 +1267,6 @@ export default function EmployeeDashboardView({
                                 </Box>
                             )}
 
-                            {/* TREND FOOTER */}
                             {history.length > 1 && (
                                 <Box
                                     sx={{
@@ -1341,7 +1320,6 @@ export default function EmployeeDashboardView({
                             )}
                         </Paper>
 
-                        {/* HISTORY */}
                         <Paper
                             elevation={0}
                             sx={{

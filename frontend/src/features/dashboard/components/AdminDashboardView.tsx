@@ -68,10 +68,6 @@ export default function AdminDashboardView() {
     const [exporting, setExporting] =
         useState(false)
 
-    /* ---------------------------------------------------------------------- */
-    /* PAGE ANIMATION                                                         */
-    /* ---------------------------------------------------------------------- */
-
     const [animationProgress, setAnimationProgress] =
         useState(0)
 
@@ -192,10 +188,6 @@ export default function AdminDashboardView() {
             }
         )
 
-    /* ---------------------------------------------------------------------- */
-    /* DASHBOARD STATS                                                        */
-    /* ---------------------------------------------------------------------- */
-
     const dashboardStats = useMemo(() => {
         if (rankings.length === 0) {
             return {
@@ -243,10 +235,6 @@ export default function AdminDashboardView() {
         () => rankings.slice(0, 5),
         [rankings]
     )
-
-    /* ---------------------------------------------------------------------- */
-    /* ANIMATED VALUES                                                        */
-    /* ---------------------------------------------------------------------- */
 
     const animatedEmployeeCount = Math.round(
         dashboardStats.employeeCount *
@@ -304,10 +292,7 @@ export default function AdminDashboardView() {
                 mx: 'auto',
             }}
         >
-            {/* ================================================================== */}
-            {/* HERO                                                               */}
-            {/* ================================================================== */}
-
+   
             <Paper
                 elevation={0}
                 sx={{
@@ -539,10 +524,6 @@ export default function AdminDashboardView() {
                 </Box>
             </Paper>
 
-            {/* ================================================================== */}
-            {/* PERIOD STATUS                                                      */}
-            {/* ================================================================== */}
-
             {selectedPeriod && (
                 <Box
                     sx={{
@@ -598,10 +579,6 @@ export default function AdminDashboardView() {
                     </Typography>
                 </Box>
             )}
-
-            {/* ================================================================== */}
-            {/* KPI CARDS                                                           */}
-            {/* ================================================================== */}
 
             <Box
                 sx={{
@@ -687,11 +664,7 @@ export default function AdminDashboardView() {
                     animationDelay={590}
                 />
             </Box>
-
-            {/* ================================================================== */}
-            {/* MAIN CONTENT                                                        */}
-            {/* ================================================================== */}
-
+    
             <Box
                 sx={{
                     display: 'grid',
@@ -703,10 +676,6 @@ export default function AdminDashboardView() {
                     alignItems: 'stretch',
                 }}
             >
-                {/* ============================================================== */}
-                {/* RANKING                                                         */}
-                {/* ============================================================== */}
-
                 <Paper
                     elevation={0}
                     sx={{
@@ -945,7 +914,6 @@ export default function AdminDashboardView() {
                                                 },
                                             }}
                                         >
-                                            {/* RANK */}
                                             <Box
                                                 sx={{
                                                     width: 34,
@@ -980,7 +948,6 @@ export default function AdminDashboardView() {
                                                 )}
                                             </Box>
 
-                                            {/* AVATAR */}
                                             <Avatar
                                                 sx={{
                                                     width: 38,
@@ -1026,7 +993,6 @@ export default function AdminDashboardView() {
                                                     .toUpperCase()}
                                             </Avatar>
 
-                                            {/* EMPLOYEE */}
                                             <Box
                                                 sx={{
                                                     minWidth: 0,
@@ -1069,7 +1035,6 @@ export default function AdminDashboardView() {
                                                 </Typography>
                                             </Box>
 
-                                            {/* SCORE */}
                                             <Box
                                                 sx={{
                                                     textAlign:
@@ -1120,10 +1085,6 @@ export default function AdminDashboardView() {
                         </Box>
                     )}
                 </Paper>
-
-                {/* ============================================================== */}
-                {/* PERIOD INSIGHT                                                 */}
-                {/* ============================================================== */}
 
                 <Paper
                     elevation={0}
@@ -1197,7 +1158,6 @@ export default function AdminDashboardView() {
                                 'column',
                         }}
                     >
-                        {/* SCORE */}
                         <Box
                             sx={{
                                 p: 2,
@@ -1390,10 +1350,6 @@ export default function AdminDashboardView() {
     )
 }
 
-/* ========================================================================== */
-/* STAT CARD                                                                  */
-/* ========================================================================== */
-
 interface StatCardProps {
     icon: React.ReactNode
     title: string
@@ -1549,10 +1505,6 @@ function StatCard({
         </Paper>
     )
 }
-
-/* ========================================================================== */
-/* INFO ROW                                                                   */
-/* ========================================================================== */
 
 interface InfoRowProps {
     label: string

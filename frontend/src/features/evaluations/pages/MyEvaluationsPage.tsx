@@ -187,7 +187,6 @@ export default function MyEvaluationsPage() {
                 </Paper>
             ) : (
                 <>
-                    {/* PERFORMANCE CHART */}
                     <Paper
                         elevation={0}
                         sx={{
@@ -347,7 +346,6 @@ export default function MyEvaluationsPage() {
                         </Box>
                     </Paper>
 
-                    {/* EVALUATION HISTORY */}
                     <Paper
                         id="history"
                         elevation={0}
@@ -359,7 +357,6 @@ export default function MyEvaluationsPage() {
                             scrollMarginTop: 90,
                         }}
                     >
-                        {/* HEADER */}
                         <Box
                             sx={{
                                 px: { xs: 2, md: 3 },
@@ -408,7 +405,6 @@ export default function MyEvaluationsPage() {
                             />
                         </Box>
 
-                        {/* SEARCH */}
                         <Box
                             sx={{
                                 px: { xs: 2, md: 3 },
@@ -448,7 +444,6 @@ export default function MyEvaluationsPage() {
                             />
                         </Box>
 
-                        {/* RESULTS */}
                         {paginatedHistory.length > 0 ? (
                             paginatedHistory.map((evaluation) => (
                                 <Box
@@ -474,7 +469,6 @@ export default function MyEvaluationsPage() {
                                         },
                                     }}
                                 >
-                                    {/* LEFT */}
                                     <Box sx={{ minWidth: 0 }}>
                                         <Typography
                                             sx={{
@@ -507,7 +501,6 @@ export default function MyEvaluationsPage() {
                                         </Typography>
                                     </Box>
 
-                                    {/* RIGHT */}
                                     <Box
                                         sx={{
                                             display: 'flex',
@@ -555,7 +548,6 @@ export default function MyEvaluationsPage() {
                                 </Box>
                             ))
                         ) : (
-                            /* EMPTY SEARCH RESULT */
                             <Box
                                 sx={{
                                     px: 3,
@@ -592,7 +584,6 @@ export default function MyEvaluationsPage() {
                             </Box>
                         )}
 
-                        {/* PAGINATION */}
                         {historyPageCount > 1 && (
                             <Box
                                 sx={{

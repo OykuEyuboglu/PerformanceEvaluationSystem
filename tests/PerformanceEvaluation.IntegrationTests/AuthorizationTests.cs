@@ -44,10 +44,6 @@ public class AuthorizationTests
         return factory.CreateClient();
     }
 
-    // ===========================================================
-    // CRITERIA / DEPARTMENTS (mevcut testler - dokunulmadı)
-    // ===========================================================
-
     [Theory]
     [InlineData("Admin", HttpStatusCode.OK)]
     [InlineData("Evaluator", HttpStatusCode.OK)]
@@ -82,10 +78,6 @@ public class AuthorizationTests
         response.StatusCode.Should().Be(expected);
     }
 
-    // ===========================================================
-    // JOB POSITIONS - sadece [Authorize], role kısıtı yok
-    // ===========================================================
-
     [Theory]
     [InlineData("Admin")]
     [InlineData("Evaluator")]
@@ -112,10 +104,6 @@ public class AuthorizationTests
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    // ===========================================================
-    // EVALUATIONS - dedicated dosyada sadece ApproveBulk var,
-    // diğer uçlar burada kapatılıyor
-    // ===========================================================
 
     [Theory]
     [InlineData("Admin", HttpStatusCode.Forbidden)]
@@ -220,11 +208,6 @@ public class AuthorizationTests
         response.StatusCode.Should().Be(expected);
     }
 
-    // ===========================================================
-    // EVALUATION PERIODS - dedicated dosyada Update hiç test
-    // edilmemiş, burada tamamlanıyor
-    // ===========================================================
-
     [Theory]
     [InlineData("Evaluator")]
     [InlineData("Employee")]
@@ -245,10 +228,6 @@ public class AuthorizationTests
 
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
-
-    // ===========================================================
-    // REPORTS - hiç test edilmemişti
-    // ===========================================================
 
     [Theory]
     [InlineData("Evaluator", HttpStatusCode.Forbidden)]
@@ -338,11 +317,6 @@ public class AuthorizationTests
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
-
-    // ===========================================================
-    // USER CONTROLLER - sınıf seviyesinde [Authorize(Roles = "Admin")],
-    // dolayısıyla Evaluator/Employee HİÇBİR uca erişememeli
-    // ===========================================================
 
     [Theory]
     [InlineData("Evaluator")]

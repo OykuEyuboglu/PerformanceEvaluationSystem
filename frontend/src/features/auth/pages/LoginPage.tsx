@@ -133,7 +133,6 @@ export default function LoginPage() {
 
     return (
         <>
-            {/* LANGUAGE SWITCHER */}
             <Box
                 sx={{
                     position: 'fixed',
@@ -219,7 +218,6 @@ export default function LoginPage() {
                 </Button>
             </Box>
 
-            {/* SESSION EXPIRED */}
             <Snackbar
                 open={sessionExpired}
                 autoHideDuration={5000}
@@ -251,7 +249,6 @@ export default function LoginPage() {
                 container
                 sx={{ minHeight: '100vh' }}
             >
-                {/* SOL PANEL - MARKA */}
                 <Grid
                     size={{ xs: 12, md: 6 }}
                     sx={{
@@ -380,7 +377,6 @@ export default function LoginPage() {
                         </Typography>
                     </Box>
 
-                    {/* FOOTER */}
                     <Typography
                         variant="caption"
                         sx={{
@@ -396,7 +392,6 @@ export default function LoginPage() {
                     </Typography>
                 </Grid>
 
-                {/* SAĞ PANEL - GİRİŞ FORMU */}
                 <Grid
                     size={{ xs: 12, md: 6 }}
                     sx={{
@@ -416,7 +411,6 @@ export default function LoginPage() {
                             maxWidth: 420,
                         }}
                     >
-                        {/* MOBİL LOGO */}
                         <Box
                             sx={{
                                 display: {
@@ -430,7 +424,6 @@ export default function LoginPage() {
                             <Logo variant="dark" />
                         </Box>
 
-                        {/* BAŞLIK */}
                         <Typography
                             variant="h5"
                             sx={{
@@ -444,7 +437,6 @@ export default function LoginPage() {
                                 : 'Welcome'}
                         </Typography>
 
-                        {/* AÇIKLAMA */}
                         <Typography
                             variant="body2"
                             sx={{
@@ -469,13 +461,11 @@ export default function LoginPage() {
                             </Alert>
                         )}
 
-                        {/* FORM */}
                         <Box
                             component="form"
                             onSubmit={handleSubmit(onSubmit)}
                             noValidate
                         >
-                            {/* E-POSTA */}
                             <TextField
                                 label={
                                     language === 'tr'
@@ -508,7 +498,6 @@ export default function LoginPage() {
                                 }
                             />
 
-                            {/* ŞİFRE */}
                             <TextField
                                 label={
                                     language === 'tr'
@@ -564,7 +553,6 @@ export default function LoginPage() {
                                 }
                             />
 
-                            {/* GİRİŞ BUTONU */}
                             <Button
                                 type="submit"
                                 fullWidth

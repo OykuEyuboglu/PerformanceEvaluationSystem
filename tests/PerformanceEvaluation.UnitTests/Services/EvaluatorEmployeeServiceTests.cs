@@ -89,7 +89,6 @@ public class EvaluatorEmployeeServiceTests
     [Fact]
     public async Task AssignAsync_GecerliEvaluatorVeEmployee_IseAtamaYapmali()
     {
-        // Arrange
         var evaluator = CreateEvaluator();
         var employee = CreateEmployee();
 
@@ -121,10 +120,8 @@ public class EvaluatorEmployeeServiceTests
             .Setup(x => x.SaveChangesAsync())
             .ReturnsAsync(true);
 
-        // Act
         var result = await _service.AssignAsync(dto);
 
-        // Assert
         Assert.NotNull(result);
 
         Assert.Equal(
@@ -166,7 +163,6 @@ public class EvaluatorEmployeeServiceTests
     [Fact]
     public async Task AssignAsync_EvaluatorBulunamazsa_KeyNotFoundExceptionFirlatmali()
     {
-        // Arrange
         var dto = new AssignEvaluatorEmployeeDto
         {
             EvaluatorId = 999,
@@ -177,11 +173,9 @@ public class EvaluatorEmployeeServiceTests
             .Setup(x => x.GetByIdAsync(dto.EvaluatorId))
             .ReturnsAsync((User?)null);
 
-        // Act
         var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
             () => _service.AssignAsync(dto));
 
-        // Assert
         Assert.Equal(
             "Evaluator bulunamadı.",
             exception.Message);
@@ -198,7 +192,6 @@ public class EvaluatorEmployeeServiceTests
     [Fact]
     public async Task AssignAsync_EmployeeBulunamazsa_KeyNotFoundExceptionFirlatmali()
     {
-        // Arrange
         var evaluator = CreateEvaluator();
 
         var dto = new AssignEvaluatorEmployeeDto
@@ -215,11 +208,9 @@ public class EvaluatorEmployeeServiceTests
             .Setup(x => x.GetByIdAsync(dto.EmployeeId))
             .ReturnsAsync((User?)null);
 
-        // Act
         var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
             () => _service.AssignAsync(dto));
 
-        // Assert
         Assert.Equal(
             "Employee bulunamadı.",
             exception.Message);
@@ -232,7 +223,6 @@ public class EvaluatorEmployeeServiceTests
     [Fact]
     public async Task AssignAsync_KullaniciEvaluatorDegilse_InvalidOperationExceptionFirlatmali()
     {
-        // Arrange
         var evaluator = CreateEvaluator();
         evaluator.Role = UserRole.Employee;
 
@@ -252,11 +242,9 @@ public class EvaluatorEmployeeServiceTests
             .Setup(x => x.GetByIdAsync(employee.Id))
             .ReturnsAsync(employee);
 
-        // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             () => _service.AssignAsync(dto));
 
-        // Assert
         Assert.Equal(
             "Seçilen kullanıcı Evaluator rolünde değil.",
             exception.Message);
@@ -265,7 +253,6 @@ public class EvaluatorEmployeeServiceTests
     [Fact]
     public async Task AssignAsync_KullaniciEmployeeDegilse_InvalidOperationExceptionFirlatmali()
     {
-        // Arrange
         var evaluator = CreateEvaluator();
         var employee = CreateEmployee();
         employee.Role = UserRole.Evaluator;
@@ -284,11 +271,9 @@ public class EvaluatorEmployeeServiceTests
             .Setup(x => x.GetByIdAsync(employee.Id))
             .ReturnsAsync(employee);
 
-        // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             () => _service.AssignAsync(dto));
 
-        // Assert
         Assert.Equal(
             "Seçilen kullanıcı Employee rolünde değil.",
             exception.Message);
@@ -297,7 +282,6 @@ public class EvaluatorEmployeeServiceTests
     [Fact]
     public async Task AssignAsync_PasifEvaluator_Ise_AtamaYapilmamali()
     {
-        // Arrange
         var evaluator = CreateEvaluator(isActive: false);
         var employee = CreateEmployee();
 
@@ -315,11 +299,9 @@ public class EvaluatorEmployeeServiceTests
             .Setup(x => x.GetByIdAsync(employee.Id))
             .ReturnsAsync(employee);
 
-        // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             () => _service.AssignAsync(dto));
 
-        // Assert
         Assert.Equal(
             "Pasif bir Evaluator'a çalışan atanamaz.",
             exception.Message);
@@ -332,7 +314,6 @@ public class EvaluatorEmployeeServiceTests
     [Fact]
     public async Task AssignAsync_PasifEmployee_Ise_AtamaYapilmamali()
     {
-        // Arrange
         var evaluator = CreateEvaluator();
         var employee = CreateEmployee(isActive: false);
 
@@ -350,11 +331,9 @@ public class EvaluatorEmployeeServiceTests
             .Setup(x => x.GetByIdAsync(employee.Id))
             .ReturnsAsync(employee);
 
-        // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             () => _service.AssignAsync(dto));
 
-        // Assert
         Assert.Equal(
             "Pasif bir Employee değerlendiriciye atanamaz.",
             exception.Message);
@@ -363,7 +342,6 @@ public class EvaluatorEmployeeServiceTests
     [Fact]
     public async Task AssignAsync_EvaluatorKendisineAtanmayaCalisilirsa_HataFirlatmali()
     {
-        // Arrange
         var evaluator = CreateEvaluator();
 
         var dto = new AssignEvaluatorEmployeeDto
@@ -376,17 +354,13 @@ public class EvaluatorEmployeeServiceTests
             .Setup(x => x.GetByIdAsync(evaluator.Id))
             .ReturnsAsync(evaluator);
 
-        // Aynı kullanıcı hem evaluator hem employee olarak
-        // repository'den dönebilsin.
         _userRepositoryMock
             .Setup(x => x.GetByIdAsync(dto.EmployeeId))
             .ReturnsAsync(evaluator);
 
-        // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             () => _service.AssignAsync(dto));
 
-        // Assert
         Assert.Equal(
             "Seçilen kullanıcı Employee rolünde değil.",
             exception.Message);
@@ -395,7 +369,6 @@ public class EvaluatorEmployeeServiceTests
     [Fact]
     public async Task AssignAsync_ZatenAtamaVarsa_HataFirlatmali()
     {
-        // Arrange
         var evaluator = CreateEvaluator();
         var employee = CreateEmployee();
 
@@ -419,11 +392,9 @@ public class EvaluatorEmployeeServiceTests
                 employee.Id))
             .ReturnsAsync(true);
 
-        // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             () => _service.AssignAsync(dto));
 
-        // Assert
         Assert.Equal(
             "Bu çalışan zaten bu Evaluator'a atanmış.",
             exception.Message);
@@ -440,7 +411,6 @@ public class EvaluatorEmployeeServiceTests
     [Fact]
     public async Task GetByEvaluatorIdAsync_AdminIse_EkibiGorebilmeli()
     {
-        // Arrange
         var evaluator = CreateEvaluator();
         var employee = CreateEmployee();
 
@@ -461,12 +431,10 @@ public class EvaluatorEmployeeServiceTests
             999,
             "Admin");
 
-        // Act
         var result = await _service.GetByEvaluatorIdAsync(
             evaluator.Id,
             claims);
 
-        // Assert
         var item = Assert.Single(result);
 
         Assert.Equal(100, item.Id);
@@ -487,7 +455,6 @@ public class EvaluatorEmployeeServiceTests
     [Fact]
     public async Task GetByEvaluatorIdAsync_EvaluatorKendiEkibiniIseGorebilmeli()
     {
-        // Arrange
         var evaluator = CreateEvaluator();
         var employee = CreateEmployee();
 
@@ -508,12 +475,10 @@ public class EvaluatorEmployeeServiceTests
             evaluator.Id,
             "Evaluator");
 
-        // Act
         var result = await _service.GetByEvaluatorIdAsync(
             evaluator.Id,
             claims);
 
-        // Assert
         var item = Assert.Single(result);
 
         Assert.Equal(employee.Id, item.EmployeeId);
@@ -523,20 +488,17 @@ public class EvaluatorEmployeeServiceTests
     [Fact]
     public async Task GetByEvaluatorIdAsync_EvaluatorBaskaEvaluatorinEkibiniGoruntuleyemez()
     {
-        // Arrange
         var evaluator = CreateEvaluator(id: 1);
 
         var claims = CreateClaimsPrincipal(
             2,
             "Evaluator");
 
-        // Act
         var exception = await Assert.ThrowsAsync<ForbiddenAccessException>(
             () => _service.GetByEvaluatorIdAsync(
                 evaluator.Id,
                 claims));
 
-        // Assert
         Assert.Equal(
             "Başka bir Evaluator'ın ekibini görüntüleme yetkiniz yok.",
             exception.Message);
@@ -549,18 +511,15 @@ public class EvaluatorEmployeeServiceTests
     [Fact]
     public async Task GetByEvaluatorIdAsync_EmployeeIse_EkibiGorememeli()
     {
-        // Arrange
         var claims = CreateClaimsPrincipal(
             2,
             "Employee");
 
-        // Act
         var exception = await Assert.ThrowsAsync<ForbiddenAccessException>(
             () => _service.GetByEvaluatorIdAsync(
                 1,
                 claims));
 
-        // Assert
         Assert.Equal(
             "Bu bilgileri görüntüleme yetkiniz yok.",
             exception.Message);
@@ -573,18 +532,15 @@ public class EvaluatorEmployeeServiceTests
     [Fact]
     public async Task GetByEvaluatorIdAsync_RolBulunamazsa_ErişimReddedilmeli()
     {
-        // Arrange
         var claims = CreateClaimsPrincipal(
             1,
             "");
 
-        // Act
         var exception = await Assert.ThrowsAsync<ForbiddenAccessException>(
             () => _service.GetByEvaluatorIdAsync(
                 1,
                 claims));
 
-        // Assert
         Assert.Equal(
             "Bu bilgileri görüntüleme yetkiniz yok.",
             exception.Message);
@@ -593,7 +549,6 @@ public class EvaluatorEmployeeServiceTests
     [Fact]
     public async Task GetByEvaluatorIdAsync_KullaniciKimligiBulunamazsa_UnauthorizedExceptionFirlatmali()
     {
-        // Arrange
         var claims = new ClaimsPrincipal(
             new ClaimsIdentity(
                 new[]
@@ -604,13 +559,11 @@ public class EvaluatorEmployeeServiceTests
                 },
                 "TestAuth"));
 
-        // Act
         var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _service.GetByEvaluatorIdAsync(
                 1,
                 claims));
 
-        // Assert
         Assert.Equal(
             "Kullanıcı kimliği bulunamadı.",
             exception.Message);
@@ -619,7 +572,6 @@ public class EvaluatorEmployeeServiceTests
     [Fact]
     public async Task RemoveAsync_MevcutAtamayiSilip_Kaydetmeli()
     {
-        // Arrange
         var assignment = new EvaluatorEmployee
         {
             Id = 100,
@@ -636,10 +588,8 @@ public class EvaluatorEmployeeServiceTests
             .Setup(x => x.SaveChangesAsync())
             .ReturnsAsync(true);
 
-        // Act
         await _service.RemoveAsync(1, 2);
 
-        // Assert
         _repositoryMock.Verify(
             x => x.Remove(assignment),
             Times.Once);
@@ -652,17 +602,14 @@ public class EvaluatorEmployeeServiceTests
     [Fact]
     public async Task RemoveAsync_AtamaBulunamazsa_KeyNotFoundExceptionFirlatmali()
     {
-        // Arrange
         _repositoryMock
             .Setup(x => x.FindAsync(
                 It.IsAny<Expression<Func<EvaluatorEmployee, bool>>>()))
             .ReturnsAsync(Array.Empty<EvaluatorEmployee>());
 
-        // Act
         var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
             () => _service.RemoveAsync(1, 2));
 
-        // Assert
         Assert.Equal(
             "Evaluator-Employee ataması bulunamadı.",
             exception.Message);

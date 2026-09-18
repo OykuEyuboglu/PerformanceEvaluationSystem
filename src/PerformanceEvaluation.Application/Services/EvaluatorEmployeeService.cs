@@ -92,12 +92,10 @@ public class EvaluatorEmployeeService : IEvaluatorEmployeeService
 
         var role = userClaims.FindFirst(ClaimTypes.Role)?.Value;
 
-        // Admin tüm Evaluator'ların ekiplerini görebilir.
         if (role == "Admin")
         {
             // Devam et.
         }
-        // Evaluator sadece kendi ekibini görebilir.
         else if (role == "Evaluator")
         {
             if (evaluatorId != userId)

@@ -10,6 +10,8 @@ import type {
     ReactElement,
     MouseEvent,
 } from 'react'
+import { getJobPositions } from '../../../shared/api/jobPositionsApi'
+import type { JobPositionDto } from '../../../shared/types/jobPosition'
 
 import {
     Box,
@@ -73,6 +75,7 @@ function UserInfoTooltip({
 }: UserInfoTooltipProps) {
     const { language } = useLanguage()
     const t = translations[language]
+   
 
     return (
         <Tooltip
@@ -172,8 +175,7 @@ function UserInfoTooltip({
                                 :
                             </strong>{' '}
                             {user.jobPositionName ||
-                                t.evaluatorEmployees
-                                    .notSpecified}
+                                t.evaluatorEmployees.notSpecified}
                         </Typography>
 
                         <Typography
@@ -297,6 +299,9 @@ export default function EvaluatorEmployeesPage() {
         [allUsers],
     )
 
+    const [jobPositions, setJobPositions] =
+        useState<JobPositionDto[]>([])
+
     const employees = useMemo(
         () =>
             allUsers.filter(
@@ -388,10 +393,16 @@ export default function EvaluatorEmployeesPage() {
     const loadUsers = useCallback(
         async () => {
             setLoadingUsers(true)
-
+          
             try {
-                const data = await getUsers()
-                setAllUsers(data)
+                const [usersData, positionsData] =
+                    await Promise.all([
+                        getUsers(),
+                        getJobPositions(),
+                    ])
+
+                setAllUsers(usersData)
+                setJobPositions(positionsData)
             } catch {
                 setSnackbar({
                     open: true,
@@ -611,7 +622,6 @@ export default function EvaluatorEmployeesPage() {
 
     return (
         <Box>
-            {/* HEADER */}
             <Box
                 sx={{
                     mb: 3,
@@ -699,7 +709,7 @@ export default function EvaluatorEmployeesPage() {
                             />
                         }
                         label={`${evaluators.length} ${t.evaluatorEmployees
-                                .evaluators
+                            .evaluators
                             }`}
                         variant="outlined"
                         sx={{
@@ -717,7 +727,7 @@ export default function EvaluatorEmployeesPage() {
                             />
                         }
                         label={`${employees.length} ${t.evaluatorEmployees
-                                .activeEmployees
+                            .activeEmployees
                             }`}
                         variant="outlined"
                         sx={{
@@ -728,7 +738,6 @@ export default function EvaluatorEmployeesPage() {
                 </Stack>
             </Box>
 
-            {/* LOADING / EMPTY */}
             {loadingUsers ? (
                 <LinearProgress />
             ) : evaluators.length === 0 ? (
@@ -752,7 +761,6 @@ export default function EvaluatorEmployeesPage() {
                         minHeight: 420,
                     }}
                 >
-                    {/* LEFT PANEL */}
                     <Paper
                         elevation={0}
                         sx={{
@@ -974,7 +982,6 @@ export default function EvaluatorEmployeesPage() {
                         )}
                     </Paper>
 
-                    {/* RESIZE DIVIDER */}
                     <Box
                         onMouseDown={
                             handleResizeStart
@@ -1037,7 +1044,6 @@ export default function EvaluatorEmployeesPage() {
                         />
                     </Box>
 
-                    {/* RIGHT PANEL */}
                     <Paper
                         elevation={0}
                         sx={{
@@ -1080,7 +1086,6 @@ export default function EvaluatorEmployeesPage() {
                             </Box>
                         ) : (
                             <>
-                                {/* SELECTED EVALUATOR */}
                                 <Box
                                     sx={{
                                         px: 2.5,
@@ -1178,8 +1183,8 @@ export default function EvaluatorEmployeesPage() {
                                             />
                                         }
                                         label={`${team.length} ${t
-                                                .evaluatorEmployees
-                                                .employees
+                                            .evaluatorEmployees
+                                            .employees
                                             }`}
                                         size="small"
                                         sx={{
@@ -1192,7 +1197,6 @@ export default function EvaluatorEmployeesPage() {
                                     />
                                 </Box>
 
-                                {/* EMPLOYEE SEARCH */}
                                 <Box
                                     sx={{
                                         px: 2.5,
@@ -1344,13 +1348,8 @@ export default function EvaluatorEmployeesPage() {
                                                                 option.departmentName
                                                             }{' '}
                                                             ·{' '}
-                                                            {
-                                                                option.jobPositionName
-                                                                ||
-                                                                t
-                                                                    .evaluatorEmployees
-                                                                    .positionNotSpecified
-                                                            }
+                                                            {option.jobPositionName ||
+                                                                t.evaluatorEmployees.positionNotSpecified}
                                                         </Typography>
                                                     </Box>
                                                 </Box>
@@ -1453,7 +1452,6 @@ export default function EvaluatorEmployeesPage() {
 
                                 <Divider />
 
-                                {/* TEAM */}
                                 {loadingTeam ? (
                                     <LinearProgress />
                                 ) : team.length === 0 ? (
@@ -1786,7 +1784,6 @@ export default function EvaluatorEmployeesPage() {
                 </Box>
             )}
 
-            {/* REMOVE CONFIRMATION */}
             <ConfirmDialog
                 open={!!removeTarget}
                 title={
@@ -1809,7 +1806,6 @@ export default function EvaluatorEmployeesPage() {
                 }
             />
 
-            {/* SNACKBAR */}
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={4000}

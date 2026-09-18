@@ -11,7 +11,8 @@ public class MappingProfile : Profile
     public MappingProfile()
     {
         CreateMap<User, UserDto>()
-            .ForMember(dest => dest.DepartmentName,opt => opt.MapFrom(src =>src.Department != null ? src.Department.Name : null))
+            .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Department != null ? src.Department.Name : null))
+            .ForMember(dest => dest.JobPositionId, opt => opt.MapFrom(src => src.JobPositionId))
             .ForMember(dest => dest.JobPositionName, opt => opt.MapFrom(src => src.JobPosition != null ? src.JobPosition.Name : null))
             .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToString()));
 

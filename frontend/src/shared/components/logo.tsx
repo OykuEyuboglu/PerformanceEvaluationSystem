@@ -44,7 +44,6 @@ export default function Logo({
                 flexShrink: 1,
             }}
         >
-            {/* LOGO ICON */}
             <Box
                 component="img"
                 src={src}
@@ -74,7 +73,6 @@ export default function Logo({
                 }}
             />
 
-            {/* LOGO TEXT */}
             <Box
                 sx={{
                     minWidth: 0,
@@ -82,7 +80,6 @@ export default function Logo({
                     overflow: 'hidden',
                 }}
             >
-                {/* VAKIFBANK 360 */}
                 <Box
                     component="p"
                     sx={{
@@ -120,7 +117,6 @@ export default function Logo({
                     </Box>
                 </Box>
 
-                {/* ALT BAŞLIK */}
                 <Box
                     component="p"
                     sx={{

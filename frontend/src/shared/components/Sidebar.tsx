@@ -216,7 +216,6 @@ export default function Sidebar({
 
     return (
         <>
-            {/* DESKTOP SIDEBAR */}
             <Box
                 onMouseEnter={() =>
                     onHoverChange(true)
@@ -280,7 +279,6 @@ export default function Sidebar({
                 </Drawer>
             </Box>
 
-            {/* MOBILE SIDEBAR */}
             <Drawer
                 variant="temporary"
                 open={mobileOpen}

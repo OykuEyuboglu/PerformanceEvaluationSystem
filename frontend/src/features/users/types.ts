@@ -8,6 +8,7 @@ export interface UserDto {
     role: UserRole
     isActive: boolean
     departmentName: string
+    jobPositionId?: number | null
     jobPositionName?: string | null
 }
 
