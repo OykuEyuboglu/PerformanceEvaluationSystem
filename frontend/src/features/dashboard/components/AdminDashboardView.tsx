@@ -355,15 +355,15 @@ export default function AdminDashboardView() {
                     sx={{
                         position: 'relative',
                         p: {
-                            xs: 2.5,
-                            sm: 3,
-                            md: 4,
+                            xs: 1.6,
+                            sm: 2.5,
+                            md: 3.5,
                         },
                         display: 'flex',
-                        alignItems: 'center',
+                        alignItems: { xs: 'stretch', md: 'center' },
                         justifyContent:
                             'space-between',
-                        gap: 3,
+                        gap: { xs: 1.5, md: 3 },
                         flexWrap: 'wrap',
                     }}
                 >
@@ -390,8 +390,8 @@ export default function AdminDashboardView() {
                         <Typography
                             sx={{
                                 fontSize: {
-                                    xs: 24,
-                                    sm: 28,
+                                    xs: 21,
+                                    sm: 27,
                                     md: 32,
                                 },
                                 fontWeight: 850,
@@ -407,9 +407,9 @@ export default function AdminDashboardView() {
                         <Typography
                             color="text.secondary"
                             sx={{
-                                mt: 1,
+                                mt: { xs: 0.65, md: 1 },
                                 fontSize: {
-                                    xs: 13,
+                                    xs: 11.5,
                                     md: 14,
                                 },
                                 maxWidth: 600,
@@ -426,8 +426,10 @@ export default function AdminDashboardView() {
                         sx={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: 1.5,
-                            flexWrap: 'wrap',
+                            gap: { xs: 1, md: 1.5 },
+                            flexWrap: 'nowrap',
+                            width: { xs: '100%', md: 'auto' },
+                            minWidth: 0,
                         }}
                     >
                         {loadingPeriods ? (
@@ -454,10 +456,9 @@ export default function AdminDashboardView() {
                                             : 'Evaluation Period'
                                     }
                                     sx={{
-                                        width: {
-                                            xs: '100%',
-                                            sm: 400,
-                                        },
+                                        width: { xs: '100%', sm: 400 },
+                                        minWidth: 0,
+                                        flex: 1,
                                         '& .MuiOutlinedInput-root':
                                         {
                                             borderRadius: 2,
@@ -499,8 +500,8 @@ export default function AdminDashboardView() {
                                         handleExport
                                     }
                                     sx={{
-                                        minHeight: 40,
-                                        px: 2,
+                                        minHeight: 38,
+                                        px: { xs: 1.25, sm: 2 },
                                         borderRadius: 2,
                                         bgcolor:
                                             '#F5B301',
@@ -606,11 +607,11 @@ export default function AdminDashboardView() {
                 sx={{
                     display: 'grid',
                     gridTemplateColumns: {
-                        xs: '1fr',
-                        sm: 'repeat(2, 1fr)',
-                        lg: 'repeat(4, 1fr)',
+                        xs: 'repeat(2, minmax(0, 1fr))',
+                        sm: 'repeat(2, minmax(0, 1fr))',
+                        lg: 'repeat(4, minmax(0, 1fr))',
                     },
-                    gap: 2,
+                    gap: { xs: 1.25, sm: 2 },
                     mb: 3,
                 }}
             >
@@ -1416,7 +1417,9 @@ function StatCard({
             sx={{
                 position: 'relative',
                 overflow: 'hidden',
-                p: 2.25,
+                p: { xs: 1.35, sm: 1.75, md: 2 },
+                minWidth: 0,
+                minHeight: { xs: 112, sm: 132 },
                 border: '1px solid',
                 borderColor: 'divider',
                 borderRadius: 3,
@@ -1472,8 +1475,8 @@ function StatCard({
 
             <Box
                 sx={{
-                    width: 38,
-                    height: 38,
+                    width: { xs: 32, sm: 36 },
+                    height: { xs: 32, sm: 36 },
                     borderRadius: 2,
                     display: 'flex',
                     alignItems: 'center',
@@ -1481,7 +1484,7 @@ function StatCard({
                     bgcolor:
                         'rgba(245,179,1,0.11)',
                     color: '#C68E00',
-                    mb: 1.7,
+                    mb: { xs: 1.1, sm: 1.5 },
                     transition:
                         'transform 0.2s ease',
                 }}
@@ -1492,7 +1495,7 @@ function StatCard({
             <Typography
                 color="text.secondary"
                 sx={{
-                    fontSize: 11.5,
+                    fontSize: { xs: 10.5, sm: 11.5 },
                     fontWeight: 600,
                     lineHeight: 1.3,
                 }}
@@ -1510,7 +1513,7 @@ function StatCard({
             >
                 <Typography
                     sx={{
-                        fontSize: 26,
+                        fontSize: { xs: 21, sm: 25 },
                         fontWeight: 850,
                         letterSpacing:
                             '-0.5px',
@@ -1537,8 +1540,8 @@ function StatCard({
             <Typography
                 color="text.secondary"
                 sx={{
-                    fontSize: 10.5,
-                    mt: 0.35,
+                    fontSize: { xs: 9.5, sm: 10.5 },
+                    mt: 0.3,
                 }}
             >
                 {description}

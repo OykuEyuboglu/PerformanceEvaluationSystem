@@ -242,13 +242,55 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
                             label={t.evaluatorDashboard.evaluationPeriod}
                             value={selectedPeriodId}
                             onChange={(e) => setSelectedPeriodId(Number(e.target.value))}
-                            sx={{ width: { xs: 220, sm: 450 } }}
-                            slotProps={{ inputLabel: { shrink: true } }}
+                            sx={{
+                                width: { xs: '100%', sm: 450 },
+                                maxWidth: { xs: '100%', sm: 450 },
+                                minWidth: 0,
+                                '& .MuiSelect-select': {
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                },
+                            }}
+                            slotProps={{
+                                inputLabel: { shrink: true },
+                            }}
                         >
                             {periods.map((period) => (
-                                <MenuItem key={period.id} value={period.id}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        {period.name}
+                                <MenuItem
+                                    key={period.id}
+                                    value={period.id}
+                                    sx={{
+                                        minWidth: 0,
+                                        width: '100%',
+                                        boxSizing: 'border-box',
+                                        whiteSpace: 'normal',
+                                        py: { xs: 1.2, sm: 1 },
+                                    }}
+                                >
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            minWidth: 0,
+                                            width: '100%',
+                                        }}
+                                    >
+                                        <Typography
+                                            component="span"
+                                            sx={{
+                                                minWidth: 0,
+                                                flex: 1,
+                                                overflow: 'hidden',
+                                                overflowWrap: 'anywhere',
+                                                wordBreak: 'break-word',
+                                                whiteSpace: 'normal',
+                                                lineHeight: 1.35,
+                                            }}
+                                        >
+                                            {period.name}
+                                        </Typography>
                                         {periodState(period) === 'Aktif' && (
                                             <Chip label={t.evaluatorDashboard.active} size="small" color="success" />
                                         )}
@@ -275,8 +317,8 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
                     <Box
                         sx={{
                             display: 'grid',
-                            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' },
-                            gap: 2,
+                            gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', sm: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(4, minmax(0, 1fr))' },
+                            gap: { xs: 1.25, sm: 2 },
                             mb: 2,
                         }}
                     >
@@ -310,10 +352,15 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
                                 key={item.title}
                                 elevation={0}
                                 sx={{
-                                    p: 2.4,
+                                    p: { xs: 1.5, sm: 2.4 },
                                     border: '1px solid',
                                     borderColor: 'divider',
-                                    borderRadius: 3,
+                                    borderRadius: { xs: 2.5, sm: 3 },
+                                    minWidth: 0,
+                                    aspectRatio: { xs: '1 / 1', sm: 'auto' },
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'space-between',
                                     transition: 'transform .2s ease, box-shadow .2s ease, border-color .2s ease',
                                     '&:hover': {
                                         transform: 'translateY(-2px)',
@@ -324,22 +371,22 @@ export default function EvaluatorDashboardView({ firstName }: EvaluatorDashboard
                             >
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                     <Box>
-                                        <Typography sx={{ fontSize: 10.5, fontWeight: 800, color: 'text.secondary', letterSpacing: '.5px' }}>
+                                        <Typography sx={{ fontSize: { xs: 9, sm: 10.5 }, fontWeight: 800, color: 'text.secondary', letterSpacing: '.4px', lineHeight: 1.25 }}>
                                             {item.title.toUpperCase()}
                                         </Typography>
-                                        <Typography sx={{ fontSize: 27, fontWeight: 800, mt: .7 }}>
+                                        <Typography sx={{ fontSize: { xs: 20, sm: 27 }, fontWeight: 800, mt: .55, lineHeight: 1.1 }}>
                                             {item.value}
                                         </Typography>
                                     </Box>
-                                    <Box sx={{ width: 40, height: 40, borderRadius: 2, display: 'grid', placeItems: 'center', bgcolor: 'rgba(245,179,1,.12)', color: 'primary.main' }}>
+                                    <Box sx={{ width: { xs: 34, sm: 40 }, height: { xs: 34, sm: 40 }, borderRadius: 2, display: 'grid', placeItems: 'center', bgcolor: 'rgba(245,179,1,.12)', color: 'primary.main', flexShrink: 0 }}>
                                         {item.icon}
                                     </Box>
                                 </Box>
-                                <Typography color="text.secondary" sx={{ fontSize: 11.5, mt: 1 }}>
+                                <Typography color="text.secondary" sx={{ fontSize: { xs: 9.5, sm: 11.5 }, mt: 1, lineHeight: 1.3 }}>
                                     {item.subtitle}
                                 </Typography>
                                 {item.title === t.evaluatorDashboard.progress && (
-                                    <LinearProgress variant="determinate" value={animated.progress} sx={{ mt: 1.5, height: 5, borderRadius: 5 }} />
+                                    <LinearProgress variant="determinate" value={animated.progress} sx={{ mt: { xs: 1, sm: 1.5 }, height: 4, borderRadius: 5 }} />
                                 )}
                             </Paper>
                         ))}

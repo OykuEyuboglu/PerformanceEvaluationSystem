@@ -188,14 +188,61 @@ export default function TeamRankingPage() {
                         label={t.teamRanking.evaluationPeriod}
                         value={selectedPeriodId}
                         onChange={(e) => setSelectedPeriodId(Number(e.target.value))}
-                        sx={{ width: { xs: 220, sm: 450 } }}
+                        sx={{
+                            width: { xs: '100%', sm: 450 },
+                            maxWidth: { xs: '100%', sm: 450 },
+                            minWidth: 0,
+                            '& .MuiSelect-select': {
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                            },
+                        }}
                         slotProps={{ inputLabel: { shrink: true } }}
                     >
                         {periods.map((period) => (
-                            <MenuItem key={period.id} value={period.id}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    {period.name}
-                                    {isActivePeriod(period) && <Chip label={t.teamRanking.active} size="small" color="success" />}
+                            <MenuItem
+                                key={period.id}
+                                value={period.id}
+                                sx={{
+                                    width: 'min(450px, calc(100vw - 32px))',
+                                    maxWidth: 'calc(100vw - 32px)',
+                                    minWidth: 0,
+                                    boxSizing: 'border-box',
+                                    whiteSpace: 'normal',
+                                    py: { xs: 1.2, sm: 1 },
+                                }}
+                            >
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1,
+                                        minWidth: 0,
+                                        width: '100%',
+                                    }}
+                                >
+                                    <Typography
+                                        component="span"
+                                        sx={{
+                                            minWidth: 0,
+                                            flex: 1,
+                                            overflowWrap: 'anywhere',
+                                            wordBreak: 'break-word',
+                                            whiteSpace: 'normal',
+                                            lineHeight: 1.35,
+                                        }}
+                                    >
+                                        {period.name}
+                                    </Typography>
+                                    {isActivePeriod(period) && (
+                                        <Chip
+                                            label={t.teamRanking.active}
+                                            size="small"
+                                            color="success"
+                                            sx={{ flexShrink: 0 }}
+                                        />
+                                    )}
                                 </Box>
                             </MenuItem>
                         ))}
@@ -213,23 +260,53 @@ export default function TeamRankingPage() {
                 </Box>
             </Box>
 
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 2, mb: 2 }}>
-                <Paper elevation={0} sx={{ p: 2.2, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', sm: 'repeat(3, minmax(0, 1fr))' }, gap: { xs: 1.25, sm: 2 }, mb: 2 }}>
+                <Paper elevation={0} sx={{
+                    p: { xs: 1.5, sm: 2.2 },
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    borderRadius: { xs: 2.5, sm: 3 },
+                    minWidth: 0,
+                    aspectRatio: { xs: '1 / 1', sm: 'auto' },
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                }}>
                     <Typography color="text.secondary" sx={{ fontSize: 10.5, fontWeight: 800 }}>{t.teamRanking.evaluated}</Typography>
-                    <Typography sx={{ fontSize: 28, fontWeight: 900, mt: .5 }}>{ranking.length}</Typography>
-                    <Typography color="text.secondary" sx={{ fontSize: 11.5 }}>{t.teamRanking.employee}</Typography>
+                    <Typography sx={{ fontSize: { xs: 23, sm: 28 }, fontWeight: 900, mt: .5 }}>{ranking.length}</Typography>
+                    <Typography color="text.secondary" sx={{ fontSize: { xs: 10, sm: 11.5 }, lineHeight: 1.35 }}>{t.teamRanking.employee}</Typography>
                 </Paper>
-                <Paper elevation={0} sx={{ p: 2.2, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
+                <Paper elevation={0} sx={{
+                    p: { xs: 1.5, sm: 2.2 },
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    borderRadius: { xs: 2.5, sm: 3 },
+                    minWidth: 0,
+                    aspectRatio: { xs: '1 / 1', sm: 'auto' },
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                }}>
                     <Typography color="text.secondary" sx={{ fontSize: 10.5, fontWeight: 800 }}>{t.teamRanking.teamAverage}</Typography>
-                    <Typography sx={{ fontSize: 28, fontWeight: 900, mt: .5 }}>{average ? average.toFixed(2) : '—'}</Typography>
-                    <Typography color="text.secondary" sx={{ fontSize: 11.5 }}>/ 5</Typography>
+                    <Typography sx={{ fontSize: { xs: 23, sm: 28 }, fontWeight: 900, mt: .5 }}>{average ? average.toFixed(2) : '—'}</Typography>
+                    <Typography color="text.secondary" sx={{ fontSize: { xs: 10, sm: 11.5 }, lineHeight: 1.35 }}>/ 5</Typography>
                 </Paper>
-                <Paper elevation={0} sx={{ p: 2.2, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
+                <Paper elevation={0} sx={{
+                    p: { xs: 1.5, sm: 2.2 },
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    borderRadius: { xs: 2.5, sm: 3 },
+                    minWidth: 0,
+                    aspectRatio: { xs: '1 / 1', sm: 'auto' },
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                }}>
                     <Typography color="text.secondary" sx={{ fontSize: 10.5, fontWeight: 800 }}>{t.teamRanking.period}</Typography>
-                    <Typography sx={{ fontSize: 18, fontWeight: 900, mt: .9, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <Typography sx={{ fontSize: { xs: 15, sm: 18 }, fontWeight: 900, mt: .9, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {selectedPeriod?.name || '—'}
                     </Typography>
-                    <Typography color="text.secondary" sx={{ fontSize: 11.5 }}>
+                    <Typography color="text.secondary" sx={{ fontSize: { xs: 10, sm: 11.5 }, lineHeight: 1.35 }}>
                         {selectedPeriod ? `${new Date(selectedPeriod.startDate).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US')} – ${new Date(selectedPeriod.endDate).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US')}` : ''}
                     </Typography>
                 </Paper>

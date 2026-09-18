@@ -604,10 +604,10 @@ export default function EmployeeDashboardView({
                         sx={{
                             display: 'grid',
                             gridTemplateColumns: {
-                                xs: '1fr',
+                                xs: 'repeat(2, minmax(0, 1fr))',
                                 sm: 'repeat(3, minmax(0, 1fr))',
                             },
-                            gap: 2,
+                            gap: { xs: 1.25, sm: 2 },
                             mb: 2.5,
                         }}
                     >
@@ -617,21 +617,25 @@ export default function EmployeeDashboardView({
                             sx={{
                                 border: '1px solid',
                                 borderColor: 'divider',
-                                borderRadius: 3,
-                                p: 2.5,
+                                borderRadius: { xs: 2.5, sm: 3 },
+                                p: { xs: 1.5, sm: 2.5 },
+                                minWidth: 0,
+                                aspectRatio: { xs: '1 / 1', sm: 'auto' },
                             }}
                         >
                             <Box
                                 sx={{
                                     display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 1.5,
+                                    flexDirection: { xs: 'column', sm: 'row' },
+                                    alignItems: { xs: 'flex-start', sm: 'center' },
+                                    justifyContent: { xs: 'space-between', sm: 'flex-start' },
+                                    gap: { xs: 1, sm: 1.5 },
                                 }}
                             >
                                 <Box
                                     sx={{
-                                        width: 42,
-                                        height: 42,
+                                        width: { xs: 36, sm: 42 },
+                                        height: { xs: 36, sm: 42 },
                                         borderRadius: 2,
                                         bgcolor:
                                             'rgba(245,179,1,0.12)',
@@ -646,7 +650,7 @@ export default function EmployeeDashboardView({
                                 >
                                     <Insights
                                         sx={{
-                                            fontSize: 21,
+                                            fontSize: { xs: 19, sm: 21 },
                                         }}
                                     />
                                 </Box>
@@ -654,7 +658,7 @@ export default function EmployeeDashboardView({
                                 <Box>
                                     <Typography
                                         sx={{
-                                            fontSize: 11,
+                                            fontSize: { xs: 9.5, sm: 11 },
                                             color:
                                                 'text.secondary',
                                             fontWeight: 700,
@@ -665,7 +669,7 @@ export default function EmployeeDashboardView({
 
                                     <Typography
                                         sx={{
-                                            fontSize: 22,
+                                            fontSize: { xs: 19, sm: 22 },
                                             fontWeight: 800,
                                             mt: 0.2,
                                         }}
@@ -693,21 +697,25 @@ export default function EmployeeDashboardView({
                             sx={{
                                 border: '1px solid',
                                 borderColor: 'divider',
-                                borderRadius: 3,
-                                p: 2.5,
+                                borderRadius: { xs: 2.5, sm: 3 },
+                                p: { xs: 1.5, sm: 2.5 },
+                                minWidth: 0,
+                                aspectRatio: { xs: '1 / 1', sm: 'auto' },
                             }}
                         >
                             <Box
                                 sx={{
                                     display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 1.5,
+                                    flexDirection: { xs: 'column', sm: 'row' },
+                                    alignItems: { xs: 'flex-start', sm: 'center' },
+                                    justifyContent: { xs: 'space-between', sm: 'flex-start' },
+                                    gap: { xs: 1, sm: 1.5 },
                                 }}
                             >
                                 <Box
                                     sx={{
-                                        width: 42,
-                                        height: 42,
+                                        width: { xs: 36, sm: 42 },
+                                        height: { xs: 36, sm: 42 },
                                         borderRadius: 2,
                                         bgcolor:
                                             'rgba(245,179,1,0.12)',
@@ -722,7 +730,7 @@ export default function EmployeeDashboardView({
                                 >
                                     <History
                                         sx={{
-                                            fontSize: 21,
+                                            fontSize: { xs: 19, sm: 21 },
                                         }}
                                     />
                                 </Box>
@@ -730,7 +738,7 @@ export default function EmployeeDashboardView({
                                 <Box>
                                     <Typography
                                         sx={{
-                                            fontSize: 11,
+                                            fontSize: { xs: 9.5, sm: 11 },
                                             color:
                                                 'text.secondary',
                                             fontWeight: 700,
@@ -741,7 +749,7 @@ export default function EmployeeDashboardView({
 
                                     <Typography
                                         sx={{
-                                            fontSize: 22,
+                                            fontSize: { xs: 19, sm: 22 },
                                             fontWeight: 800,
                                             mt: 0.2,
                                         }}
@@ -758,21 +766,25 @@ export default function EmployeeDashboardView({
                             sx={{
                                 border: '1px solid',
                                 borderColor: 'divider',
-                                borderRadius: 3,
-                                p: 2.5,
+                                borderRadius: { xs: 2.5, sm: 3 },
+                                p: { xs: 1.5, sm: 2.5 },
+                                minWidth: 0,
+                                aspectRatio: { xs: '1 / 1', sm: 'auto' },
                             }}
                         >
                             <Box
                                 sx={{
                                     display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 1.5,
+                                    flexDirection: { xs: 'column', sm: 'row' },
+                                    alignItems: { xs: 'flex-start', sm: 'center' },
+                                    justifyContent: { xs: 'space-between', sm: 'flex-start' },
+                                    gap: { xs: 1, sm: 1.5 },
                                 }}
                             >
                                 <Box
                                     sx={{
-                                        width: 42,
-                                        height: 42,
+                                        width: { xs: 36, sm: 42 },
+                                        height: { xs: 36, sm: 42 },
                                         borderRadius: 2,
                                         bgcolor:
                                             'rgba(245,179,1,0.12)',
@@ -787,7 +799,7 @@ export default function EmployeeDashboardView({
                                 >
                                     <EmojiEvents
                                         sx={{
-                                            fontSize: 21,
+                                            fontSize: { xs: 19, sm: 21 },
                                         }}
                                     />
                                 </Box>
@@ -795,7 +807,7 @@ export default function EmployeeDashboardView({
                                 <Box>
                                     <Typography
                                         sx={{
-                                            fontSize: 11,
+                                            fontSize: { xs: 9.5, sm: 11 },
                                             color:
                                                 'text.secondary',
                                             fontWeight: 700,
