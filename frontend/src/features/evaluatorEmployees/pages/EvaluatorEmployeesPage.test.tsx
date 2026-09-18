@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import EvaluatorEmployeesPage from './EvaluatorEmployeesPage'
 import type { UserDto } from '../../users/types'
+import { LanguageProvider } from '../../../shared/i18n/LanguageContext'
 
 vi.mock('../../users/usersApi', () => ({
     getUsers: vi.fn(),
@@ -21,7 +22,9 @@ vi.mock('@mui/icons-material', () => ({
     Groups: () => <span data-testid="groups-icon" />,
     PersonAdd: () => <span data-testid="person-add-icon" />,
     Search: () => <span data-testid="search-icon" />,
-    DragIndicator: () => <span data-testid="drag-indicator-icon" />,
+    DragIndicator: () => (
+        <span data-testid="drag-indicator-icon" />
+    ),
     PeopleAltOutlined: () => (
         <span data-testid="people-alt-icon" />
     ),
@@ -76,6 +79,17 @@ const inactiveEmployee: UserDto = {
     departmentName: 'IT',
 }
 
+const otherDepartmentEmployee: UserDto = {
+    id: 4,
+    firstName: 'Buse',
+    lastName: 'Yıldız',
+    email: 'buse@example.com',
+    role: 'Employee',
+    isActive: true,
+    departmentName: 'Human Resources',
+    jobPositionName: 'HR Specialist',
+}
+
 function setupDefaultMocks() {
     mockedGetUsers.mockResolvedValue([
         evaluator,
@@ -88,6 +102,14 @@ function setupDefaultMocks() {
     mockedAssign.mockResolvedValue({} as any)
 
     mockedRemove.mockResolvedValue(undefined)
+}
+
+function renderPage() {
+    return render(
+        <LanguageProvider>
+            <EvaluatorEmployeesPage />
+        </LanguageProvider>,
+    )
 }
 
 async function selectEvaluator(
@@ -104,7 +126,7 @@ describe('EvaluatorEmployeesPage', () => {
     })
 
     it('değerlendirici seçilmeden önce yönlendirme mesajı göstermeli', async () => {
-        render(<EvaluatorEmployeesPage />)
+        renderPage()
 
         expect(
             await screen.findByText('Bir değerlendirici seç.'),
@@ -114,7 +136,7 @@ describe('EvaluatorEmployeesPage', () => {
     it('değerlendirici seçilince ekibi yükleyip boşsa uygun mesajı göstermeli', async () => {
         const user = userEvent.setup()
 
-        render(<EvaluatorEmployeesPage />)
+        renderPage()
 
         await selectEvaluator(user, 'Deniz Kaya')
 
@@ -132,7 +154,7 @@ describe('EvaluatorEmployeesPage', () => {
     it('sadece aktif çalışanlar atama için seçilebilir listede olmalı', async () => {
         const user = userEvent.setup()
 
-        render(<EvaluatorEmployeesPage />)
+        renderPage()
 
         await selectEvaluator(user, 'Deniz Kaya')
 
@@ -157,6 +179,41 @@ describe('EvaluatorEmployeesPage', () => {
         ).not.toBeInTheDocument()
     })
 
+    it('değerlendirici seçildiğinde sadece kendi departmanındaki çalışanlar listelenmeli', async () => {
+        mockedGetUsers.mockResolvedValue([
+            evaluator,
+            activeEmployee,
+            inactiveEmployee,
+            otherDepartmentEmployee,
+        ])
+
+        const user = userEvent.setup()
+
+        renderPage()
+
+        await selectEvaluator(user, 'Deniz Kaya')
+
+        await screen.findByText('Henüz ekip üyesi yok')
+
+        const addInput = screen.getByPlaceholderText(
+            'Çalışan adı, e-posta veya departman ara...',
+        )
+
+        await user.click(addInput)
+
+        expect(
+            await screen.findByRole('option', {
+                name: /ayşe yılmaz/i,
+            }),
+        ).toBeInTheDocument()
+
+        expect(
+            screen.queryByRole('option', {
+                name: /buse yıldız/i,
+            }),
+        ).not.toBeInTheDocument()
+    })
+
     it('çalışan seçip Ekle butonuna basınca assignEmployee çağrılıp ekip yenilenmeli', async () => {
         mockedGetTeam
             .mockResolvedValueOnce([])
@@ -168,13 +225,14 @@ describe('EvaluatorEmployeesPage', () => {
                     employeeId: 2,
                     employeeName: 'Ayşe Yılmaz',
                     employeeJobPositionId: 1,
-                    employeeJobPositionName: 'Yazılım Geliştirici',
+                    employeeJobPositionName:
+                        'Yazılım Geliştirici',
                 },
             ])
 
         const user = userEvent.setup()
 
-        render(<EvaluatorEmployeesPage />)
+        renderPage()
 
         await selectEvaluator(user, 'Deniz Kaya')
 
@@ -206,7 +264,9 @@ describe('EvaluatorEmployeesPage', () => {
         })
 
         expect(
-            await screen.findByText('1 çalışan ekibe eklendi.'),
+            await screen.findByText(
+                '1 çalışan ekibe eklendi.',
+            ),
         ).toBeInTheDocument()
 
         expect(mockedGetTeam).toHaveBeenCalledTimes(2)
@@ -215,7 +275,7 @@ describe('EvaluatorEmployeesPage', () => {
     it('hiç çalışan seçilmeden Ekle butonu devre dışı olmalı', async () => {
         const user = userEvent.setup()
 
-        render(<EvaluatorEmployeesPage />)
+        renderPage()
 
         await selectEvaluator(user, 'Deniz Kaya')
 
@@ -237,20 +297,20 @@ describe('EvaluatorEmployeesPage', () => {
                 employeeId: 2,
                 employeeName: 'Ayşe Yılmaz',
                 employeeJobPositionId: 1,
-                employeeJobPositionName: 'Yazılım Geliştirici',
+                employeeJobPositionName:
+                    'Yazılım Geliştirici',
             },
         ])
 
         const user = userEvent.setup()
 
-        render(<EvaluatorEmployeesPage />)
+        renderPage()
 
         await selectEvaluator(user, 'Deniz Kaya')
 
         await screen.findByText('Ayşe Yılmaz')
 
         const deleteIcon = screen.getByTestId('delete-icon')
-
         const deleteButton = deleteIcon.closest('button')
 
         expect(deleteButton).not.toBeNull()
@@ -272,7 +332,9 @@ describe('EvaluatorEmployeesPage', () => {
         })
 
         expect(
-            await screen.findByText('Çalışan ekipten çıkarıldı.'),
+            await screen.findByText(
+                'Çalışan ekipten çıkarıldı.',
+            ),
         ).toBeInTheDocument()
     })
 
@@ -291,7 +353,7 @@ describe('EvaluatorEmployeesPage', () => {
 
         const user = userEvent.setup()
 
-        render(<EvaluatorEmployeesPage />)
+        renderPage()
 
         await screen.findByText('Deniz Kaya')
 
@@ -326,7 +388,7 @@ describe('EvaluatorEmployeesPage', () => {
 
         const user = userEvent.setup()
 
-        render(<EvaluatorEmployeesPage />)
+        renderPage()
 
         await selectEvaluator(user, 'Deniz Kaya')
 
@@ -351,7 +413,9 @@ describe('EvaluatorEmployeesPage', () => {
         )
 
         expect(
-            await screen.findByText('Atama başarısız oldu.'),
+            await screen.findByText(
+                'Atama başarısız oldu.',
+            ),
         ).toBeInTheDocument()
     })
 })

@@ -8,6 +8,6 @@ namespace PerformanceEvaluation.Domain.Enums;
 
 public enum EvaluationStatus
 {
-    Submitted = 2,
-    Approved = 3
+    Submitted = 1,
+    Approved = 2
 }

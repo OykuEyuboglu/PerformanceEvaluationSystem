@@ -254,6 +254,8 @@ export default function CriterionFormDialog({
             onClose={onClose}
             maxWidth="sm"
             fullWidth
+            scroll="paper"
+
             slotProps={{
                 paper: {
                     sx: {
@@ -341,11 +343,21 @@ export default function CriterionFormDialog({
             <Box
                 component="form"
                 onSubmit={handleSubmit(onSubmit)}
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    minHeight: 0,
+                    flex: 1,
+                    overflow: 'hidden',
+                }}
             >
                 <DialogContent
                     sx={{
                         px: { xs: 2.5, sm: 3 },
                         py: 2.5,
+                        overflowY: 'auto',
+                        minHeight: 0,
+                        flex: 1,
                     }}
                 >
                     <Stack spacing={2.2}>

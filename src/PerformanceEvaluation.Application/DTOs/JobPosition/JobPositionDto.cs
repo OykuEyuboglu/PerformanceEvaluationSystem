@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PerformanceEvaluation.Application.DTOs.JobPosition
+﻿namespace PerformanceEvaluation.Application.DTOs.JobPosition
 {
     public class JobPositionDto
     {
         public int Id { get; set; }
+
         public string Name { get; set; } = string.Empty;
+
+        public int DepartmentId { get; set; }
     }
 }
