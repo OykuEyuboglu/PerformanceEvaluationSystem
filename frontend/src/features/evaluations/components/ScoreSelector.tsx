@@ -26,7 +26,9 @@ export default function ScoreSelector({
 
     const scoreLabel =
         value !== null
-            ? t.scoreSelector.labels[value]
+            ? t.scoreSelector.labels[
+            value as 1 | 2 | 3 | 4 | 5
+            ]
             : ''
 
     return (

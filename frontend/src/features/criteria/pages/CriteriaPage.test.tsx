@@ -85,13 +85,6 @@ const category2 = {
     isActive: true,
 }
 
-const inactiveCategory = {
-    id: 3,
-    name: 'Eski Kategori',
-    weight: 20,
-    isActive: false,
-}
-
 const criterion1 = {
     id: 1,
     name: 'Kod Kalitesi',
@@ -147,6 +140,7 @@ function setupDefaultMocks() {
         {
             id: 1,
             name: 'Yazılım Geliştirici',
+            departmentId: 1,
         },
     ])
 

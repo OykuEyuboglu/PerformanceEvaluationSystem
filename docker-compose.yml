@@ -1,0 +1,46 @@
+services:
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: performance-evaluation-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${SA_PASSWORD}"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: performance-evaluation-backend
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=PerformanceEvaluationDb;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;"
+      Jwt__Secret: "${JWT_SECRET}"
+      Jwt__Issuer: "PerformanceEvaluationSystem"
+      Jwt__Audience: "PerformanceEvaluationSystemUsers"
+      Jwt__ExpirationMinutes: "30"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - sqlserver
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: performance-evaluation-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  sqlserver_data:

@@ -27,8 +27,16 @@ const categories: PerformanceCategoryDto[] = [
 ]
 
 const jobPositions: JobPositionDto[] = [
-    { id: 1, name: 'Yazılım Geliştirici' },
-    { id: 2, name: 'Analist' },
+    {
+        id: 1,
+        name: 'Yazılım Geliştirici',
+        departmentId: 1,
+    },
+    {
+        id: 2,
+        name: 'Analist',
+        departmentId: 1,
+    },
 ]
 
 const existingCriterion: PerformanceCriterionDto = {

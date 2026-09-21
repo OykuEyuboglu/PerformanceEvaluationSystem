@@ -1,0 +1,26 @@
+﻿FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+
+WORKDIR /src
+
+COPY src/PerformanceEvaluation.Domain/PerformanceEvaluation.Domain.csproj src/PerformanceEvaluation.Domain/
+COPY src/PerformanceEvaluation.Application/PerformanceEvaluation.Application.csproj src/PerformanceEvaluation.Application/
+COPY src/PerformanceEvaluation.Infrastructure/PerformanceEvaluation.Infrastructure.csproj src/PerformanceEvaluation.Infrastructure/
+COPY src/PerformanceEvaluation.API/PerformanceEvaluation.API.csproj src/PerformanceEvaluation.API/
+
+RUN dotnet restore src/PerformanceEvaluation.API/PerformanceEvaluation.API.csproj
+
+COPY src/ src/
+
+RUN dotnet publish src/PerformanceEvaluation.API/PerformanceEvaluation.API.csproj -c Release -o /app/publish /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+
+WORKDIR /app
+
+COPY --from=build /app/publish .
+
+ENV ASPNETCORE_URLS=http://+:8080
+
+EXPOSE 8080
+
+ENTRYPOINT ["dotnet", "PerformanceEvaluation.API.dll"]

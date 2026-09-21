@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.37027.9
@@ -16,6 +16,27 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceEvaluation.Domain", "src\PerformanceEvaluation.Domain\PerformanceEvaluation.Domain.csproj", "{C1689B44-E809-4CC0-8689-7E4C51AE68B0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceEvaluation.Infrastructure", "src\PerformanceEvaluation.Infrastructure\PerformanceEvaluation.Infrastructure.csproj", "{E752A22E-C066-43F7-8163-1DFFE0BCC48A}"
+EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "frontend", "frontend\", "{BEC1AF4D-7070-47DE-541E-D6A8B557E3AB}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.8"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_55336"
+		Debug.AspNetCompiler.PhysicalPath = "frontend\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_55336\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_55336"
+		Release.AspNetCompiler.PhysicalPath = "frontend\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_55336\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "55336"
+		SlnRelativePath = "frontend\"
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceEvaluation.UnitTests", "tests\PerformanceEvaluation.UnitTests\PerformanceEvaluation.UnitTests.csproj", "{762090C0-9279-4BA4-BCFF-F3A9FB5655DB}"
 EndProject
@@ -131,6 +152,3 @@ Global
 		SolutionGuid = {BBB388C8-6BC3-4691-A6C2-59D95B1F46D2}
 	EndGlobalSection
 EndGlobal
-
-
-
