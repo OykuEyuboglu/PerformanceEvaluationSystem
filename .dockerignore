@@ -1,0 +1,12 @@
+.git
+.github
+.vs
+.idea
+**/bin
+**/obj
+frontend/node_modules
+frontend/dist
+tests
+*.user
+*.suo
+.env

@@ -1,5 +1,9 @@
 ﻿import { useEffect, useState, type ReactNode } from 'react'
-import { useForm, Controller, useWatch } from 'react-hook-form'
+import {
+    useForm,
+    Controller,
+    useWatch,
+} from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 
@@ -120,13 +124,15 @@ export default function UserFormDialog({
 
         email: z
             .string()
+            .trim()
             .min(1, 'Email gereklidir')
-            .email(
-                'Geçerli bir email adresi giriniz'
-            )
             .max(
                 200,
                 'Email maksimum 200 karakter olabilir'
+            )
+            .regex(
+                /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                'Geçerli bir email adresi giriniz'
             ),
 
         password: z
@@ -161,6 +167,7 @@ export default function UserFormDialog({
     const editSchema = z.object({
         firstName: z
             .string()
+            .trim()
             .min(1, 'Ad boş olamaz.')
             .max(
                 100,
@@ -169,6 +176,7 @@ export default function UserFormDialog({
 
         lastName: z
             .string()
+            .trim()
             .min(1, 'Soyad boş olamaz.')
             .max(
                 100,
@@ -198,6 +206,7 @@ export default function UserFormDialog({
         isActive: z.boolean(),
 
         email: z.string().optional(),
+
         password: z.string().optional(),
     })
 
@@ -263,14 +272,22 @@ export default function UserFormDialog({
             reset({
                 firstName:
                     initialData.firstName,
+
                 lastName:
                     initialData.lastName,
-                email: initialData.email,
+
+                email:
+                    initialData.email,
+
                 password: '',
+
                 role:
                     initialData.role as UserFormValues['role'],
+
                 departmentId,
+
                 jobPositionId,
+
                 isActive:
                     initialData.isActive,
             })
@@ -327,12 +344,14 @@ export default function UserFormDialog({
                             '0 24px 70px rgba(0,0,0,0.16)',
                         animation:
                             'dialogEnter 260ms ease-out',
+
                         '@keyframes dialogEnter': {
                             from: {
                                 opacity: 0,
                                 transform:
                                     'translateY(8px) scale(0.985)',
                             },
+
                             to: {
                                 opacity: 1,
                                 transform:
@@ -384,8 +403,7 @@ export default function UserFormDialog({
                             sx={{
                                 fontWeight: 850,
                                 fontSize: 18,
-                                letterSpacing:
-                                    '-0.2px',
+                                letterSpacing: '-0.2px',
                             }}
                         >
                             {mode === 'create'
@@ -511,6 +529,17 @@ export default function UserFormDialog({
                                     }) => (
                                         <TextField
                                             {...field}
+                                            value={
+                                                field.value ??
+                                                ''
+                                            }
+                                            onChange={(
+                                                event
+                                            ) => {
+                                                field.onChange(
+                                                    event.target.value
+                                                )
+                                            }}
                                             label={
                                                 t.userForm
                                                     .email
@@ -553,6 +582,10 @@ export default function UserFormDialog({
                                     }) => (
                                         <TextField
                                             {...field}
+                                            value={
+                                                field.value ??
+                                                ''
+                                            }
                                             label={
                                                 t.userForm
                                                     .password
@@ -584,6 +617,7 @@ export default function UserFormDialog({
                                                             />
                                                         </InputAdornment>
                                                     ),
+
                                                     endAdornment: (
                                                         <InputAdornment position="end">
                                                             <IconButton
@@ -1012,6 +1046,7 @@ export default function UserFormDialog({
                             color: '#111111',
                             fontWeight: 500,
                             boxShadow: 'none',
+
                             '&:hover': {
                                 bgcolor: '#E0A300',
                                 boxShadow:

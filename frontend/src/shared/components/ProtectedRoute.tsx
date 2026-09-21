@@ -1,7 +1,7 @@
 ﻿import { useEffect } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
-import type { UserRole } from '../types/user'
+import type { UserRole } from '../../features/users/types'
 import { jwtDecode } from 'jwt-decode'
 
 interface ProtectedRouteProps {

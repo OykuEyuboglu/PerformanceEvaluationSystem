@@ -1,4 +1,4 @@
-﻿import type { UserRole } from './user'
+﻿import type { UserRole } from '../../features/users/types'
 
 export interface NavItem {
     path: string

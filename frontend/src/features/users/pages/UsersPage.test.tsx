@@ -271,10 +271,12 @@ function setupMocks() {
         {
             id: 1,
             name: 'Yazılım Geliştirici',
+            departmentId: 1,
         },
         {
             id: 2,
             name: 'QA Uzmanı',
+            departmentId: 1,
         },
     ])
 
