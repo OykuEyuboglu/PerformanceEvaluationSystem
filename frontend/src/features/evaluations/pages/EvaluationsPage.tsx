@@ -27,6 +27,7 @@ import {
     Snackbar,
     Alert,
     CircularProgress,
+    GlobalStyles,
 } from '@mui/material'
 
 import {
@@ -208,33 +209,89 @@ export default function EvaluationsPage() {
     const [approving, setApproving] =
         useState(false)
 
-    const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>({
-        type: 'include',
-        ids: new Set(),
-    })
-    const [bulkApproving, setBulkApproving] = useState(false)
-    const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
-        open: false, message: '', severity: 'success',
-    })
-    const [bulkApproveDialogOpen, setBulkApproveDialogOpen] = useState(false)
+    const [page, setPage] = useState(0)
+    const [pageSize, setPageSize] = useState(10)
 
-    const loadData = useCallback(async (periodIdFilter?: number) => {
-        setLoading(true)
-        try {
-            const [evalData, periodData] = await Promise.all([
-                getAllEvaluations(periodIdFilter),
-                getEvaluationPeriods(),
-            ])
-            setEvaluations(evalData)
-            setPeriods(periodData)
-        } finally {
-            setLoading(false)
-        }
-    }, [])
+    const [totalCount, setTotalCount] =
+        useState(0)
+
+    const [selectionModel, setSelectionModel] =
+        useState<GridRowSelectionModel>({
+            type: 'include',
+            ids: new Set(),
+        })
+
+    const [bulkApproving, setBulkApproving] =
+        useState(false)
+
+    const [snackbar, setSnackbar] =
+        useState<{
+            open: boolean
+            message: string
+            severity: 'success' | 'error'
+        }>({
+            open: false,
+            message: '',
+            severity: 'success',
+        })
+
+    const [bulkApproveDialogOpen, setBulkApproveDialogOpen] =
+        useState(false)
+
+    const loadData = useCallback(
+        async (
+            pageNumber: number,
+            pageSizeNumber: number,
+            periodIdFilter?: number
+        ) => {
+            setLoading(true)
+
+            try {
+                const [
+                    evalData,
+                    periodData,
+                ] = await Promise.all([
+                    getAllEvaluations(
+                        periodIdFilter,
+                        pageNumber + 1,
+                        pageSizeNumber
+                    ),
+                    getEvaluationPeriods(),
+                ])
+
+                setEvaluations(
+                    evalData.items
+                )
+
+                setTotalCount(
+                    evalData.totalCount
+                )
+
+                setPeriods(periodData)
+            } finally {
+                setLoading(false)
+            }
+        },
+        []
+    )
 
     useEffect(() => {
-        loadData()
-    }, [loadData])
+        const periodId =
+            periodFilter === 'all'
+                ? undefined
+                : Number(periodFilter)
+
+        loadData(
+            page,
+            pageSize,
+            periodId
+        )
+    }, [
+        loadData,
+        page,
+        pageSize,
+        periodFilter,
+    ])
 
     useEffect(() => {
         if (!periods.length) return
@@ -244,103 +301,160 @@ export default function EvaluationsPage() {
 
         if (!periodId) return
 
-        const selectedPeriod = periods.find(
-            (period) =>
-                period.id === Number(periodId)
-        )
+        const selectedPeriod =
+            periods.find(
+                (period) =>
+                    period.id ===
+                    Number(periodId)
+            )
 
         if (selectedPeriod) {
             setPeriodFilter(
-                selectedPeriod.name
+                String(selectedPeriod.id)
             )
+
+            setPage(0)
         }
     }, [periods, searchParams])
 
-    const handleRowClick = async (params: any) => {
+    const handleRowClick = async (
+        params: any
+    ) => {
         try {
-            const full = await getEvaluationById(params.row.id)
+            const full =
+                await getEvaluationById(
+                    params.row.id
+                )
+
             setSelected(full)
         } catch {
             setSnackbar({
                 open: true,
-                message: t.evaluation.loadDetailError,
+                message:
+                    t.evaluation
+                        .loadDetailError,
                 severity: 'error',
             })
         }
     }
 
-    const isRowSelected = (id: number) => {
-        if (selectionModel.type === 'include') {
+    const isRowSelected = (
+        id: number
+    ) => {
+        if (
+            selectionModel.type ===
+            'include'
+        ) {
             return selectionModel.ids.has(id)
         }
 
         return !selectionModel.ids.has(id)
     }
 
-    const selectedSubmittedCount = evaluations.filter(
-        (evaluation) =>
-            isRowSelected(evaluation.id) &&
-            evaluation.status === 'Submitted'
-    ).length
+    const selectedSubmittedCount =
+        evaluations.filter(
+            (evaluation) =>
+                isRowSelected(
+                    evaluation.id
+                ) &&
+                evaluation.status ===
+                'Submitted'
+        ).length
 
-    const selectedEvaluationIds = evaluations
-        .filter((evaluation) => isRowSelected(evaluation.id))
-        .map((evaluation) => evaluation.id)
-
-    const handleBulkApprove = async () => {
-        if (!selectedEvaluationIds.length) return
-
-        setBulkApproving(true)
-
-        try {
-            const { approvedCount } = await approveBulk(selectedEvaluationIds)
-
-            setSnackbar({
-                open: true,
-                message: `${approvedCount} ${t.evaluation.approvedCountSuffix}`,
-                severity: 'success',
-            })
-
-            setSelectionModel({
-                type: 'include',
-                ids: new Set(),
-            })
-
-            setBulkApproveDialogOpen(false)
-
-            await loadData(
-                periods.find((period) => period.name === periodFilter)?.id
+    const selectedEvaluationIds =
+        evaluations
+            .filter((evaluation) =>
+                isRowSelected(
+                    evaluation.id
+                )
             )
-        } catch {
-            setSnackbar({
-                open: true,
-                message: t.evaluation.bulkApproveError,
-                severity: 'error',
-            })
-        } finally {
-            setBulkApproving(false)
-        }
-    }
+            .map(
+                (evaluation) =>
+                    evaluation.id
+            )
 
-    const handleApprove = async (id: number) => {
+    const handleBulkApprove =
+        async () => {
+            if (
+                !selectedEvaluationIds.length
+            ) {
+                return
+            }
+
+            setBulkApproving(true)
+
+            try {
+                const {
+                    approvedCount,
+                } = await approveBulk(
+                    selectedEvaluationIds
+                )
+
+                setSnackbar({
+                    open: true,
+                    message: `${approvedCount} ${t.evaluation.approvedCountSuffix}`,
+                    severity: 'success',
+                })
+
+                setSelectionModel({
+                    type: 'include',
+                    ids: new Set(),
+                })
+
+                setBulkApproveDialogOpen(
+                    false
+                )
+
+                const periodId =
+                    periodFilter === 'all'
+                        ? undefined
+                        : Number(
+                            periodFilter
+                        )
+
+                await loadData(
+                    page,
+                    pageSize,
+                    periodId
+                )
+            } catch {
+                setSnackbar({
+                    open: true,
+                    message:
+                        t.evaluation
+                            .bulkApproveError,
+                    severity: 'error',
+                })
+            } finally {
+                setBulkApproving(false)
+            }
+        }
+
+    const handleApprove = async (
+        id: number
+    ) => {
         setApproving(true)
 
         try {
             const updated =
                 await approveEvaluation(id)
 
-            setEvaluations((prev) =>
-                prev.map((evaluation) =>
-                    evaluation.id === id
-                        ? updated
-                        : evaluation
-                )
+            setEvaluations(
+                (prev) =>
+                    prev.map(
+                        (evaluation) =>
+                            evaluation.id ===
+                                id
+                                ? updated
+                                : evaluation
+                    )
             )
 
             setSelected(updated)
         } catch (error) {
             console.error(
-                t.evaluation.approveErrorConsole,
+                t.evaluation
+                    .approveErrorConsole,
                 error
             )
         } finally {
@@ -353,65 +467,65 @@ export default function EvaluationsPage() {
             .trim()
             .toLowerCase()
 
-        return evaluations.filter((e) => {
-            if (
-                periodFilter !== 'all' &&
-                e.evaluationPeriodName !==
-                periodFilter
-            ) {
-                return false
-            }
+        if (!q) {
+            return evaluations
+        }
 
-            if (!q) return true
-
-            return (
-                e.employeeName
+        return evaluations.filter(
+            (evaluation) =>
+                evaluation.employeeName
                     .toLowerCase()
                     .includes(q) ||
-                e.evaluatorName
+                evaluation.evaluatorName
                     .toLowerCase()
                     .includes(q) ||
-                e.evaluationPeriodName
+                evaluation.evaluationPeriodName
                     .toLowerCase()
                     .includes(q)
-            )
-        })
+        )
     }, [
         evaluations,
-        periodFilter,
         search,
     ])
 
     const stats = useMemo(() => {
-        const total = filtered.length
+        const currentPageTotal =
+            filtered.length
 
-        const average = total
-            ? filtered.reduce(
-                (sum, e) =>
-                    sum + e.totalScore,
-                0
-            ) / total
-            : 0
+        const average =
+            currentPageTotal
+                ? filtered.reduce(
+                    (sum, evaluation) =>
+                        sum +
+                        evaluation.totalScore,
+                    0
+                ) / currentPageTotal
+                : 0
 
         const approved =
             filtered.filter(
-                (e) =>
-                    e.status === 'Approved'
+                (evaluation) =>
+                    evaluation.status ===
+                    'Approved'
             ).length
 
         const submitted =
             filtered.filter(
-                (e) =>
-                    e.status === 'Submitted'
+                (evaluation) =>
+                    evaluation.status ===
+                    'Submitted'
             ).length
 
         return {
-            total,
+            total: totalCount,
             average,
             approved,
             submitted,
         }
-    }, [filtered])
+    }, [
+        filtered,
+        totalCount,
+    ])
 
     const columns = useMemo<
         GridColDef<EvaluationDto>[]
@@ -419,9 +533,11 @@ export default function EvaluationsPage() {
         () => [
             {
                 field: 'employeeName',
-                headerName: t.evaluation.employee,
+                headerName:
+                    t.evaluation.employee,
                 flex: 1.15,
                 minWidth: 190,
+
                 renderCell: (
                     params: GridRenderCellParams<
                         EvaluationDto,
@@ -431,7 +547,8 @@ export default function EvaluationsPage() {
                     <Box
                         sx={{
                             display: 'flex',
-                            alignItems: 'center',
+                            alignItems:
+                                'center',
                             gap: 1.25,
                             minWidth: 0,
                             width: '100%',
@@ -445,12 +562,14 @@ export default function EvaluationsPage() {
                                 fontWeight: 800,
                                 bgcolor:
                                     '#bdbdbd',
-                                color: 'text.primary',
+                                color:
+                                    'text.primary',
                                 flexShrink: 0,
                             }}
                         >
                             {getInitials(
-                                params.value ?? ''
+                                params.value ??
+                                ''
                             )}
                         </Avatar>
 
@@ -458,8 +577,10 @@ export default function EvaluationsPage() {
                             sx={{
                                 fontSize: 13.5,
                                 fontWeight: 650,
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
+                                whiteSpace:
+                                    'nowrap',
+                                overflow:
+                                    'hidden',
                                 textOverflow:
                                     'ellipsis',
                             }}
@@ -472,21 +593,28 @@ export default function EvaluationsPage() {
 
             {
                 field: 'evaluatorName',
-                headerName: t.evaluation.evaluator,
+                headerName:
+                    t.evaluation.evaluator,
                 flex: 1.1,
                 minWidth: 180,
             },
 
             {
-                field: 'evaluationPeriodName',
-                headerName: t.evaluation.periodShort,
+                field:
+                    'evaluationPeriodName',
+                headerName:
+                    t.evaluation.periodShort,
                 flex: 1.15,
                 minWidth: 170,
-                renderCell: (params) => (
+
+                renderCell: (
+                    params
+                ) => (
                     <Typography
                         sx={{
                             fontSize: 13,
-                            color: 'text.secondary',
+                            color:
+                                'text.secondary',
                         }}
                     >
                         {params.value}
@@ -496,17 +624,24 @@ export default function EvaluationsPage() {
 
             {
                 field: 'totalScore',
-                headerName: t.evaluation.totalScore,
+                headerName:
+                    t.evaluation.totalScore,
                 flex: 0.8,
                 minWidth: 125,
-                renderCell: (params) => {
+
+                renderCell: (
+                    params
+                ) => {
                     const score =
-                        Number(params.value)
+                        Number(
+                            params.value
+                        )
 
                     return (
                         <Box
                             sx={{
-                                display: 'flex',
+                                display:
+                                    'flex',
                                 alignItems:
                                     'center',
                                 gap: 0.8,
@@ -528,16 +663,21 @@ export default function EvaluationsPage() {
 
                             <Typography
                                 sx={{
-                                    fontWeight: 800,
-                                    fontSize: 13.5,
+                                    fontWeight:
+                                        800,
+                                    fontSize:
+                                        13.5,
                                 }}
                             >
-                                {score.toFixed(2)}
+                                {score.toFixed(
+                                    2
+                                )}
                             </Typography>
 
                             <Typography
                                 sx={{
-                                    fontSize: 11.5,
+                                    fontSize:
+                                        11.5,
                                     color:
                                         'text.secondary',
                                 }}
@@ -551,23 +691,32 @@ export default function EvaluationsPage() {
 
             {
                 field: 'status',
-                headerName: t.evaluation.status,
+                headerName:
+                    t.evaluation.status,
                 flex: 0.85,
                 minWidth: 125,
-                renderCell: (params) => (
+
+                renderCell: (
+                    params
+                ) => (
                     <Chip
                         size="small"
                         label={
-                            params.value === 'Submitted'
-                                ? t.evaluation.submitted
-                                : params.value === 'Approved'
-                                    ? t.evaluation.approved
+                            params.value ===
+                                'Submitted'
+                                ? t.evaluation
+                                    .submitted
+                                : params.value ===
+                                    'Approved'
+                                    ? t.evaluation
+                                        .approved
                                     : params.value
                         }
                         color={
                             STATUS_COLORS[
                             params.value
-                            ] ?? 'default'
+                            ] ??
+                            'default'
                         }
                         variant={
                             params.value ===
@@ -586,15 +735,22 @@ export default function EvaluationsPage() {
 
             {
                 field: 'createdAt',
-                headerName: t.evaluation.date,
+                headerName:
+                    t.evaluation.date,
                 flex: 0.85,
                 minWidth: 115,
-                valueFormatter: (value) =>
+
+                valueFormatter: (
+                    value
+                ) =>
                     value
                         ? new Date(
                             value
                         ).toLocaleDateString(
-                            language === 'tr' ? 'tr-TR' : 'en-US'
+                            language ===
+                                'tr'
+                                ? 'tr-TR'
+                                : 'en-US'
                         )
                         : '-',
             },
@@ -605,18 +761,33 @@ export default function EvaluationsPage() {
                 width: 64,
                 sortable: false,
                 filterable: false,
-                disableColumnMenu: true,
-                renderCell: (params) => (
-                    <Tooltip title={t.evaluation.viewDetails}>
+                disableColumnMenu:
+                    true,
+
+                renderCell: (
+                    params
+                ) => (
+                    <Tooltip
+                        title={
+                            t.evaluation
+                                .viewDetails
+                        }
+                    >
                         <IconButton
                             size="small"
-                            onClick={(event) => {
+                            onClick={(
+                                event
+                            ) => {
                                 event.stopPropagation()
-                                void handleRowClick(params)
+
+                                void handleRowClick(
+                                    params
+                                )
                             }}
                             sx={{
                                 color:
                                     'text.secondary',
+
                                 '&:hover': {
                                     color:
                                         'primary.main',
@@ -631,7 +802,10 @@ export default function EvaluationsPage() {
                 ),
             },
         ],
-        [handleRowClick, language]
+        [
+            handleRowClick,
+            language,
+        ]
     )
 
     return (
@@ -639,6 +813,7 @@ export default function EvaluationsPage() {
             sx={{
                 animation:
                     'evaluationsEnter 260ms ease-out',
+
                 '@keyframes evaluationsEnter': {
                     from: {
                         opacity: 0,
@@ -682,7 +857,8 @@ export default function EvaluationsPage() {
                                 height: 42,
                                 borderRadius: 2.25,
                                 display: 'grid',
-                                placeItems: 'center',
+                                placeItems:
+                                    'center',
                                 bgcolor:
                                     'primary.main',
                                 color:
@@ -703,17 +879,24 @@ export default function EvaluationsPage() {
                                         -0.35,
                                 }}
                             >
-                                {t.evaluation.title}
+                                {
+                                    t.evaluation
+                                        .title
+                                }
                             </Typography>
 
                             <Typography
                                 color="text.secondary"
                                 sx={{
                                     mt: 0.25,
-                                    fontSize: 13.5,
+                                    fontSize:
+                                        13.5,
                                 }}
                             >
-                                {t.evaluation.description}
+                                {
+                                    t.evaluation
+                                        .description
+                                }
                             </Typography>
                         </Box>
                     </Box>
@@ -722,18 +905,24 @@ export default function EvaluationsPage() {
                 <TextField
                     select
                     size="small"
-                    label={t.evaluation.period}
-                    value={periodFilter}
-                    onChange={(e) =>
+                    label={
+                        t.evaluation.period
+                    }
+                    value={
+                        periodFilter
+                    }
+                    onChange={(e) => {
                         setPeriodFilter(
                             e.target.value
                         )
-                    }
+                        setPage(0)
+                    }}
                     sx={{
                         minWidth: {
                             xs: '100%',
                             sm: 230,
                         },
+
                         '& .MuiOutlinedInput-root':
                         {
                             borderRadius: 2,
@@ -741,17 +930,26 @@ export default function EvaluationsPage() {
                     }}
                 >
                     <MenuItem value="all">
-                        {t.evaluation.allPeriods}
+                        {
+                            t.evaluation
+                                .allPeriods
+                        }
                     </MenuItem>
 
-                    {periods.map((period) => (
-                        <MenuItem
-                            key={period.id}
-                            value={period.name}
-                        >
-                            {period.name}
-                        </MenuItem>
-                    ))}
+                    {periods.map(
+                        (period) => (
+                            <MenuItem
+                                key={
+                                    period.id
+                                }
+                                value={String(
+                                    period.id
+                                )}
+                            >
+                                {period.name}
+                            </MenuItem>
+                        )
+                    )}
                 </TextField>
             </Box>
 
@@ -763,53 +961,86 @@ export default function EvaluationsPage() {
                         sm: 'repeat(2, minmax(0, 1fr))',
                         lg: 'repeat(4, minmax(0, 1fr))',
                     },
-                    gap: { xs: 1.25, sm: 1.75 },
+                    gap: {
+                        xs: 1.25,
+                        sm: 1.75,
+                    },
                     mb: 2.5,
                 }}
             >
                 <KpiCard
-                    label={t.evaluation.totalEvaluations}
+                    label={
+                        t.evaluation
+                            .totalEvaluations
+                    }
                     value={stats.total}
-                    caption={t.evaluation.filteredRecords}
+                    caption={
+                        t.evaluation
+                            .filteredRecords
+                    }
                     icon={
                         <AssessmentOutlined fontSize="small" />
                     }
                 />
 
                 <KpiCard
-                    label={t.evaluation.averageScore}
+                    label={
+                        t.evaluation
+                            .averageScore
+                    }
                     value={`${stats.average.toFixed(
                         2
                     )} / 5`}
-                    caption={t.evaluation.overallAverage}
+                    caption={
+                        t.evaluation
+                            .overallAverage
+                    }
                     icon={
                         <TrendingUpOutlined fontSize="small" />
                     }
                 />
 
                 <KpiCard
-                    label={t.evaluation.approved}
-                    value={stats.approved}
+                    label={
+                        t.evaluation
+                            .approved
+                    }
+                    value={
+                        stats.approved
+                    }
                     caption={`${stats.total
                         ? Math.round(
                             (stats.approved /
-                                stats.total) *
+                                filtered.length) *
                             100
                         )
                         : 0
-                        }% ${t.evaluation.approvalRate}`
-                    }
+                        }% ${t.evaluation.approvalRate
+                        }`}
                     icon={
                         <CheckCircleOutlined fontSize="small" />
                     }
                 />
             </Box>
 
+            <GlobalStyles
+                styles={{
+                    '.MuiDataGrid-filterFormOperatorInput': {
+                        display: 'none !important',
+                    },
+
+                    '.MuiDataGrid-filterFormValueInput': {
+                        flex: '1 1 auto',
+                    },
+                }}
+            />
+
             <Paper
                 elevation={0}
                 sx={{
                     border: '1px solid',
-                    borderColor: 'divider',
+                    borderColor:
+                        'divider',
                     borderRadius: 3,
                     overflow: 'hidden',
                 }}
@@ -821,36 +1052,48 @@ export default function EvaluationsPage() {
                             md: 2.25,
                         },
                         py: 1.75,
-                        borderBottom: '1px solid',
-                        borderColor: 'divider',
+                        borderBottom:
+                            '1px solid',
+                        borderColor:
+                            'divider',
                         display: 'flex',
                         alignItems:
                             'center',
                         justifyContent:
                             'space-between',
                         gap: 2,
-                        flexWrap: 'wrap',
+                        flexWrap:
+                            'wrap',
                     }}
                 >
                     <Box>
                         <Typography
                             sx={{
-                                fontWeight: 750,
-                                fontSize: 14.5,
+                                fontWeight:
+                                    750,
+                                fontSize:
+                                    14.5,
                             }}
                         >
-                            {t.evaluation.recordsTitle}
+                            {
+                                t.evaluation
+                                    .recordsTitle
+                            }
                         </Typography>
 
                         <Typography
                             color="text.secondary"
                             sx={{
-                                fontSize: 11.5,
+                                fontSize:
+                                    11.5,
                                 mt: 0.25,
                             }}
                         >
-                            {filtered.length}{' '}
-                            {t.evaluation.recordsListed}
+                            {totalCount}{' '}
+                            {
+                                t.evaluation
+                                    .recordsListed
+                            }
                         </Typography>
                     </Box>
 
@@ -859,106 +1102,174 @@ export default function EvaluationsPage() {
                         value={search}
                         onChange={(e) =>
                             setSearch(
-                                e.target.value
+                                e.target
+                                    .value
                             )
                         }
-                        placeholder={t.evaluation.searchPlaceholder}
+                        placeholder={
+                            t.evaluation
+                                .searchPlaceholder
+                        }
                         sx={{
                             width: {
                                 xs: '100%',
                                 sm: 330,
                             },
+
                             '& .MuiOutlinedInput-root':
                             {
-                                borderRadius: 2,
-                                fontSize: 13,
+                                borderRadius:
+                                    2,
+                                fontSize:
+                                    13,
                             },
                         }}
                         slotProps={{
                             input: {
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <Search
-                                            fontSize="small"
-                                            sx={{
-                                                color:
-                                                    'text.secondary',
-                                            }}
-                                        />
-                                    </InputAdornment>
-                                ),
+                                startAdornment:
+                                    (
+                                        <InputAdornment position="start">
+                                            <Search
+                                                fontSize="small"
+                                                sx={{
+                                                    color:
+                                                        'text.secondary',
+                                                }}
+                                            />
+                                        </InputAdornment>
+                                    ),
                             },
                         }}
                     />
 
-                    {selectedSubmittedCount > 0 && (
-                        <Button
-                            variant="contained"
-                            color="success"
-                            size="small"
-                            startIcon={
-                                bulkApproving ? (
-                                    <CircularProgress size={16} sx={{ color: '#fff' }} />
-                                ) : (
-                                    <CheckCircleOutlined />
-                                )
-                            }
-                            disabled={bulkApproving}
-                            onClick={() => setBulkApproveDialogOpen(true)}
-                            sx={{ borderRadius: 2, flexShrink: 0 }}
-                        >
-                            {bulkApproving
-                                ? t.evaluation.approving
-                                : `${t.evaluation.approveSelected} (${selectedSubmittedCount})`}
-                        </Button>
-                    )}
+                    {selectedSubmittedCount >
+                        0 && (
+                            <Button
+                                variant="contained"
+                                color="success"
+                                size="small"
+                                startIcon={
+                                    bulkApproving ? (
+                                        <CircularProgress
+                                            size={
+                                                16
+                                            }
+                                            sx={{
+                                                color:
+                                                    '#fff',
+                                            }}
+                                        />
+                                    ) : (
+                                        <CheckCircleOutlined />
+                                    )
+                                }
+                                disabled={
+                                    bulkApproving
+                                }
+                                onClick={() =>
+                                    setBulkApproveDialogOpen(
+                                        true
+                                    )
+                                }
+                                sx={{
+                                    borderRadius:
+                                        2,
+                                    flexShrink:
+                                        0,
+                                }}
+                            >
+                                {bulkApproving
+                                    ? t
+                                        .evaluation
+                                        .approving
+                                    : `${t.evaluation.approveSelected} (${selectedSubmittedCount})`}
+                            </Button>
+                        )}
                 </Box>
 
                 <DataGrid
                     rows={filtered}
                     columns={columns}
                     loading={loading}
-                    getRowId={(row) => row.id}
+                    getRowId={(row) =>
+                        row.id
+                    }
                     autoHeight
                     checkboxSelection
                     disableRowSelectionOnClick
-                    onRowClick={handleRowClick}
-                    rowSelectionModel={selectionModel}
-                    onRowSelectionModelChange={(newSelection) =>
-                        setSelectionModel(newSelection)
+                    pagination
+                    paginationMode="server"
+                    rowCount={
+                        totalCount
                     }
+
+                    paginationModel={{
+                        page,
+                        pageSize,
+                    }}
+
+                    onPaginationModelChange={(
+                        model
+                    ) => {
+                        setPage(
+                            model.page
+                        )
+                        setPageSize(
+                            model.pageSize
+                        )
+                    }}
+
+                    onRowClick={
+                        handleRowClick
+                    }
+
+                    rowSelectionModel={
+                        selectionModel
+                    }
+
+                    onRowSelectionModelChange={(
+                        newSelection
+                    ) =>
+                        setSelectionModel(
+                            newSelection
+                        )
+                    }
+
                     pageSizeOptions={[
                         10,
                         25,
                         50,
                     ]}
+
                     initialState={{
-                        pagination: {
-                            paginationModel: {
-                                pageSize: 10,
-                            },
-                        },
                         sorting: {
                             sortModel: [
                                 {
-                                    field: 'createdAt',
-                                    sort: 'desc',
+                                    field:
+                                        'createdAt',
+                                    sort:
+                                        'desc',
                                 },
                             ],
                         },
                     }}
+
                     localeText={{
                         noRowsLabel:
-                            t.evaluation.gridNoRows,
+                            t.evaluation
+                                .gridNoRows,
+
                         noResultsOverlayLabel:
-                            t.evaluation.gridNoResults,
+                            t.evaluation
+                                .gridNoResults,
 
                         footerRowSelected:
                             (count) =>
                                 `${count.toLocaleString()} ${t.evaluation.gridRowSelected}`,
 
                         footerTotalRows:
-                            t.evaluation.gridTotalRows,
+                            t.evaluation
+                                .gridTotalRows,
 
                         footerTotalVisibleRows:
                             (
@@ -968,100 +1279,130 @@ export default function EvaluationsPage() {
                                 `${visibleCount.toLocaleString()} / ${totalCount.toLocaleString()}`,
 
                         columnMenuLabel:
-                            t.evaluation.gridColumnMenu,
+                            t.evaluation
+                                .gridColumnMenu,
+
                         columnMenuShowColumns:
-                            t.evaluation.gridShowColumns,
+                            t.evaluation
+                                .gridShowColumns,
+
                         columnMenuManageColumns:
-                            t.evaluation.gridManageColumns,
+                            t.evaluation
+                                .gridManageColumns,
+
                         columnMenuFilter:
-                            t.evaluation.gridFilter,
+                            t.evaluation
+                                .gridFilter,
+
                         columnMenuHideColumn:
-                            t.evaluation.gridHideColumn,
+                            t.evaluation
+                                .gridHideColumn,
+
                         columnMenuUnsort:
-                            t.evaluation.gridUnsort,
+                            t.evaluation
+                                .gridUnsort,
+
                         columnMenuSortAsc:
-                            t.evaluation.gridSortAsc,
+                            t.evaluation
+                                .gridSortAsc,
+
                         columnMenuSortDesc:
-                            t.evaluation.gridSortDesc,
+                            t.evaluation
+                                .gridSortDesc,
 
                         filterPanelAddFilter:
-                            t.evaluation.gridAddFilter,
-                        filterPanelDeleteIconLabel:
-                            t.evaluation.gridDelete,
-                        filterPanelColumn:
-                            t.evaluation.gridColumn,
-                        filterPanelInputLabel:
-                            t.evaluation.gridValue,
-                        filterPanelInputPlaceholder:
-                            t.evaluation.gridFilterValue,
+                            t.evaluation
+                                .gridAddFilter,
 
-                        filterOperatorContains:
-                            t.evaluation.gridContains,
-                        filterOperatorEquals:
-                            t.evaluation.gridEquals,
-                        filterOperatorStartsWith:
-                            t.evaluation.gridStartsWith,
-                        filterOperatorEndsWith:
-                            t.evaluation.gridEndsWith,
-                        filterOperatorIs:
-                            t.evaluation.gridEquals,
-                        filterOperatorNot:
-                            t.evaluation.gridNotEqual,
-                        filterOperatorAfter:
-                            t.evaluation.gridAfter,
-                        filterOperatorOnOrAfter:
-                            t.evaluation.gridAfterOrEqual,
-                        filterOperatorBefore:
-                            t.evaluation.gridBefore,
-                        filterOperatorOnOrBefore:
-                            t.evaluation.gridBeforeOrEqual,
-                        filterOperatorIsEmpty:
-                            t.evaluation.gridEmpty,
-                        filterOperatorIsNotEmpty:
-                            t.evaluation.gridNotEmpty,
-                        filterOperatorIsAnyOf:
-                            t.evaluation.gridAnyOf,
+                        filterPanelDeleteIconLabel:
+                            t.evaluation
+                                .gridDelete,
+
+                        filterPanelColumn:
+                            t.evaluation
+                                .gridColumn,
+
+                        filterPanelInputLabel:
+                            t.evaluation
+                                .gridValue,
+
+                        filterPanelInputPlaceholder:
+                            t.evaluation
+                                .gridFilterValue,
 
                         columnHeaderSortIconLabel:
-                            t.evaluation.gridSortHint,
+                            t.evaluation
+                                .gridSortHint,
 
                         checkboxSelectionHeaderName:
-                            t.evaluation.gridSelect,
+                            t.evaluation
+                                .gridSelect,
+
                         checkboxSelectionSelectAllRows:
-                            t.evaluation.gridSelectAll,
+                            t.evaluation
+                                .gridSelectAll,
+
                         checkboxSelectionUnselectAllRows:
-                            t.evaluation.gridUnselectAll,
+                            t.evaluation
+                                .gridUnselectAll,
 
                         toolbarExport:
-                            t.evaluation.gridExport,
+                            t.evaluation
+                                .gridExport,
+
                         toolbarExportCSV:
-                            t.evaluation.gridExportCsv,
+                            t.evaluation
+                                .gridExportCsv,
+
                         toolbarExportPrint:
-                            t.evaluation.gridPrint,
+                            t.evaluation
+                                .gridPrint,
+
                         toolbarColumns:
-                            t.evaluation.gridColumns,
+                            t.evaluation
+                                .gridColumns,
+
                         toolbarFilters:
-                            t.evaluation.gridFilters,
+                            t.evaluation
+                                .gridFilters,
+
                         toolbarDensity:
-                            t.evaluation.gridDensity,
+                            t.evaluation
+                                .gridDensity,
+
                         toolbarDensityLabel:
-                            t.evaluation.gridDensity,
+                            t.evaluation
+                                .gridDensity,
+
                         toolbarDensityCompact:
-                            t.evaluation.gridCompact,
+                            t.evaluation
+                                .gridCompact,
+
                         toolbarDensityStandard:
-                            t.evaluation.gridStandard,
+                            t.evaluation
+                                .gridStandard,
+
                         toolbarDensityComfortable:
-                            t.evaluation.gridComfortable,
+                            t.evaluation
+                                .gridComfortable,
 
                         filterPanelOperator:
-                            t.evaluation.gridOperator,
+                            t.evaluation
+                                .gridOperator,
+
                         filterPanelLogicOperator:
-                            t.evaluation.gridLogicOperator,
+                            t.evaluation
+                                .gridLogicOperator,
+
                         filterPanelOperatorAnd:
-                            t.evaluation.gridAnd,
+                            t.evaluation
+                                .gridAnd,
+
                         filterPanelOperatorOr:
-                            t.evaluation.gridOr,
+                            t.evaluation
+                                .gridOr,
                     }}
+
                     sx={{
                         border: 'none',
 
@@ -1077,15 +1418,18 @@ export default function EvaluationsPage() {
 
                         '& .MuiDataGrid-columnHeaderTitle':
                         {
-                            fontWeight: 750,
-                            fontSize: 12,
+                            fontWeight:
+                                750,
+                            fontSize:
+                                12,
                         },
 
                         '& .MuiDataGrid-cell':
                         {
                             borderColor:
                                 'divider',
-                            display: 'flex',
+                            display:
+                                'flex',
                             alignItems:
                                 'center',
                         },
@@ -1094,7 +1438,8 @@ export default function EvaluationsPage() {
                         {
                             transition:
                                 'background-color 140ms ease',
-                            cursor: 'pointer',
+                            cursor:
+                                'pointer',
                         },
 
                         '& .MuiDataGrid-row:hover':
@@ -1110,6 +1455,7 @@ export default function EvaluationsPage() {
                             borderColor:
                                 'divider',
                         },
+
                     }}
                 />
             </Paper>
@@ -1118,72 +1464,140 @@ export default function EvaluationsPage() {
                 open={!!selected}
                 evaluation={selected}
                 onClose={() =>
-                    setSelected(null)
+                    setSelected(
+                        null
+                    )
                 }
                 canApprove
-                onApprove={handleApprove}
-                approving={approving}
+                onApprove={
+                    handleApprove
+                }
+                approving={
+                    approving
+                }
             />
 
             <Dialog
-                open={bulkApproveDialogOpen}
-                onClose={() => !bulkApproving && setBulkApproveDialogOpen(false)}
+                open={
+                    bulkApproveDialogOpen
+                }
+                onClose={() =>
+                    !bulkApproving &&
+                    setBulkApproveDialogOpen(
+                        false
+                    )
+                }
                 maxWidth="xs"
                 fullWidth
             >
-                <DialogTitle>{t.evaluation.bulkDialogTitle}</DialogTitle>
+                <DialogTitle>
+                    {
+                        t.evaluation
+                            .bulkDialogTitle
+                    }
+                </DialogTitle>
+
                 <DialogContent>
                     <DialogContentText>
-                        {
-                            t.evaluation.bulkDialogDescription
-                                .replace(
-                                    '{count}',
-                                    String(selectedSubmittedCount),
-                                )
-                        }
+                        {t.evaluation.bulkDialogDescription.replace(
+                            '{count}',
+                            String(
+                                selectedSubmittedCount
+                            )
+                        )}
                     </DialogContentText>
                 </DialogContent>
+
                 <DialogActions>
                     <Button
-                        onClick={() => setBulkApproveDialogOpen(false)}
-                        disabled={bulkApproving}
+                        onClick={() =>
+                            setBulkApproveDialogOpen(
+                                false
+                            )
+                        }
+                        disabled={
+                            bulkApproving
+                        }
                     >
-                        {t.evaluation.cancel}
+                        {
+                            t.evaluation
+                                .cancel
+                        }
                     </Button>
+
                     <Button
                         variant="contained"
                         color="success"
-                        onClick={handleBulkApprove}
-                        disabled={bulkApproving}
+                        onClick={
+                            handleBulkApprove
+                        }
+                        disabled={
+                            bulkApproving
+                        }
                         startIcon={
                             bulkApproving ? (
-                                <CircularProgress size={16} sx={{ color: '#fff' }} />
+                                <CircularProgress
+                                    size={
+                                        16
+                                    }
+                                    sx={{
+                                        color:
+                                            '#fff',
+                                    }}
+                                />
                             ) : (
                                 <CheckCircleOutlined />
                             )
                         }
                     >
-                        {bulkApproving ? t.evaluation.approving : t.evaluation.approve}
+                        {bulkApproving
+                            ? t
+                                .evaluation
+                                .approving
+                            : t
+                                .evaluation
+                                .approve}
                     </Button>
                 </DialogActions>
             </Dialog>
 
             <Snackbar
-                open={snackbar.open}
-                autoHideDuration={3500}
-                onClose={() =>
-                    setSnackbar((prev) => ({ ...prev, open: false }))
+                open={
+                    snackbar.open
                 }
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                autoHideDuration={
+                    3500
+                }
+                onClose={() =>
+                    setSnackbar(
+                        (prev) => ({
+                            ...prev,
+                            open: false,
+                        })
+                    )
+                }
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                }}
             >
                 <Alert
-                    severity={snackbar.severity}
+                    severity={
+                        snackbar.severity
+                    }
                     variant="filled"
                     onClose={() =>
-                        setSnackbar((prev) => ({ ...prev, open: false }))
+                        setSnackbar(
+                            (prev) => ({
+                                ...prev,
+                                open: false,
+                            })
+                        )
                     }
                 >
-                    {snackbar.message}
+                    {
+                        snackbar.message
+                    }
                 </Alert>
             </Snackbar>
         </Box>

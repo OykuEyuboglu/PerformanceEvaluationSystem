@@ -342,12 +342,46 @@ const approvedEvaluation = {
         },
     ],
 }
-
 function setupDefaultMocks() {
-    mockedGetAll.mockResolvedValue([
-        submittedEvaluation,
-        approvedEvaluation,
-    ] as any)
+    mockedGetAll.mockImplementation(
+        async (
+            periodId?: number,
+            page = 1,
+            pageSize = 10,
+        ) => {
+            const allEvaluations =
+                periodId === 1
+                    ? [submittedEvaluation]
+                    : periodId === 2
+                        ? [approvedEvaluation]
+                        : [
+                            submittedEvaluation,
+                            approvedEvaluation,
+                        ]
+
+            const start =
+                (page - 1) * pageSize
+
+            const items =
+                allEvaluations.slice(
+                    start,
+                    start + pageSize,
+                )
+
+            return {
+                items,
+                page,
+                pageSize,
+                totalCount:
+                    allEvaluations.length,
+                totalPages:
+                    Math.ceil(
+                        allEvaluations.length /
+                        pageSize,
+                    ),
+            } as any
+        },
+    )
 
     mockedGetPeriods.mockResolvedValue(
         periods as any,
@@ -465,6 +499,8 @@ describe('EvaluationsPage', () => {
             mockedGetAll,
         ).toHaveBeenCalledWith(
             undefined,
+            1,
+            10,
         )
 
         expect(
@@ -533,7 +569,7 @@ describe('EvaluationsPage', () => {
 
             expect(
                 screen.getByText(
-                    '1 kayıt listeleniyor',
+                    '2 kayıt listeleniyor',
                 ),
             ).toBeInTheDocument()
         })
@@ -615,7 +651,7 @@ describe('EvaluationsPage', () => {
 
             expect(
                 screen.getByText(
-                    '1 kayıt listeleniyor',
+                    '2 kayıt listeleniyor',
                 ),
             ).toBeInTheDocument()
         })
@@ -650,7 +686,7 @@ describe('EvaluationsPage', () => {
 
             expect(
                 screen.getByText(
-                    '1 kayıt listeleniyor',
+                    '2 kayıt listeleniyor',
                 ),
             ).toBeInTheDocument()
         })
@@ -1227,9 +1263,13 @@ describe('EvaluationsPage', () => {
     })
 
     it('boş değerlendirme listesinde sonuç bulunamadı göstermeli', async () => {
-        mockedGetAll.mockResolvedValueOnce(
-            [],
-        )
+        mockedGetAll.mockResolvedValueOnce({
+            items: [],
+            page: 1,
+            pageSize: 10,
+            totalCount: 0,
+            totalPages: 0,
+        })
 
         renderPage()
 
@@ -1266,10 +1306,16 @@ describe('EvaluationsPage', () => {
             ),
         ).toBeInTheDocument()
 
-        resolveRequest?.([
-            submittedEvaluation,
-            approvedEvaluation,
-        ])
+        resolveRequest?.({
+            items: [
+                submittedEvaluation,
+                approvedEvaluation,
+            ],
+            page: 1,
+            pageSize: 10,
+            totalCount: 2,
+            totalPages: 1,
+        })
 
         await waitFor(() => {
             expect(

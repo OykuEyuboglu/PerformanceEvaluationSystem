@@ -229,10 +229,35 @@ public class EvaluationService : IEvaluationService
         return _mapper.Map<EvaluationDto>(created);
     }
 
-    public async Task<IEnumerable<EvaluationDto>> GetAllAsync(int? evaluationPeriodId = null)
+    public async Task<PagedResultDto<EvaluationDto>> GetAllAsync(int? evaluationPeriodId, int page, int pageSize)
     {
-        var evaluations = await _evaluationRepository.GetAllSummaryAsync(evaluationPeriodId);
-        return _mapper.Map<IEnumerable<EvaluationDto>>(evaluations);
+        page = page < 1 ? 1 : page;
+
+        pageSize = pageSize < 1
+            ? 10
+            : pageSize;
+
+        if (pageSize > 100)
+            pageSize = 100;
+
+        var (evaluations, totalCount) =
+            await _evaluationRepository.GetAllSummaryAsync(evaluationPeriodId, page, pageSize);
+
+        var items =
+            _mapper.Map<IEnumerable<EvaluationDto>>(evaluations);
+
+        var totalPages =
+            (int)Math.Ceiling(
+                totalCount / (double)pageSize);
+
+        return new PagedResultDto<EvaluationDto>
+        {
+            Items = items,
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount,
+            TotalPages = totalPages
+        };
     }
 
     public async Task<IEnumerable<EvaluationDto>> GetByEvaluatorAndPeriodAsync(
