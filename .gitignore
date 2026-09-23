@@ -2,3 +2,19 @@
 bin/
 obj/
 *.user
+
+# Test results
+**/TestResults/
+**/test-results/
+
+# Coverage temporary files
+/coverage-temp/
+
+# Generated coverage reports
+/coverage-report/
+
+# Frontend coverage
+/frontend/coverage/
+
+# Coverage tools
+/.coverage/
