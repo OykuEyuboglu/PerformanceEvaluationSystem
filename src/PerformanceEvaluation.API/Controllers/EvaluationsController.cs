@@ -15,8 +15,7 @@ public class EvaluationsController(
     [Authorize(Roles = "Evaluator")]
     [HttpPost]
     [SwaggerOperation(Summary = "Yeni performans değerlendirmesi oluştur")]
-    public async Task<IActionResult> Create(
-        [FromBody] CreateEvaluationDto dto)
+    public async Task<IActionResult> Create([FromBody] CreateEvaluationDto dto)
     {
         var result = await evaluationService.CreateAsync(dto, User);
 
@@ -28,10 +27,15 @@ public class EvaluationsController(
 
     [Authorize(Roles = "Admin")]
     [HttpGet]
-    [SwaggerOperation(Summary = "Tüm performans değerlendirmelerini getir")]
-    public async Task<IActionResult> GetAll()
+    [SwaggerOperation(
+      Summary = "Performans değerlendirmelerini sayfalı şekilde getir")]
+    public async Task<IActionResult> GetAll([FromQuery] int? evaluationPeriodId = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        var result = await evaluationService.GetAllAsync();
+        var result = await evaluationService.GetAllAsync(
+            evaluationPeriodId,
+            page,
+            pageSize);
+
         return Ok(result);
     }
 
@@ -56,8 +60,7 @@ public class EvaluationsController(
     [HttpGet("my-period/{evaluationPeriodId}")]
     [SwaggerOperation(
     Summary = "Evaluator'ın seçilen dönemdeki değerlendirmelerini getir")]
-    public async Task<IActionResult> GetMyPeriodEvaluations(
-    int evaluationPeriodId)
+    public async Task<IActionResult> GetMyPeriodEvaluations(int evaluationPeriodId)
     {
         var evaluatorId = int.Parse(
             User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value

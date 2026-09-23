@@ -1213,7 +1213,7 @@ export const translations = {
             gridBeforeOrEqual: 'before or equal',
             gridEmpty: 'empty',
             gridNotEmpty: 'not empty',
-            gridAnyOf: 'is any of',
+            gridAnyOf: 'is any of',    
             gridSortHint: 'Click to sort',
             gridSelect: 'Select',
             gridSelectAll: 'Select all rows',

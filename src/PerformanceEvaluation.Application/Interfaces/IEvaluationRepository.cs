@@ -12,12 +12,7 @@ public interface IEvaluationRepository : IRepository<Evaluation>
     Task<Evaluation?> GetByIdWithDetailsAsync(int id);
     Task<IEnumerable<Evaluation>> GetByEmployeeIdAsync(int employeeId);
     Task<IEnumerable<Evaluation>> GetAllWithDetailsAsync();
-    Task<bool> ExistsByEvaluatorEmployeePeriodAsync(
-    int evaluatorId,
-    int employeeId,
-    int evaluationPeriodId);
-    Task<IEnumerable<Evaluation>> GetAllSummaryAsync(int? evaluationPeriodId = null);
-    Task<IEnumerable<Evaluation>> GetByEvaluatorAndPeriodAsync(
-        int evaluatorId,
-        int evaluationPeriodId);
+    Task<bool> ExistsByEvaluatorEmployeePeriodAsync(int evaluatorId, int employeeId, int evaluationPeriodId);
+    Task<(IEnumerable<Evaluation> Items, int TotalCount)> GetAllSummaryAsync(int? evaluationPeriodId, int page, int pageSize);
+    Task<IEnumerable<Evaluation>> GetByEvaluatorAndPeriodAsync(int evaluatorId, int evaluationPeriodId);
 }

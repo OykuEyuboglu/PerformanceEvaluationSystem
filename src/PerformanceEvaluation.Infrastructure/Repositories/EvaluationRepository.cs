@@ -55,7 +55,7 @@ namespace PerformanceEvaluation.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Evaluation>> GetAllSummaryAsync(int? evaluationPeriodId = null)
+        public async Task<(IEnumerable<Evaluation> Items, int TotalCount)> GetAllSummaryAsync(int? evaluationPeriodId, int page, int pageSize)
         {
             var query = _dbSet
                 .AsNoTracking()
@@ -65,11 +65,20 @@ namespace PerformanceEvaluation.Infrastructure.Repositories
                 .AsQueryable();
 
             if (evaluationPeriodId.HasValue)
-                query = query.Where(e => e.EvaluationPeriodId == evaluationPeriodId.Value);
+            {
+                query = query.Where(
+                    e => e.EvaluationPeriodId == evaluationPeriodId.Value);
+            }
 
-            return await query
+            var totalCount = await query.CountAsync();
+
+            var items = await query
                 .OrderByDescending(e => e.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
+
+            return (items, totalCount);
         }
 
         public async Task<bool> ExistsByEvaluatorEmployeePeriodAsync(int evaluatorId, int employeeId, int evaluationPeriodId)
