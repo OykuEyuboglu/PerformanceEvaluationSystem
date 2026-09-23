@@ -94,12 +94,16 @@ export default function LoginPage() {
             setAuth(res.token, res.user)
             navigate('/dashboard')
         } catch (err: any) {
-            setServerError(
-                err?.response?.data?.message ??
-                (language === 'tr'
-                    ? 'E-posta veya şifre hatalı.'
-                    : 'Incorrect email or password.')
-            )
+            if (err?.response?.status === 429) {
+                setServerError(
+                    'Çok fazla giriş denemesi yaptınız. Lütfen 1 dakika sonra tekrar deneyin.'
+                )
+            } else {
+                setServerError(
+                    err?.response?.data?.message ??
+                    'E-posta veya şifre hatalı.'
+                )
+            }
         } finally {
             setLoading(false)
         }
