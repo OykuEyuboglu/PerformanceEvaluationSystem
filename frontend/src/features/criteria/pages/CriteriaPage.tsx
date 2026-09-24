@@ -314,7 +314,7 @@ export default function CriteriaPage() {
                 },
             }}
         >
-             <Box
+            <Box
                 sx={{
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -402,7 +402,7 @@ export default function CriteriaPage() {
                 </Button>
             </Box>
 
-             <Box
+            <Box
                 sx={{
                     display: 'grid',
                     gridTemplateColumns: {
@@ -511,7 +511,7 @@ export default function CriteriaPage() {
                 )}
             </Box>
 
-             <Box
+            <Box
                 sx={{
                     mb: 2.5,
                     p: {
@@ -1200,11 +1200,10 @@ export default function CriteriaPage() {
                 title={
                     t.criteria.deleteCategoryTitle
                 }
-                description={
-                    language === 'tr'
-                        ? `"${catDeleteTarget?.name}" kategorisini silmek istediğine emin misin? İçindeki kriterler etkilenebilir.`
-                        : `Are you sure you want to delete the "${catDeleteTarget?.name}" category? The criteria inside it may be affected.`
-                }
+                description={t.criteria.deleteCategoryDescriptionWithName.replace(
+                    '{name}',
+                    catDeleteTarget?.name ?? '',
+                )}
                 onConfirm={
                     handleDeleteCategory
                 }
@@ -1218,11 +1217,10 @@ export default function CriteriaPage() {
                 title={
                     t.criteria.deleteCriterionTitle
                 }
-                description={
-                    language === 'tr'
-                        ? `"${critDeleteTarget?.name}" kriterini silmek istediğine emin misin?`
-                        : `Are you sure you want to delete the "${critDeleteTarget?.name}" criterion?`
-                }
+                description={t.criteria.deleteCriterionDescriptionWithName.replace(
+                    '{name}',
+                    critDeleteTarget?.name ?? '',
+                )}
                 onConfirm={
                     handleDeleteCriterion
                 }

@@ -48,7 +48,6 @@ export default function AdminDashboardView() {
     const { language } = useLanguage()
     const t = translations[language]
 
-    const isTurkish = language === 'tr'
 
     const [periods, setPeriods] =
         useState<EvaluationPeriod[]>([])
@@ -180,7 +179,7 @@ export default function AdminDashboardView() {
 
     const formatDate = (date: string) =>
         new Date(date).toLocaleDateString(
-            isTurkish ? 'tr-TR' : 'en-US',
+            language === 'tr' ? 'tr-TR' : 'en-US',
             {
                 day: '2-digit',
                 month: 'long',
@@ -256,32 +255,22 @@ export default function AdminDashboardView() {
 
     const getScoreLabel = (score: number) => {
         if (score >= 4.5) {
-            return isTurkish
-                ? 'Mükemmel'
-                : 'Excellent'
+            return t.adminDashboard.excellent
         }
 
         if (score >= 4) {
-            return isTurkish
-                ? 'Çok İyi'
-                : 'Very Good'
+            return t.adminDashboard.veryGood
         }
 
         if (score >= 3) {
-            return isTurkish
-                ? 'İyi'
-                : 'Good'
+            return t.adminDashboard.good
         }
 
         if (score >= 2) {
-            return isTurkish
-                ? 'Geliştirilmeli'
-                : 'Needs Improvement'
+            return t.adminDashboard.needsImprovement
         }
 
-        return isTurkish
-            ? 'Kritik'
-            : 'Critical'
+        return t.adminDashboard.critical
     }
 
     return (
@@ -292,7 +281,7 @@ export default function AdminDashboardView() {
                 mx: 'auto',
             }}
         >
-   
+
             <Paper
                 elevation={0}
                 sx={{
@@ -367,9 +356,7 @@ export default function AdminDashboardView() {
                                 mb: 0.8,
                             }}
                         >
-                            {isTurkish
-                                ? 'Yönetim Paneli'
-                                : 'Administration'}
+                            {t.adminDashboard.administration}
                         </Typography>
 
                         <Typography
@@ -401,9 +388,7 @@ export default function AdminDashboardView() {
                                 lineHeight: 1.6,
                             }}
                         >
-                            {isTurkish
-                                ? 'Performans değerlendirme süreçlerini ve kurum genelindeki sonuçları tek bir ekrandan takip edin.'
-                                : 'Monitor performance evaluation processes and organization-wide results from a single dashboard.'}
+                            {t.adminDashboard.heroDescription}
                         </Typography>
                     </Box>
 
@@ -436,9 +421,7 @@ export default function AdminDashboardView() {
                                         )
                                     }
                                     label={
-                                        isTurkish
-                                            ? 'Değerlendirme Dönemi'
-                                            : 'Evaluation Period'
+                                        t.adminDashboard.evaluationPeriod
                                     }
                                     sx={{
                                         width: { xs: '100%', sm: 400 },
@@ -511,12 +494,8 @@ export default function AdminDashboardView() {
                                     }}
                                 >
                                     {exporting
-                                        ? isTurkish
-                                            ? 'Aktarılıyor...'
-                                            : 'Exporting...'
-                                        : isTurkish
-                                            ? "Excel'e Aktar"
-                                            : 'Export Excel'}
+                                        ? t.adminDashboard.exporting
+                                        : t.adminDashboard.exportExcel}
                                 </Button>
                             </>
                         )}
@@ -595,15 +574,11 @@ export default function AdminDashboardView() {
                 <StatCard
                     icon={<Groups />}
                     title={
-                        isTurkish
-                            ? 'Değerlendirilen Çalışan'
-                            : 'Evaluated Employees'
+                        t.adminDashboard.evaluatedEmployees
                     }
                     value={animatedEmployeeCount}
                     description={
-                        isTurkish
-                            ? 'Seçili dönemde'
-                            : 'In selected period'
+                        t.adminDashboard.inSelectedPeriod
                     }
                     animationDelay={350}
                 />
@@ -611,17 +586,13 @@ export default function AdminDashboardView() {
                 <StatCard
                     icon={<Assessment />}
                     title={
-                        isTurkish
-                            ? 'Toplam Değerlendirme'
-                            : 'Total Evaluations'
+                        t.adminDashboard.totalEvaluations
                     }
                     value={
                         animatedEvaluationCount
                     }
                     description={
-                        isTurkish
-                            ? 'Tamamlanan değerlendirmeler'
-                            : 'Completed evaluations'
+                        t.adminDashboard.completedEvaluations
                     }
                     animationDelay={430}
                 />
@@ -629,18 +600,14 @@ export default function AdminDashboardView() {
                 <StatCard
                     icon={<TrendingUp />}
                     title={
-                        isTurkish
-                            ? 'Genel Ortalama'
-                            : 'Overall Average'
+                        t.adminDashboard.overallAverage
                     }
                     value={animatedAverage.toFixed(
                         2
                     )}
                     suffix="/ 5"
                     description={
-                        isTurkish
-                            ? 'Kurum performans ortalaması'
-                            : 'Overall performance average'
+                        t.adminDashboard.overallPerformanceAverage
                     }
                     animationDelay={510}
                 />
@@ -648,9 +615,7 @@ export default function AdminDashboardView() {
                 <StatCard
                     icon={<WorkspacePremium />}
                     title={
-                        isTurkish
-                            ? 'En Yüksek Performans'
-                            : 'Highest Performance'
+                        t.adminDashboard.highestPerformance
                     }
                     value={animatedHighest.toFixed(
                         2
@@ -664,7 +629,7 @@ export default function AdminDashboardView() {
                     animationDelay={590}
                 />
             </Box>
-    
+
             <Box
                 sx={{
                     display: 'grid',
@@ -727,9 +692,7 @@ export default function AdminDashboardView() {
                                     fontSize: 16,
                                 }}
                             >
-                                {isTurkish
-                                    ? 'Performans Özeti'
-                                    : 'Performance Overview'}
+                                {t.adminDashboard.performanceOverview}
                             </Typography>
 
                             <Typography
@@ -739,9 +702,7 @@ export default function AdminDashboardView() {
                                     fontSize: 12,
                                 }}
                             >
-                                {isTurkish
-                                    ? 'Seçili dönemin en yüksek performans gösteren çalışanları.'
-                                    : 'Top performing employees in the selected period.'}
+                                {t.adminDashboard.performanceOverviewDescription}
                             </Typography>
                         </Box>
 
@@ -767,9 +728,7 @@ export default function AdminDashboardView() {
                                 },
                             }}
                         >
-                            {isTurkish
-                                ? 'Tümünü Gör'
-                                : 'View All'}
+                            {t.adminDashboard.viewAll}
                         </Button>
                     </Box>
 
@@ -830,9 +789,7 @@ export default function AdminDashboardView() {
                                     fontSize: 14,
                                 }}
                             >
-                                {isTurkish
-                                    ? 'Henüz değerlendirme verisi yok'
-                                    : 'No evaluation data yet'}
+                                {t.adminDashboard.noEvaluationData}
                             </Typography>
 
                             <Typography
@@ -842,9 +799,7 @@ export default function AdminDashboardView() {
                                     mt: 0.5,
                                 }}
                             >
-                                {isTurkish
-                                    ? 'Seçili dönem için sonuçlar oluştuğunda burada görünecek.'
-                                    : 'Results for the selected period will appear here.'}
+                                {t.adminDashboard.noEvaluationDataDescription}
                             </Typography>
                         </Box>
                     ) : (
@@ -1073,9 +1028,7 @@ export default function AdminDashboardView() {
                                                     {
                                                         item.evaluationCount
                                                     }{' '}
-                                                    {isTurkish
-                                                        ? 'değerlendirme'
-                                                        : 'evaluations'}
+                                                    {t.adminDashboard.evaluations}
                                                 </Typography>
                                             </Box>
                                         </Box>
@@ -1131,9 +1084,7 @@ export default function AdminDashboardView() {
                                 fontSize: 16,
                             }}
                         >
-                            {isTurkish
-                                ? 'Dönem Özeti'
-                                : 'Period Summary'}
+                            {t.adminDashboard.periodSummary}
                         </Typography>
 
                         <Typography
@@ -1143,9 +1094,7 @@ export default function AdminDashboardView() {
                                 fontSize: 12,
                             }}
                         >
-                            {isTurkish
-                                ? 'Seçili değerlendirme döneminin genel görünümü.'
-                                : 'Overview of the selected evaluation period.'}
+                            {t.adminDashboard.periodSummaryDescription}
                         </Typography>
                     </Box>
 
@@ -1197,9 +1146,7 @@ export default function AdminDashboardView() {
                                     letterSpacing: 0.7,
                                 }}
                             >
-                                {isTurkish
-                                    ? 'Genel Performans'
-                                    : 'Overall Performance'}
+                                {t.adminDashboard.overallPerformance}
                             </Typography>
 
                             <Box
@@ -1252,11 +1199,7 @@ export default function AdminDashboardView() {
                         </Box>
 
                         <InfoRow
-                            label={
-                                isTurkish
-                                    ? 'Değerlendirme Dönemi'
-                                    : 'Evaluation Period'
-                            }
+                            label={t.adminDashboard.evaluationPeriod}
                             value={
                                 selectedPeriod
                                     ?.name ??
@@ -1265,11 +1208,7 @@ export default function AdminDashboardView() {
                         />
 
                         <InfoRow
-                            label={
-                                isTurkish
-                                    ? 'Başlangıç'
-                                    : 'Start Date'
-                            }
+                            label={t.adminDashboard.startDate}
                             value={
                                 selectedPeriod
                                     ? formatDate(
@@ -1280,11 +1219,7 @@ export default function AdminDashboardView() {
                         />
 
                         <InfoRow
-                            label={
-                                isTurkish
-                                    ? 'Bitiş'
-                                    : 'End Date'
-                            }
+                            label={t.adminDashboard.endDate}
                             value={
                                 selectedPeriod
                                     ? formatDate(
@@ -1295,11 +1230,7 @@ export default function AdminDashboardView() {
                         />
 
                         <InfoRow
-                            label={
-                                isTurkish
-                                    ? 'Çalışan'
-                                    : 'Employees'
-                            }
+                            label={t.adminDashboard.employees}
                             value={`${animatedEmployeeCount}`}
                         />
 
@@ -1338,9 +1269,7 @@ export default function AdminDashboardView() {
                                     },
                                 }}
                             >
-                                {isTurkish
-                                    ? 'Detaylı Performans Raporu'
-                                    : 'Detailed Performance Report'}
+                                {t.adminDashboard.detailedReport}
                             </Button>
                         </Box>
                     </Box>

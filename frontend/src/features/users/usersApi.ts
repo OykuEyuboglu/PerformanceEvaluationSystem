@@ -30,3 +30,14 @@ export async function patchUser(id: number, dto: UpdatePatchUserDto): Promise<Us
 export async function deleteUser(id: number): Promise<void> {
     await axiosInstance.delete(`/user/${id}`)
 }
+
+export interface ChangePasswordDto {
+    newPassword: string
+}
+
+export async function changeUserPassword(
+    id: number,
+    dto: ChangePasswordDto,
+): Promise<void> {
+    await axiosInstance.put(`/user/${id}/password`, dto)
+}

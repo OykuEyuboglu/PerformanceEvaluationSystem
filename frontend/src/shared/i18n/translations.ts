@@ -26,7 +26,30 @@ export const translations = {
             changeTheme: 'Tema değiştir',
             changeLanguage: 'Dil değiştir',
             userMenu: 'Kullanıcı menüsü',
+            toggleMenu: 'Menüyü daralt/genişlet',
+            openMenu: 'Menüyü aç',
+            systemAdministrator: 'Sistem Yöneticisi',
             logout: 'Çıkış Yap',
+        },
+
+        login: {
+            sessionExpired: 'Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.',
+            tooManyAttempts: 'Çok fazla giriş denemesi yaptınız. Lütfen 1 dakika sonra tekrar deneyin.',
+            invalidCredentials: 'E-posta veya şifre hatalı.',
+            emailRequired: 'E-posta boş olamaz.',
+            invalidEmail: 'Geçerli bir e-posta adresi girin.',
+            passwordRequired: 'Şifre boş olamaz.',
+            heroMeasure: 'Performansı',
+            heroMeasureAccent: 'ölçün',
+            heroPotential: 'potansiyeli',
+            heroPotentialAccent: 'büyütün',
+            heroDescription: 'IT departmanı için objektif, şeffaf ve kriter bazlı performans değerlendirme platformu.',
+            allRightsReserved: 'Tüm hakları saklıdır',
+            welcome: 'Hoş geldiniz',
+            signInContinue: 'Devam etmek için hesabınıza giriş yapın',
+            email: 'E-posta',
+            password: 'Şifre',
+            signIn: 'Giriş Yap',
         },
 
         sidebar: {
@@ -137,10 +160,21 @@ export const translations = {
             deleteCategoryTitle: 'Kategoriyi Sil',
             deleteCategoryDescription:
                 'Bu kategoriyi silmek istediğinize emin misiniz? İçindeki kriterler etkilenebilir.',
+            deleteCategoryDescriptionWithName:
+                '"{name}" kategorisini silmek istediğine emin misin? İçindeki kriterler etkilenebilir.',
 
             deleteCriterionTitle: 'Kriteri Sil',
             deleteCriterionDescription:
                 'Bu kriteri silmek istediğinize emin misiniz?',
+            deleteCriterionDescriptionWithName:
+                '"{name}" kriterini silmek istediğine emin misin?',
+        },
+
+        criteriaFormValidation: {
+            criterionNameMin: 'Kriter adı en az 2 karakter olmalı',
+            categoryRequired: 'Ana kategori belirtilmelidir',
+            descriptionRequired: 'Açıklama boş bırakılamaz',
+            positionRequired: 'En az bir iş pozisyonu seçmelisin',
         },
 
         criteriaForm: {
@@ -167,6 +201,12 @@ export const translations = {
             saving: 'Kaydediliyor...',
             create: 'Oluştur',
             save: 'Kaydet',
+        },
+
+        categoryFormValidation: {
+            categoryNameMin: 'Kategori adı en az 2 karakter olmalı',
+            weightMin: 'Ağırlık 0’dan büyük olmalı',
+            weightMax: 'Ağırlık 100’ü geçemez',
         },
 
         categoryForm: {
@@ -214,6 +254,8 @@ export const translations = {
             deletePeriod: 'Dönemi sil',
 
             deleteTitle: 'Dönemi Sil',
+            deleteDescription:
+                '"{name}" dönemini silmek istediğine emin misin?',
 
             periodCreated: 'Dönem oluşturuldu.',
             periodUpdated: 'Dönem güncellendi.',
@@ -312,6 +354,8 @@ export const translations = {
 
             removeTitle: 'Ekipten Çıkar',
             remove: 'Çıkar',
+            removeDescription:
+                '"{name}" adlı çalışanı bu değerlendiricinin ekibinden çıkarmak istediğine emin misin?',
 
             usersLoadError:
                 'Kullanıcılar yüklenemedi.',
@@ -641,8 +685,10 @@ export const translations = {
 
         users: {
             title: 'Kullanıcı Yönetimi',
+
             description:
                 'Sistemdeki tüm kullanıcıları görüntüle, ekle ve yönet.',
+
             newUser: 'Yeni Kullanıcı',
 
             firstName: 'Ad',
@@ -654,32 +700,61 @@ export const translations = {
             department: 'Departman',
             position: 'Pozisyon',
             jobPosition: 'İş Pozisyonu',
-            active: 'Aktif',
+            status: 'Durum',
+
+            totalUsers: 'Toplam Kullanıcı',
+            activeUsers: 'Aktif Kullanıcı',
+            administrators: 'Yönetici',
+            inactiveUsers: 'Pasif Kullanıcı',
+
+            searchPlaceholder:
+                'Ad, e-posta, departman veya pozisyon ara...',
+
+            usersShown: 'kullanıcı gösteriliyor',
 
             filterUsers: 'Kullanıcıları Filtrele',
+            activeFilter: 'Aktif filtre:',
             field: 'Alan',
+            value: 'Değer',
             filterValue: 'Filtre değeri',
+            filterValuePlaceholder:
+                'Filtre değerini yazın...',
 
             createSuccess:
                 'Kullanıcı oluşturuldu.',
+
             updateSuccess:
                 'Kullanıcı güncellendi.',
+
             deleteSuccess:
                 'Kullanıcı silindi.',
 
+            passwordSuccess:
+                'Şifre başarıyla değiştirildi.',
+
             loadError:
                 'Veriler yüklenirken hata oluştu.',
+
             operationError:
                 'İşlem sırasında hata oluştu.',
+
+            passwordError:
+                'Şifre değiştirilirken hata oluştu.',
+
             deleteError:
                 'Kullanıcı silinemedi.',
+
             statusError:
                 'Durum güncellenemedi.',
 
-            deleteTitle: 'Kullanıcıyı Sil',
+            notSpecified:
+                'Belirtilmemiş',
+
+            deleteTitle:
+                'Kullanıcıyı Sil',
 
             deleteDescription:
-                'Bu kullanıcıyı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
+                '"{name}" adlı kullanıcıyı silmek istediğinize emin misiniz? Kullanıcı sistemden silinmez, yalnızca gizlenir.',
         },
 
         roles: {
@@ -691,6 +766,68 @@ export const translations = {
         userForm: {
             createTitle: 'Yeni Kullanıcı',
             editTitle: 'Kullanıcı Düzenle',
+
+            createDescription:
+                'Yeni bir sistem kullanıcısı oluşturun.',
+            editDescription:
+                'Kullanıcı bilgilerini ve erişim durumunu güncelleyin.',
+            personalInformation:
+                'Kişisel Bilgiler',
+            accountInformation:
+                'Hesap Bilgileri',
+            organizationAndRole:
+                'Organizasyon ve Rol',
+            selectDepartmentFirst:
+                'Önce departman seçin',
+            changePassword:
+                'Şifre Değiştir',
+            newPassword:
+                'Yeni Şifre',
+            passwordRequirement:
+                'En az 8 karakter; büyük harf, küçük harf, sayı ve özel karakter içermelidir.',
+            changingPassword:
+                'Değiştiriliyor...',
+            changePasswordButton:
+                'Şifreyi Değiştir',
+            userStatus:
+                'Kullanıcı Durumu',
+            userStatusDescription:
+                'Kullanıcının sisteme erişimini yönetin.',
+            saving:
+                'Kaydediliyor...',
+
+            firstNameRequired:
+                'Ad gereklidir',
+            firstNameMax:
+                'Ad maksimum 100 karakter olabilir',
+            firstNameEmpty:
+                'Ad boş olamaz.',
+            lastNameRequired:
+                'Soyad gereklidir',
+            lastNameMax:
+                'Soyad maksimum 100 karakter olabilir',
+            lastNameEmpty:
+                'Soyad boş olamaz.',
+            emailRequired:
+                'E-posta gereklidir',
+            emailMax:
+                'E-posta maksimum 200 karakter olabilir',
+            passwordRequired:
+                'Şifre gereklidir',
+            passwordMax:
+                'Şifre maksimum 256 karakter olabilir',
+            passwordUppercase:
+                'Şifre en az bir büyük harf içermeli',
+            passwordLowercase:
+                'Şifre en az bir küçük harf içermeli',
+            passwordNumber:
+                'Şifre en az bir sayı içermeli',
+            passwordSpecial:
+                'Şifre en az bir özel karakter içermeli',
+            validRole:
+                'Geçerli bir rol seçilmelidir.',
+            departmentRequired:
+                'Departman seçilmelidir.',
 
             firstName: 'Ad',
             lastName: 'Soyad',
@@ -719,7 +856,7 @@ export const translations = {
             validEmail:
                 'Geçerli bir e-posta girin',
             passwordMin:
-                'Şifre en az 6 karakter olmalı',
+                'Şifre en az 8 karakter olmalı',
             selectRole:
                 'Rol seçin',
             selectDepartmentError:
@@ -768,7 +905,30 @@ export const translations = {
             changeTheme: 'Change theme',
             changeLanguage: 'Change language',
             userMenu: 'User menu',
+            toggleMenu: 'Collapse/expand menu',
+            openMenu: 'Open menu',
+            systemAdministrator: 'System Administrator',
             logout: 'Log out',
+        },
+
+        login: {
+            sessionExpired: 'Your session has expired. Please log in again.',
+            tooManyAttempts: 'Too many login attempts. Please try again in 1 minute.',
+            invalidCredentials: 'Invalid email or password.',
+            emailRequired: 'Email is required.',
+            invalidEmail: 'Please enter a valid email address.',
+            passwordRequired: 'Password is required.',
+            heroMeasure: 'Measure',
+            heroMeasureAccent: 'performance',
+            heroPotential: 'unlock',
+            heroPotentialAccent: 'potential',
+            heroDescription: 'An objective, transparent and criteria-based performance evaluation platform for IT departments.',
+            allRightsReserved: 'All rights reserved',
+            welcome: 'Welcome',
+            signInContinue: 'Sign in to continue',
+            email: 'Email',
+            password: 'Password',
+            signIn: 'Sign In',
         },
 
         sidebar: {
@@ -880,10 +1040,21 @@ export const translations = {
             deleteCategoryTitle: 'Delete Category',
             deleteCategoryDescription:
                 'Are you sure you want to delete this category? The criteria inside it may be affected.',
+            deleteCategoryDescriptionWithName:
+                'Are you sure you want to delete the "{name}" category? The criteria inside it may be affected.',
 
             deleteCriterionTitle: 'Delete Criterion',
             deleteCriterionDescription:
-                'Are you sure you want to delete this criterion?',
+                'Are you sure you want to delete the "{name}" criterion?',
+            deleteCriterionDescriptionWithName:
+                'Are you sure you want to delete the "{name}" criterion?',
+        },
+
+        criteriaFormValidation: {
+            criterionNameMin: 'Criterion name must be at least 2 characters',
+            categoryRequired: 'Main category must be specified',
+            descriptionRequired: 'Description cannot be empty',
+            positionRequired: 'You must select at least one job position',
         },
 
         criteriaForm: {
@@ -910,6 +1081,12 @@ export const translations = {
             saving: 'Saving...',
             create: 'Create',
             save: 'Save',
+        },
+
+        categoryFormValidation: {
+            categoryNameMin: 'Category name must be at least 2 characters',
+            weightMin: 'Weight must be greater than 0',
+            weightMax: 'Weight cannot exceed 100',
         },
 
         categoryForm: {
@@ -957,6 +1134,8 @@ export const translations = {
             deletePeriod: 'Delete period',
 
             deleteTitle: 'Delete Period',
+            deleteDescription:
+                'Are you sure you want to delete the "{name}" period?',
 
             periodCreated: 'Period created successfully.',
             periodUpdated: 'Period updated successfully.',
@@ -1055,6 +1234,8 @@ export const translations = {
 
             removeTitle: 'Remove from Team',
             remove: 'Remove',
+            removeDescription:
+                'Are you sure you want to remove "{name}" from this evaluator\'s team?',
 
             usersLoadError:
                 'Users could not be loaded.',
@@ -1213,7 +1394,7 @@ export const translations = {
             gridBeforeOrEqual: 'before or equal',
             gridEmpty: 'empty',
             gridNotEmpty: 'not empty',
-            gridAnyOf: 'is any of',    
+            gridAnyOf: 'is any of',
             gridSortHint: 'Click to sort',
             gridSelect: 'Select',
             gridSelectAll: 'Select all rows',
@@ -1384,8 +1565,10 @@ export const translations = {
 
         users: {
             title: 'User Management',
+
             description:
                 'View, add and manage all users in the system.',
+
             newUser: 'New User',
 
             firstName: 'First Name',
@@ -1397,32 +1580,61 @@ export const translations = {
             department: 'Department',
             position: 'Position',
             jobPosition: 'Job Position',
-            active: 'Active',
+            status: 'Status',
+
+            totalUsers: 'Total Users',
+            activeUsers: 'Active Users',
+            administrators: 'Administrators',
+            inactiveUsers: 'Inactive Users',
+
+            searchPlaceholder:
+                'Search name, email, department or position...',
+
+            usersShown: 'users shown',
 
             filterUsers: 'Filter Users',
+            activeFilter: 'Active filter:',
             field: 'Field',
+            value: 'Value',
             filterValue: 'Filter value',
+            filterValuePlaceholder:
+                'Enter filter value...',
 
             createSuccess:
                 'User created successfully.',
+
             updateSuccess:
                 'User updated successfully.',
+
             deleteSuccess:
                 'User deleted successfully.',
 
+            passwordSuccess:
+                'Password changed successfully.',
+
             loadError:
                 'An error occurred while loading data.',
+
             operationError:
                 'An error occurred during the operation.',
+
+            passwordError:
+                'An error occurred while changing the password.',
+
             deleteError:
                 'User could not be deleted.',
+
             statusError:
                 'Status could not be updated.',
 
-            deleteTitle: 'Delete User',
+            notSpecified:
+                'Not specified',
+
+            deleteTitle:
+                'Delete User',
 
             deleteDescription:
-                'Are you sure you want to delete this user? This action cannot be undone.',
+                'Are you sure you want to deactivate "{name}"? The user will not be permanently deleted and will only be hidden.',
         },
 
         roles: {
@@ -1434,6 +1646,68 @@ export const translations = {
         userForm: {
             createTitle: 'New User',
             editTitle: 'Edit User',
+
+            createDescription:
+                'Create a new system user.',
+            editDescription:
+                'Update user information and access status.',
+            personalInformation:
+                'Personal Information',
+            accountInformation:
+                'Account Information',
+            organizationAndRole:
+                'Organization & Role',
+            selectDepartmentFirst:
+                'Select a department first',
+            changePassword:
+                'Change Password',
+            newPassword:
+                'New Password',
+            passwordRequirement:
+                'At least 8 characters with uppercase, lowercase, number and special character.',
+            changingPassword:
+                'Changing...',
+            changePasswordButton:
+                'Change Password',
+            userStatus:
+                'User Status',
+            userStatusDescription:
+                'Manage the user’s system access.',
+            saving:
+                'Saving...',
+
+            firstNameRequired:
+                'First name is required',
+            firstNameMax:
+                'First name can be at most 100 characters',
+            firstNameEmpty:
+                'First name cannot be empty.',
+            lastNameRequired:
+                'Last name is required',
+            lastNameMax:
+                'Last name can be at most 100 characters',
+            lastNameEmpty:
+                'Last name cannot be empty.',
+            emailRequired:
+                'Email is required',
+            emailMax:
+                'Email can be at most 200 characters',
+            passwordRequired:
+                'Password is required',
+            passwordMax:
+                'Password can be at most 256 characters',
+            passwordUppercase:
+                'Password must contain at least one uppercase letter',
+            passwordLowercase:
+                'Password must contain at least one lowercase letter',
+            passwordNumber:
+                'Password must contain at least one number',
+            passwordSpecial:
+                'Password must contain at least one special character',
+            validRole:
+                'A valid role must be selected.',
+            departmentRequired:
+                'Department must be selected.',
 
             firstName: 'First Name',
             lastName: 'Last Name',
@@ -1462,7 +1736,7 @@ export const translations = {
             validEmail:
                 'Enter a valid email address',
             passwordMin:
-                'Password must be at least 6 characters',
+                'Password must be at least 8 characters',
             selectRole:
                 'Select a role',
             selectDepartmentError:

@@ -25,37 +25,32 @@ import { login } from '../authApi'
 import { useAuthStore } from '../../../store/authStore'
 import Logo from '../../../shared/components/logo'
 import { useLanguage } from '../../../shared/i18n/LanguageContext'
+import { translations } from '../../../shared/i18n/translations'
 
 type LoginFormValues = {
     email: string
     password: string
 }
 
-const getLoginSchema = (language: 'tr' | 'en') =>
-    z.object({
+const getLoginSchema = (language: 'tr' | 'en') => {
+    const t = translations[language].login
+
+    return z.object({
         email: z
             .string()
             .min(
                 1,
-                language === 'tr'
-                    ? 'E-posta boş olamaz.'
-                    : 'Email is required.'
+                t.emailRequired
             )
             .email(
-                language === 'tr'
-                    ? 'Geçerli bir e-posta adresi girin.'
-                    : 'Please enter a valid email address.'
+                t.invalidEmail
             ),
 
         password: z
             .string()
-            .min(
-                1,
-                language === 'tr'
-                    ? 'Şifre boş olamaz.'
-                    : 'Password is required.'
-            ),
+            .min(1, t.passwordRequired),
     })
+}
 
 export default function LoginPage() {
     const navigate = useNavigate()
@@ -69,6 +64,7 @@ export default function LoginPage() {
     )
 
     const { language, setLanguage } = useLanguage()
+    const t = translations[language]
 
     const [serverError, setServerError] = useState<string | null>(
         null
@@ -96,12 +92,12 @@ export default function LoginPage() {
         } catch (err: any) {
             if (err?.response?.status === 429) {
                 setServerError(
-                    'Çok fazla giriş denemesi yaptınız. Lütfen 1 dakika sonra tekrar deneyin.'
+                    t.login.tooManyAttempts
                 )
             } else {
                 setServerError(
                     err?.response?.data?.message ??
-                    'E-posta veya şifre hatalı.'
+                    t.login.invalidCredentials
                 )
             }
         } finally {
@@ -243,9 +239,7 @@ export default function LoginPage() {
                         fontWeight: 600,
                     }}
                 >
-                    {language === 'tr'
-                        ? 'Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.'
-                        : 'Your session has expired. Please log in again.'}
+                    {t.login.sessionExpired}
                 </Alert>
             </Snackbar>
 
@@ -319,51 +313,17 @@ export default function LoginPage() {
                                 maxWidth: 480,
                             }}
                         >
-                            {language === 'tr' ? (
-                                <>
-                                    Performansı{' '}
-                                    <Box
-                                        component="span"
-                                        sx={{
-                                            color: '#F5B301',
-                                        }}
-                                    >
-                                        ölçün
-                                    </Box>
-                                    , potansiyeli{' '}
-                                    <Box
-                                        component="span"
-                                        sx={{
-                                            color: '#F5B301',
-                                        }}
-                                    >
-                                        büyütün
-                                    </Box>
-                                    .
-                                </>
-                            ) : (
-                                <>
-                                    Measure{' '}
-                                    <Box
-                                        component="span"
-                                        sx={{
-                                            color: '#F5B301',
-                                        }}
-                                    >
-                                        performance
-                                    </Box>
-                                    , unlock{' '}
-                                    <Box
-                                        component="span"
-                                        sx={{
-                                            color: '#F5B301',
-                                        }}
-                                    >
-                                        potential
-                                    </Box>
-                                    .
-                                </>
-                            )}
+                            <>
+                                {t.login.heroMeasure}{' '}
+                                <Box component="span" sx={{ color: '#F5B301' }}>
+                                    {t.login.heroMeasureAccent}
+                                </Box>
+                                , {t.login.heroPotential}{' '}
+                                <Box component="span" sx={{ color: '#F5B301' }}>
+                                    {t.login.heroPotentialAccent}
+                                </Box>
+                                .
+                            </>
                         </Typography>
 
                         <Typography
@@ -375,9 +335,7 @@ export default function LoginPage() {
                                 lineHeight: 1.6,
                             }}
                         >
-                            {language === 'tr'
-                                ? 'IT departmanı için objektif, şeffaf ve kriter bazlı performans değerlendirme platformu.'
-                                : 'An objective, transparent and criteria-based performance evaluation platform for IT departments.'}
+                            {t.login.heroDescription}
                         </Typography>
                     </Box>
 
@@ -390,9 +348,7 @@ export default function LoginPage() {
                     >
                         © {new Date().getFullYear()}{' '}
                         VakıfBank 360 ·{' '}
-                        {language === 'tr'
-                            ? 'Tüm hakları saklıdır'
-                            : 'All rights reserved'}
+                        {t.login.allRightsReserved}
                     </Typography>
                 </Grid>
 
@@ -436,9 +392,7 @@ export default function LoginPage() {
                                 mb: 0.5,
                             }}
                         >
-                            {language === 'tr'
-                                ? 'Hoş geldiniz'
-                                : 'Welcome'}
+                            {t.login.welcome}
                         </Typography>
 
                         <Typography
@@ -448,9 +402,7 @@ export default function LoginPage() {
                                 mb: 3,
                             }}
                         >
-                            {language === 'tr'
-                                ? 'Devam etmek için hesabınıza giriş yapın'
-                                : 'Sign in to continue'}
+                            {t.login.signInContinue}
                         </Typography>
 
                         {serverError && (
@@ -471,11 +423,7 @@ export default function LoginPage() {
                             noValidate
                         >
                             <TextField
-                                label={
-                                    language === 'tr'
-                                        ? 'E-posta'
-                                        : 'Email'
-                                }
+                                label={t.login.email}
                                 fullWidth
                                 autoComplete="email"
                                 sx={{
@@ -503,11 +451,7 @@ export default function LoginPage() {
                             />
 
                             <TextField
-                                label={
-                                    language === 'tr'
-                                        ? 'Şifre'
-                                        : 'Password'
-                                }
+                                label={t.login.password}
                                 type={
                                     showPassword
                                         ? 'text'
@@ -577,10 +521,8 @@ export default function LoginPage() {
                                             color: '#111111',
                                         }}
                                     />
-                                ) : language === 'tr' ? (
-                                    'Giriş Yap'
                                 ) : (
-                                    'Sign In'
+                                    t.login.signIn
                                 )}
                             </Button>
                         </Box>

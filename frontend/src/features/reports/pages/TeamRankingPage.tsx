@@ -438,7 +438,7 @@ export default function TeamRankingPage() {
                                                 <Typography sx={{ fontWeight: 750 }}>{item.employeeName}</Typography>
                                             </Box>
                                         </TableCell>
-                                        <TableCell color="text.secondary">{item.jobPositionName || '—'}</TableCell>
+                                        <TableCell color="text.secondary">{item.jobPositionName || t.teamRanking.positionNotSpecified}</TableCell>
                                         <TableCell>
                                             <Chip label={`${item.averageScore.toFixed(2)} / 5`} size="small" sx={{ fontWeight: 800 }} />
                                         </TableCell>

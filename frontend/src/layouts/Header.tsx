@@ -62,14 +62,12 @@ export default function Header({
 
     const roleLabel =
         user?.role === 'Admin'
-            ? language === 'tr'
-                ? 'Admin'
-                : 'Admin'
+            ? t.roles.Admin
             : user?.role === 'Evaluator'
-                ? language === 'tr'
-                    ? 'Değerlendirici'
-                    : 'Evaluator'
-                : ''
+                ? t.roles.Evaluator
+                : user?.role === 'Employee'
+                    ? t.roles.Employee
+                    : ''
 
     const logout = useAuthStore(
         (s) => s.logout
@@ -155,11 +153,7 @@ export default function Header({
                             md: 'inline-flex',
                         },
                     }}
-                    aria-label={
-                        language === 'tr'
-                            ? 'Menüyü daralt/genişlet'
-                            : 'Collapse/expand menu'
-                    }
+                    aria-label={t.header.toggleMenu}
                 >
                     {sidebarOpen ? (
                         <MenuOpen />
@@ -187,11 +181,7 @@ export default function Header({
                             md: 'none',
                         },
                     }}
-                    aria-label={
-                        language === 'tr'
-                            ? 'Menüyü aç'
-                            : 'Open menu'
-                    }
+                    aria-label={t.header.openMenu}
                 >
                     <MenuIcon />
                 </IconButton>
@@ -383,11 +373,7 @@ export default function Header({
                                 md: 1,
                             },
                         }}
-                        aria-label={
-                            language === 'tr'
-                                ? 'Tema değiştir'
-                                : 'Change theme'
-                        }
+                        aria-label={t.header.changeTheme}
                     >
                         {isDark ? (
                             <LightMode />
@@ -400,11 +386,7 @@ export default function Header({
                         onClick={
                             handleProfileClick
                         }
-                        aria-label={
-                            language === 'tr'
-                                ? 'Kullanıcı menüsü'
-                                : 'User menu'
-                        }
+                        aria-label={t.header.userMenu}
                         aria-controls={
                             profileMenuOpen
                                 ? 'profile-menu'
@@ -518,9 +500,7 @@ export default function Header({
                                 >
                                     {user?.jobPositionName ||
                                         (user?.role === 'Admin'
-                                            ? language === 'tr'
-                                                ? 'Sistem Yöneticisi'
-                                                : 'System Administrator'
+                                            ? t.header.systemAdministrator
                                             : '')}
                                 </Typography>
                             )}

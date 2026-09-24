@@ -7,6 +7,7 @@
     Button,
 } from '@mui/material'
 import { useLanguage } from '../i18n/LanguageContext'
+import { translations } from '../i18n/translations'
 
 interface ConfirmDialogProps {
     open: boolean
@@ -29,6 +30,7 @@ export default function ConfirmDialog({
 }: ConfirmDialogProps) {
 
     const { language } = useLanguage()
+    const t = translations[language]
 
     return (
         <Dialog open={open} onClose={onCancel} maxWidth="xs" fullWidth>
@@ -39,7 +41,7 @@ export default function ConfirmDialog({
             <DialogActions sx={{ px: 3, pb: 2.5 }
             }>
                 <Button onClick={onCancel} color="inherit">
-                    {language === 'tr' ? 'Vazgeç' : 'Cancel'}
+                    {t.common.cancel}
                 </Button>
 
                 <Button
@@ -48,10 +50,9 @@ export default function ConfirmDialog({
                     variant="contained"
                     disabled={loading}
                 >
-                    {confirmLabel ??
-                        (language === 'tr' ? 'Sil' : 'Delete')}
+                    {confirmLabel ?? t.common.delete}
                 </Button>
-                
+
             </DialogActions>
         </Dialog>
     )

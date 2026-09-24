@@ -36,24 +36,18 @@ const getCategorySchema = (language: 'tr' | 'en') =>
     z.object({
         name: z.string().min(
             2,
-            language === 'tr'
-                ? 'Kategori adı en az 2 karakter olmalı'
-                : 'Category name must be at least 2 characters',
+            translations[language].categoryFormValidation.categoryNameMin,
         ),
 
         weight: z
             .number()
             .min(
                 0.01,
-                language === 'tr'
-                    ? 'Ağırlık 0’dan büyük olmalı'
-                    : 'Weight must be greater than 0',
+                translations[language].categoryFormValidation.weightMin,
             )
             .max(
                 100,
-                language === 'tr'
-                    ? 'Ağırlık 100’ü geçemez'
-                    : 'Weight cannot exceed 100',
+                translations[language].categoryFormValidation.weightMax,
             ),
 
         isActive: z.boolean(),
