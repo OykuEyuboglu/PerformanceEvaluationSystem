@@ -1,4 +1,23 @@
-# VakıfBank 360 — Performance Evaluation System
+# 📊 VakıfBank 360 — Performance Evaluation System
+
+<div align="center">
+
+![.NET](https://img.shields.io/badge/.NET_8-512BD4?style=for-the-badge&logo=dotnet)
+![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=csharp)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript)
+![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite)
+![MUI](https://img.shields.io/badge/MUI-007FFF?style=for-the-badge&logo=mui)
+![SQL Server](https://img.shields.io/badge/SQL_Server-CC2927?style=for-the-badge&logo=microsoftsqlserver)
+![Entity Framework Core](https://img.shields.io/badge/EF_Core-512BD4?style=for-the-badge)
+![JWT](https://img.shields.io/badge/JWT-Authentication-black?style=for-the-badge&logo=jsonwebtokens)
+![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger)
+![xUnit](https://img.shields.io/badge/xUnit-512BD4?style=for-the-badge)
+![Vitest](https://img.shields.io/badge/Vitest-6E9F18?style=for-the-badge)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge)
+![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge)
+
+</div>
 
 A role-based, criteria-driven performance evaluation platform for organizations with multiple departments.
 
