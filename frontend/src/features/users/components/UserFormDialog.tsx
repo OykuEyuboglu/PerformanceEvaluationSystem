@@ -49,6 +49,10 @@ interface UserFormDialogProps {
     jobPositions: JobPositionDto[]
     submitting: boolean
     onSubmit: (values: UserFormValues) => void
+    onChangePassword: (
+        userId: number,
+        newPassword: string,
+    ) => Promise<void>
     onClose: () => void
 }
 
@@ -71,6 +75,7 @@ export default function UserFormDialog({
     jobPositions,
     submitting,
     onSubmit,
+    onChangePassword,
     onClose,
 }: UserFormDialogProps) {
     const { language } = useLanguage()
@@ -78,31 +83,34 @@ export default function UserFormDialog({
 
     const [showPassword, setShowPassword] =
         useState(false)
+    const [newPassword, setNewPassword] = useState('')
+    const [passwordError, setPasswordError] = useState('')
+    const [changingPassword, setChangingPassword] =
+        useState(false)
 
     const baseSchema = {
         firstName: z
             .string()
             .trim()
-            .min(1, 'Ad gereklidir')
+            .min(1, t.userForm.firstNameRequired)
             .max(
                 100,
-                'Ad maksimum 100 karakter olabilir'
+                t.userForm.firstNameMax
             ),
 
         lastName: z
             .string()
             .trim()
-            .min(1, 'Soyad gereklidir')
+            .min(1, t.userForm.lastNameRequired)
             .max(
                 100,
-                'Soyad maksimum 100 karakter olabilir'
+                t.userForm.lastNameMax
             ),
 
-        role: z.enum([
-            'Admin',
-            'Evaluator',
-            'Employee',
-        ]),
+        role: z.enum(
+            ['Admin', 'Evaluator', 'Employee'],
+            { message: t.userForm.validRole },
+        ),
 
         departmentId: z
             .number()
@@ -119,48 +127,82 @@ export default function UserFormDialog({
         isActive: z.boolean(),
     }
 
+    const validateNewPassword = (
+        password: string,
+    ): string => {
+        if (!password) {
+            return t.userForm.passwordRequired
+        }
+
+        if (password.length < 8) {
+            return t.userForm.passwordMin
+        }
+
+        if (password.length > 256) {
+            return t.userForm.passwordMax
+        }
+
+        if (!/[A-Z]/.test(password)) {
+            return t.userForm.passwordUppercase
+        }
+
+        if (!/[a-z]/.test(password)) {
+            return t.userForm.passwordLowercase
+        }
+
+        if (!/[0-9]/.test(password)) {
+            return t.userForm.passwordNumber
+        }
+
+        if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+            return t.userForm.passwordSpecial
+        }
+
+        return ''
+    }
+
     const createSchema = z.object({
         ...baseSchema,
 
         email: z
             .string()
             .trim()
-            .min(1, 'Email gereklidir')
+            .min(1, t.userForm.emailRequired)
             .max(
                 200,
-                'Email maksimum 200 karakter olabilir'
+                t.userForm.emailMax
             )
             .regex(
                 /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                'Geçerli bir email adresi giriniz'
+                t.userForm.validEmail
             ),
 
         password: z
             .string()
-            .min(1, 'Şifre gereklidir')
+            .min(1, t.userForm.passwordRequired)
             .min(
                 8,
-                'Şifre en az 8 karakter olmalı'
+                t.userForm.passwordMin
             )
             .max(
                 256,
-                'Şifre maksimum 256 karakter olabilir'
+                t.userForm.passwordMax
             )
             .regex(
                 /[A-Z]/,
-                'Şifre en az bir büyük harf içermeli'
+                t.userForm.passwordUppercase
             )
             .regex(
                 /[a-z]/,
-                'Şifre en az bir küçük harf içermeli'
+                t.userForm.passwordLowercase
             )
             .regex(
                 /[0-9]/,
-                'Şifre en az bir sayı içermeli'
+                t.userForm.passwordNumber
             )
             .regex(
                 /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
-                'Şifre en az bir özel karakter içermeli'
+                t.userForm.passwordSpecial
             ),
     })
 
@@ -168,26 +210,26 @@ export default function UserFormDialog({
         firstName: z
             .string()
             .trim()
-            .min(1, 'Ad boş olamaz.')
+            .min(1, t.userForm.firstNameEmpty)
             .max(
                 100,
-                'Ad maksimum 100 karakter olabilir.'
+                t.userForm.firstNameMax
             ),
 
         lastName: z
             .string()
             .trim()
-            .min(1, 'Soyad boş olamaz.')
+            .min(1, t.userForm.lastNameEmpty)
             .max(
                 100,
-                'Soyad maksimum 100 karakter olabilir.'
+                t.userForm.lastNameMax
             ),
 
         role: z.enum(
             ['Admin', 'Evaluator', 'Employee'],
             {
                 message:
-                    'Geçerli bir rol seçilmelidir.',
+                    t.userForm.validRole,
             }
         ),
 
@@ -195,7 +237,7 @@ export default function UserFormDialog({
             .number()
             .gt(
                 0,
-                'Departman seçilmelidir.'
+                t.userForm.departmentRequired
             ),
 
         jobPositionId: z
@@ -251,6 +293,9 @@ export default function UserFormDialog({
         if (!open) return
 
         setShowPassword(false)
+        setNewPassword('')
+        setPasswordError('')
+        setChangingPassword(false)
 
         if (mode === 'edit' && initialData) {
             const departmentId =
@@ -336,6 +381,10 @@ export default function UserFormDialog({
             slotProps={{
                 paper: {
                     sx: {
+                        width: '100%',
+                        maxHeight: 'calc(100vh - 32px)',
+                        display: 'flex',
+                        flexDirection: 'column',
                         borderRadius: 3,
                         overflow: 'hidden',
                         border: '1px solid',
@@ -351,7 +400,6 @@ export default function UserFormDialog({
                                 transform:
                                     'translateY(8px) scale(0.985)',
                             },
-
                             to: {
                                 opacity: 1,
                                 transform:
@@ -368,6 +416,7 @@ export default function UserFormDialog({
                     py: 2.25,
                     borderBottom: '1px solid',
                     borderColor: 'divider',
+                    flexShrink: 0,
                 }}
             >
                 <Box
@@ -385,8 +434,7 @@ export default function UserFormDialog({
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            bgcolor:
-                                'rgba(245,179,1,0.12)',
+                            bgcolor: 'rgba(245,179,1,0.12)',
                             color: '#C68E00',
                             flexShrink: 0,
                         }}
@@ -419,12 +467,8 @@ export default function UserFormDialog({
                             }}
                         >
                             {mode === 'create'
-                                ? language === 'tr'
-                                    ? 'Yeni bir sistem kullanıcısı oluşturun.'
-                                    : 'Create a new system user.'
-                                : language === 'tr'
-                                    ? 'Kullanıcı bilgilerini ve erişim durumunu güncelleyin.'
-                                    : 'Update user information and access status.'}
+                                ? t.userForm.createDescription
+                                : t.userForm.editDescription}
                         </Typography>
                     </Box>
                 </Box>
@@ -433,21 +477,46 @@ export default function UserFormDialog({
             <Box
                 component="form"
                 onSubmit={handleSubmit(onSubmit)}
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    flex: 1,
+                    minHeight: 0,
+                }}
             >
                 <DialogContent
                     sx={{
                         px: { xs: 2.5, sm: 3 },
                         py: 2.5,
+                        overflowY: 'auto',
+                        overflowX: 'hidden',
+                        flex: 1,
+                        minHeight: 0,
+
+                        '&::-webkit-scrollbar': {
+                            width: 6,
+                        },
+
+                        '&::-webkit-scrollbar-track': {
+                            background: 'transparent',
+                        },
+
+                        '&::-webkit-scrollbar-thumb': {
+                            backgroundColor:
+                                'rgba(0,0,0,0.18)',
+                            borderRadius: 10,
+                        },
+
+                        '&::-webkit-scrollbar-thumb:hover': {
+                            backgroundColor:
+                                'rgba(0,0,0,0.28)',
+                        },
                     }}
                 >
                     <Stack spacing={2.25}>
                         <SectionTitle
                             icon={<PersonOutlined />}
-                            title={
-                                language === 'tr'
-                                    ? 'Kişisel Bilgiler'
-                                    : 'Personal Information'
-                            }
+                            title={t.userForm.personalInformation}
                         />
 
                         <Stack
@@ -460,15 +529,10 @@ export default function UserFormDialog({
                             <Controller
                                 name="firstName"
                                 control={control}
-                                render={({
-                                    field,
-                                }) => (
+                                render={({ field }) => (
                                     <TextField
                                         {...field}
-                                        label={
-                                            t.userForm
-                                                .firstName
-                                        }
+                                        label={t.userForm.firstName}
                                         fullWidth
                                         error={
                                             !!errors.firstName
@@ -486,15 +550,10 @@ export default function UserFormDialog({
                             <Controller
                                 name="lastName"
                                 control={control}
-                                render={({
-                                    field,
-                                }) => (
+                                render={({ field }) => (
                                     <TextField
                                         {...field}
-                                        label={
-                                            t.userForm
-                                                .lastName
-                                        }
+                                        label={t.userForm.lastName}
                                         fullWidth
                                         error={
                                             !!errors.lastName
@@ -512,11 +571,7 @@ export default function UserFormDialog({
 
                         <SectionTitle
                             icon={<LockOutlined />}
-                            title={
-                                language === 'tr'
-                                    ? 'Hesap Bilgileri'
-                                    : 'Account Information'
-                            }
+                            title={t.userForm.accountInformation}
                         />
 
                         {mode === 'create' ? (
@@ -524,31 +579,21 @@ export default function UserFormDialog({
                                 <Controller
                                     name="email"
                                     control={control}
-                                    render={({
-                                        field,
-                                    }) => (
+                                    render={({ field }) => (
                                         <TextField
                                             {...field}
                                             value={
-                                                field.value ??
-                                                ''
+                                                field.value ?? ''
                                             }
-                                            onChange={(
-                                                event
-                                            ) => {
+                                            onChange={(event) => {
                                                 field.onChange(
-                                                    event.target.value
+                                                    event.target.value,
                                                 )
                                             }}
-                                            label={
-                                                t.userForm
-                                                    .email
-                                            }
+                                            label={t.userForm.email}
                                             fullWidth
                                             size="small"
-                                            error={
-                                                !!errors.email
-                                            }
+                                            error={!!errors.email}
                                             helperText={
                                                 errors.email
                                                     ?.message
@@ -577,19 +622,13 @@ export default function UserFormDialog({
                                 <Controller
                                     name="password"
                                     control={control}
-                                    render={({
-                                        field,
-                                    }) => (
+                                    render={({ field }) => (
                                         <TextField
                                             {...field}
                                             value={
-                                                field.value ??
-                                                ''
+                                                field.value ?? ''
                                             }
-                                            label={
-                                                t.userForm
-                                                    .password
-                                            }
+                                            label={t.userForm.password}
                                             type={
                                                 showPassword
                                                     ? 'text'
@@ -617,7 +656,6 @@ export default function UserFormDialog({
                                                             />
                                                         </InputAdornment>
                                                     ),
-
                                                     endAdornment: (
                                                         <InputAdornment position="end">
                                                             <IconButton
@@ -625,7 +663,7 @@ export default function UserFormDialog({
                                                                 onClick={() =>
                                                                     setShowPassword(
                                                                         (value) =>
-                                                                            !value
+                                                                            !value,
                                                                     )
                                                                 }
                                                                 edge="end"
@@ -650,11 +688,9 @@ export default function UserFormDialog({
                                     px: 1.5,
                                     py: 1.25,
                                     borderRadius: 2,
-                                    bgcolor:
-                                        'action.hover',
+                                    bgcolor: 'action.hover',
                                     border: '1px solid',
-                                    borderColor:
-                                        'divider',
+                                    borderColor: 'divider',
                                 }}
                             >
                                 <Typography
@@ -665,25 +701,20 @@ export default function UserFormDialog({
                                         mb: 0.3,
                                     }}
                                 >
-                                    {language === 'tr'
-                                        ? 'E-posta'
-                                        : 'Email'}
+                                    {t.userForm.email}
                                 </Typography>
 
                                 <Controller
                                     name="email"
                                     control={control}
-                                    render={({
-                                        field,
-                                    }) => (
+                                    render={({ field }) => (
                                         <Typography
                                             sx={{
                                                 fontSize: 13,
                                                 fontWeight: 400,
                                             }}
                                         >
-                                            {field.value ||
-                                                '-'}
+                                            {field.value || '-'}
                                         </Typography>
                                     )}
                                 />
@@ -691,14 +722,8 @@ export default function UserFormDialog({
                         )}
 
                         <SectionTitle
-                            icon={
-                                <BusinessOutlined />
-                            }
-                            title={
-                                language === 'tr'
-                                    ? 'Organizasyon ve Rol'
-                                    : 'Organization & Role'
-                            }
+                            icon={<BusinessOutlined />}
+                            title={t.userForm.organizationAndRole}
                         />
 
                         <Stack
@@ -711,30 +736,21 @@ export default function UserFormDialog({
                             <Controller
                                 name="role"
                                 control={control}
-                                render={({
-                                    field,
-                                }) => (
+                                render={({ field }) => (
                                     <TextField
                                         {...field}
                                         select
-                                        label={
-                                            t.userForm.role
-                                        }
+                                        label={t.userForm.role}
                                         fullWidth
                                         size="small"
-                                        error={
-                                            !!errors.role
-                                        }
+                                        error={!!errors.role}
                                         helperText={
-                                            errors.role
-                                                ?.message
+                                            errors.role?.message
                                         }
                                         sx={fieldSx}
                                     >
                                         {roleOptions.map(
-                                            (
-                                                option
-                                            ) => (
+                                            (option) => (
                                                 <MenuItem
                                                     key={
                                                         option.value
@@ -743,11 +759,9 @@ export default function UserFormDialog({
                                                         option.value
                                                     }
                                                 >
-                                                    {
-                                                        option.label
-                                                    }
+                                                    {option.label}
                                                 </MenuItem>
-                                            )
+                                            ),
                                         )}
                                     </TextField>
                                 )}
@@ -756,30 +770,22 @@ export default function UserFormDialog({
                             <Controller
                                 name="departmentId"
                                 control={control}
-                                render={({
-                                    field,
-                                }) => (
+                                render={({ field }) => (
                                     <TextField
                                         {...field}
                                         value={
-                                            field.value ===
-                                                0
+                                            field.value === 0
                                                 ? ''
-                                                : field.value ??
-                                                ''
+                                                : field.value ?? ''
                                         }
-                                        onChange={(
-                                            event
-                                        ) => {
+                                        onChange={(event) => {
                                             const departmentId =
                                                 Number(
-                                                    event
-                                                        .target
-                                                        .value
+                                                    event.target.value,
                                                 )
 
                                             field.onChange(
-                                                departmentId
+                                                departmentId,
                                             )
 
                                             setValue(
@@ -788,13 +794,12 @@ export default function UserFormDialog({
                                                 {
                                                     shouldValidate:
                                                         true,
-                                                }
+                                                },
                                             )
                                         }}
                                         select
                                         label={
-                                            t.userForm
-                                                .department
+                                            t.userForm.department
                                         }
                                         fullWidth
                                         size="small"
@@ -802,24 +807,20 @@ export default function UserFormDialog({
                                             !!errors.departmentId
                                         }
                                         helperText={
-                                            errors
-                                                .departmentId
+                                            errors.departmentId
                                                 ?.message
                                         }
                                         sx={fieldSx}
                                     >
                                         <MenuItem value="">
                                             {
-                                                t
-                                                    .userForm
+                                                t.userForm
                                                     .selectDepartment
                                             }
                                         </MenuItem>
 
                                         {departments.map(
-                                            (
-                                                department
-                                            ) => (
+                                            (department) => (
                                                 <MenuItem
                                                     key={
                                                         department.id
@@ -828,11 +829,9 @@ export default function UserFormDialog({
                                                         department.id
                                                     }
                                                 >
-                                                    {
-                                                        department.name
-                                                    }
+                                                    {department.name}
                                                 </MenuItem>
-                                            )
+                                            ),
                                         )}
                                     </TextField>
                                 )}
@@ -842,43 +841,31 @@ export default function UserFormDialog({
                         <Controller
                             name="jobPositionId"
                             control={control}
-                            render={({
-                                field,
-                            }) => (
+                            render={({ field }) => (
                                 <TextField
                                     {...field}
                                     value={
-                                        field.value ===
-                                            0
+                                        field.value === 0
                                             ? ''
-                                            : field.value ??
-                                            ''
+                                            : field.value ?? ''
                                     }
-                                    onChange={(
-                                        event
-                                    ) =>
+                                    onChange={(event) =>
                                         field.onChange(
-                                            event.target
-                                                .value ===
+                                            event.target.value ===
                                                 ''
                                                 ? null
                                                 : Number(
-                                                    event
-                                                        .target
-                                                        .value
-                                                )
+                                                    event.target
+                                                        .value,
+                                                ),
                                         )
                                     }
                                     select
                                     disabled={
                                         !selectedDepartmentId ||
-                                        selectedDepartmentId ===
-                                        0
+                                        selectedDepartmentId === 0
                                     }
-                                    label={
-                                        t.userForm
-                                            .position
-                                    }
+                                    label={t.userForm.position}
                                     fullWidth
                                     size="small"
                                     sx={fieldSx}
@@ -890,33 +877,20 @@ export default function UserFormDialog({
                                 >
                                     <MenuItem value="">
                                         {!selectedDepartmentId ||
-                                            selectedDepartmentId ===
-                                            0
-                                            ? language ===
-                                                'tr'
-                                                ? 'Önce departman seçin'
-                                                : 'Select a department first'
-                                            : t.userForm
-                                                .notSelected}
+                                            selectedDepartmentId === 0
+                                            ? t.userForm.selectDepartmentFirst
+                                            : t.userForm.notSelected}
                                     </MenuItem>
 
                                     {filteredJobPositions.map(
-                                        (
-                                            position
-                                        ) => (
+                                        (position) => (
                                             <MenuItem
-                                                key={
-                                                    position.id
-                                                }
-                                                value={
-                                                    position.id
-                                                }
+                                                key={position.id}
+                                                value={position.id}
                                             >
-                                                {
-                                                    position.name
-                                                }
+                                                {position.name}
                                             </MenuItem>
-                                        )
+                                        ),
                                     )}
                                 </TextField>
                             )}
@@ -926,12 +900,137 @@ export default function UserFormDialog({
                             <>
                                 <Divider />
 
+                                <SectionTitle
+                                    icon={<LockOutlined />}
+                                    title={t.userForm.changePassword}
+                                />
+
+                                <Stack spacing={1.5}>
+                                    <TextField
+                                        value={newPassword}
+                                        onChange={(event) => {
+                                            setNewPassword(
+                                                event.target.value,
+                                            )
+                                            setPasswordError('')
+                                        }}
+                                        label={t.userForm.newPassword}
+                                        type={
+                                            showPassword
+                                                ? 'text'
+                                                : 'password'
+                                        }
+                                        fullWidth
+                                        size="small"
+                                        error={!!passwordError}
+                                        helperText={
+                                            passwordError ||
+                                            t.userForm.passwordRequirement
+                                        }
+                                        sx={fieldSx}
+                                        slotProps={{
+                                            input: {
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <LockOutlined
+                                                            sx={{
+                                                                fontSize: 18,
+                                                                color: 'text.secondary',
+                                                            }}
+                                                        />
+                                                    </InputAdornment>
+                                                ),
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() =>
+                                                                setShowPassword(
+                                                                    (value) =>
+                                                                        !value,
+                                                                )
+                                                            }
+                                                            edge="end"
+                                                        >
+                                                            {showPassword ? (
+                                                                <VisibilityOff fontSize="small" />
+                                                            ) : (
+                                                                <Visibility fontSize="small" />
+                                                            )}
+                                                        </IconButton>
+                                                    </InputAdornment>
+                                                ),
+                                            },
+                                        }}
+                                    />
+
+                                    <Button
+                                        variant="outlined"
+                                        disabled={
+                                            changingPassword ||
+                                            !newPassword
+                                        }
+                                        onClick={async () => {
+                                            if (!initialData) return
+
+                                            const error =
+                                                validateNewPassword(
+                                                    newPassword,
+                                                )
+
+                                            if (error) {
+                                                setPasswordError(
+                                                    error,
+                                                )
+                                                return
+                                            }
+
+                                            setChangingPassword(
+                                                true,
+                                            )
+
+                                            try {
+                                                await onChangePassword(
+                                                    initialData.id,
+                                                    newPassword,
+                                                )
+
+                                                setNewPassword('')
+                                                setPasswordError('')
+                                            } finally {
+                                                setChangingPassword(
+                                                    false,
+                                                )
+                                            }
+                                        }}
+                                        sx={{
+                                            alignSelf: 'flex-start',
+                                            minHeight: 40,
+                                            borderRadius: 2,
+                                            borderColor: '#F5B301',
+                                            color: '#C68E00',
+                                            fontWeight: 600,
+                                            '&:hover': {
+                                                borderColor: '#E0A300',
+                                                bgcolor:
+                                                    'rgba(245,179,1,0.06)',
+                                            },
+                                        }}
+                                    >
+                                        {
+                                            changingPassword
+                                                ? t.userForm.changingPassword
+                                                : t.userForm.changePasswordButton
+                                        }
+                                    </Button>
+                                </Stack>
+
+                                <Divider />
+
                                 <Box
                                     sx={{
-                                        display:
-                                            'flex',
-                                        alignItems:
-                                            'center',
+                                        display: 'flex',
+                                        alignItems: 'center',
                                         justifyContent:
                                             'space-between',
                                         gap: 2,
@@ -951,10 +1050,9 @@ export default function UserFormDialog({
                                                 fontWeight: 400,
                                             }}
                                         >
-                                            {language ===
-                                                'tr'
-                                                ? 'Kullanıcı Durumu'
-                                                : 'User Status'}
+                                            {
+                                                t.userForm.userStatus
+                                            }
                                         </Typography>
 
                                         <Typography
@@ -964,25 +1062,18 @@ export default function UserFormDialog({
                                                 mt: 0.25,
                                             }}
                                         >
-                                            {language ===
-                                                'tr'
-                                                ? 'Kullanıcının sisteme erişimini yönetin.'
-                                                : 'Manage the user’s system access.'}
+                                            {
+                                                t.userForm.userStatusDescription
+                                            }
                                         </Typography>
                                     </Box>
 
                                     <Controller
                                         name="isActive"
-                                        control={
-                                            control
-                                        }
-                                        render={({
-                                            field,
-                                        }) => (
+                                        control={control}
+                                        render={({ field }) => (
                                             <FormControlLabel
-                                                sx={{
-                                                    m: 0,
-                                                }}
+                                                sx={{ m: 0 }}
                                                 control={
                                                     <Switch
                                                         checked={
@@ -996,14 +1087,8 @@ export default function UserFormDialog({
                                                 }
                                                 label={
                                                     field.value
-                                                        ? language ===
-                                                            'tr'
-                                                            ? 'Aktif'
-                                                            : 'Active'
-                                                        : language ===
-                                                            'tr'
-                                                            ? 'Pasif'
-                                                            : 'Inactive'
+                                                        ? t.common.active
+                                                        : t.common.inactive
                                                 }
                                             />
                                         )}
@@ -1021,6 +1106,8 @@ export default function UserFormDialog({
                         borderTop: '1px solid',
                         borderColor: 'divider',
                         gap: 1,
+                        flexShrink: 0,
+                        bgcolor: 'background.paper',
                     }}
                 >
                     <Button
@@ -1054,13 +1141,13 @@ export default function UserFormDialog({
                             },
                         }}
                     >
-                        {submitting
-                            ? language === 'tr'
-                                ? 'Kaydediliyor...'
-                                : 'Saving...'
-                            : mode === 'create'
-                                ? t.userForm.create
-                                : t.userForm.update}
+                        {
+                            submitting
+                                ? t.userForm.saving
+                                : mode === 'create'
+                                    ? t.userForm.create
+                                    : t.userForm.update
+                        }
                     </Button>
                 </DialogActions>
             </Box>

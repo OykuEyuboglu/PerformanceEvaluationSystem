@@ -1,20 +1,53 @@
+# Visual Studio / .NET
 .vs/
 bin/
 obj/
 *.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Logs
+logs/
+*.log
 
 # Test results
 **/TestResults/
 **/test-results/
 
-# Coverage temporary files
-/coverage-temp/
+# Coverage
+coverage/
+coverage-temp/
+coverage-report/
+.coverage/
+**/coverage/
 
-# Generated coverage reports
-/coverage-report/
+# Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
 
-# Frontend coverage
-/frontend/coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Coverage tools
-/.coverage/
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+!.vscode/extensions.json
+
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml

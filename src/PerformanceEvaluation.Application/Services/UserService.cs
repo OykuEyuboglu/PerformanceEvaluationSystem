@@ -131,4 +131,19 @@ public class UserService : IUserService
         _userRepository.Update(user);
         await _userRepository.SaveChangesAsync();
     }
+
+    public async Task ChangePasswordAsync(int userId, string newPassword)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+
+        if (user == null || user.IsDeleted)
+            throw new KeyNotFoundException("Kullanıcı bulunamadı.");
+
+        user.PasswordHash = _passwordHasher.Hash(newPassword);
+        user.UpdatedAt = DateTime.UtcNow;
+
+        _userRepository.Update(user);
+
+        await _userRepository.SaveChangesAsync();
+    }
 }

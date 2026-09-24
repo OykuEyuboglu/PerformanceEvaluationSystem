@@ -852,11 +852,10 @@ export default function EvaluationPeriodsPage() {
                     t.evaluationPeriods
                         .deleteTitle
                 }
-                description={
-                    language === 'tr'
-                        ? `"${deleteTarget?.name}" dönemini silmek istediğine emin misin?`
-                        : `Are you sure you want to delete the "${deleteTarget?.name}" period?`
-                }
+                description={t.evaluationPeriods.deleteDescription.replace(
+                    '{name}',
+                    deleteTarget?.name ?? '',
+                )}
                 loading={deleting}
                 onConfirm={handleDelete}
                 onCancel={() =>

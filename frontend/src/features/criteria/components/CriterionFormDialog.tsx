@@ -50,18 +50,14 @@ const getCriterionSchema = (language: 'tr' | 'en') =>
             .string()
             .min(
                 2,
-                language === 'tr'
-                    ? 'Kriter adı en az 2 karakter olmalı'
-                    : 'Criterion name must be at least 2 characters',
+                translations[language].criteriaFormValidation.criterionNameMin,
             ),
 
         performanceCategoryId: z
             .number()
             .min(
                 1,
-                language === 'tr'
-                    ? 'Ana kategori belirtilmelidir'
-                    : 'Main category must be specified',
+                translations[language].criteriaFormValidation.categoryRequired,
             ),
 
         isActive: z.boolean(),
@@ -76,17 +72,13 @@ const getCriterionSchema = (language: 'tr' | 'en') =>
                         .trim()
                         .min(
                             1,
-                            language === 'tr'
-                                ? 'Açıklama boş bırakılamaz'
-                                : 'Description cannot be empty',
+                            translations[language].criteriaFormValidation.descriptionRequired,
                         ),
                 }),
             )
             .min(
                 1,
-                language === 'tr'
-                    ? 'En az bir iş pozisyonu seçmelisin'
-                    : 'You must select at least one job position',
+                translations[language].criteriaFormValidation.positionRequired,
             ),
     })
 

@@ -62,4 +62,18 @@ public class UserController(IUserService userService) : ControllerBase
 
         return NoContent();
     }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPut("{id}/password")]
+    public async Task<IActionResult> ChangePassword(
+    int id,
+    [FromBody] ChangePasswordDto dto)
+    {
+        await userService.ChangePasswordAsync(id, dto.NewPassword);
+
+        return Ok(new
+        {
+            message = "Şifre başarıyla güncellendi."
+        });
+    }
 }

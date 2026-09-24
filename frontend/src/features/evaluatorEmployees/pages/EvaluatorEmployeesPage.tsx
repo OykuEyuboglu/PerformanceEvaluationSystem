@@ -73,7 +73,7 @@ function UserInfoTooltip({
 }: UserInfoTooltipProps) {
     const { language } = useLanguage()
     const t = translations[language]
-   
+
 
     return (
         <Tooltip
@@ -401,7 +401,7 @@ export default function EvaluatorEmployeesPage() {
     const loadUsers = useCallback(
         async () => {
             setLoadingUsers(true)
-          
+
             try {
                 const usersData = await getUsers()
 
@@ -1794,11 +1794,10 @@ export default function EvaluatorEmployeesPage() {
                     t.evaluatorEmployees
                         .removeTitle
                 }
-                description={
-                    language === 'tr'
-                        ? `"${removeTarget?.employeeName}" adlı çalışanı bu değerlendiricinin ekibinden çıkarmak istediğine emin misin?`
-                        : `Are you sure you want to remove "${removeTarget?.employeeName}" from this evaluator's team?`
-                }
+                description={t.evaluatorEmployees.removeDescription.replace(
+                    '{name}',
+                    removeTarget?.employeeName ?? '',
+                )}
                 confirmLabel={
                     t.evaluatorEmployees
                         .remove

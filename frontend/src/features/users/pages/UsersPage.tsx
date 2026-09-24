@@ -43,11 +43,13 @@ import {
     updateUser,
     patchUser,
     deleteUser,
+    changeUserPassword,
 } from '../usersApi'
 
 import { getDepartments } from '../../../shared/api/departmentsApi'
 import { getJobPositions } from '../../../shared/api/jobPositionsApi'
 import { useLanguage } from '../../../shared/i18n/LanguageContext'
+import { translations } from '../../../shared/i18n/translations'
 import type { UserDto } from '../types'
 import type { DepartmentDto } from '../../../shared/types/department'
 import type { JobPositionDto } from '../../../shared/types/jobPosition'
@@ -57,12 +59,6 @@ import UserFormDialog, {
 } from '../components/UserFormDialog'
 
 import ConfirmDialog from '../../../shared/components/ConfirmDialog'
-
-const ROLE_LABELS: Record<string, { tr: string; en: string }> = {
-    Admin: { tr: 'Yönetici', en: 'Admin' },
-    Evaluator: { tr: 'Değerlendirici', en: 'Evaluator' },
-    Employee: { tr: 'Çalışan', en: 'Employee' },
-}
 
 const ROLE_COLORS: Record<
     string,
@@ -80,6 +76,13 @@ export default function UsersPage() {
     const [loading, setLoading] = useState(true)
 
     const { language } = useLanguage()
+    const t = translations[language]
+
+    const roleLabels: Record<string, string> = {
+        Admin: t.roles.Admin,
+        Evaluator: t.roles.Evaluator,
+        Employee: t.roles.Employee,
+    }
 
     const [dialogOpen, setDialogOpen] = useState(false)
     const [dialogMode, setDialogMode] =
@@ -140,9 +143,7 @@ export default function UsersPage() {
             setSnackbar({
                 open: true,
                 message:
-                    language === 'tr'
-                        ? 'Veriler yüklenirken hata oluştu.'
-                        : 'An error occurred while loading data.',
+                    t.users.loadError,
                 severity: 'error',
             })
         } finally {
@@ -185,9 +186,7 @@ export default function UsersPage() {
                 setSnackbar({
                     open: true,
                     message:
-                        language === 'tr'
-                            ? 'Kullanıcı oluşturuldu.'
-                            : 'User created successfully.',
+                        t.users.createSuccess,
                     severity: 'success',
                 })
             } else if (selectedUser) {
@@ -204,9 +203,7 @@ export default function UsersPage() {
                 setSnackbar({
                     open: true,
                     message:
-                        language === 'tr'
-                            ? 'Kullanıcı güncellendi.'
-                            : 'User updated successfully.',
+                        t.users.updateSuccess,
                     severity: 'success',
                 })
             }
@@ -218,9 +215,37 @@ export default function UsersPage() {
                 open: true,
                 message:
                     err?.response?.data?.message ??
-                    (language === 'tr'
-                        ? 'İşlem sırasında hata oluştu.'
-                        : 'An error occurred during the operation.'),
+                    (t.users.operationError),
+                severity: 'error',
+            })
+        } finally {
+            setSubmitting(false)
+        }
+    }
+
+    const handleChangePassword = async (
+        userId: number,
+        newPassword: string,
+    ) => {
+        setSubmitting(true)
+
+        try {
+            await changeUserPassword(userId, {
+                newPassword,
+            })
+
+            setSnackbar({
+                open: true,
+                message:
+                    t.users.passwordSuccess,
+                severity: 'success',
+            })
+        } catch (err: any) {
+            setSnackbar({
+                open: true,
+                message:
+                    err?.response?.data?.message ??
+                    (t.users.passwordError),
                 severity: 'error',
             })
         } finally {
@@ -248,9 +273,7 @@ export default function UsersPage() {
             setSnackbar({
                 open: true,
                 message:
-                    language === 'tr'
-                        ? 'Durum güncellenemedi.'
-                        : 'Status could not be updated.',
+                    t.users.statusError,
                 severity: 'error',
             })
         }
@@ -267,9 +290,7 @@ export default function UsersPage() {
             setSnackbar({
                 open: true,
                 message:
-                    language === 'tr'
-                        ? 'Kullanıcı silindi.'
-                        : 'User deleted successfully.',
+                    t.users.deleteSuccess,
                 severity: 'success',
             })
 
@@ -280,9 +301,7 @@ export default function UsersPage() {
                 open: true,
                 message:
                     err?.response?.data?.message ??
-                    (language === 'tr'
-                        ? 'Kullanıcı silinemedi.'
-                        : 'User could not be deleted.'),
+                    (t.users.deleteError),
                 severity: 'error',
             })
         } finally {
@@ -329,7 +348,7 @@ export default function UsersPage() {
     }
 
     const visibleUsers = useMemo(() => {
-        const query = search.trim().toLocaleLowerCase('tr-TR')
+        const query = search.trim().toLocaleLowerCase(language === 'tr' ? 'tr-TR' : 'en-US')
 
         if (!query) return users
 
@@ -339,7 +358,7 @@ export default function UsersPage() {
                 user.email,
                 user.departmentName,
                 user.jobPositionName ?? '',
-                ROLE_LABELS[user.role]?.[language] ?? user.role,
+                roleLabels[user.role] ?? user.role,
             ].some((value) =>
                 value
                     .toLocaleLowerCase('tr-TR')
@@ -369,7 +388,7 @@ export default function UsersPage() {
         {
             field: 'fullName',
             headerName:
-                language === 'tr' ? 'Ad Soyad' : 'Full Name',
+                t.users.fullName,
             flex: 1.25,
             minWidth: 180,
             sortable: true,
@@ -403,7 +422,7 @@ export default function UsersPage() {
         {
             field: 'email',
             headerName:
-                language === 'tr' ? 'E-posta' : 'Email',
+                t.users.email,
             flex: 1.25,
             minWidth: 200,
             sortable: true,
@@ -412,7 +431,7 @@ export default function UsersPage() {
         {
             field: 'role',
             headerName:
-                language === 'tr' ? 'Rol' : 'Role',
+                t.users.role,
             flex: 0.8,
             minWidth: 125,
             sortable: true,
@@ -421,9 +440,7 @@ export default function UsersPage() {
                 <Chip
                     size="small"
                     label={
-                        ROLE_LABELS[params.value]?.[
-                        language
-                        ] ?? params.value
+                        roleLabels[params.value] ?? params.value
                     }
                     color={
                         ROLE_COLORS[params.value] ??
@@ -439,9 +456,7 @@ export default function UsersPage() {
         {
             field: 'departmentName',
             headerName:
-                language === 'tr'
-                    ? 'Departman'
-                    : 'Department',
+                t.users.department,
             flex: 1,
             minWidth: 145,
             sortable: true,
@@ -450,20 +465,18 @@ export default function UsersPage() {
         {
             field: 'jobPositionName',
             headerName:
-                language === 'tr'
-                    ? 'Pozisyon'
-                    : 'Position',
+                t.users.position,
             flex: 1,
             minWidth: 145,
             sortable: true,
             filterable: false,
             valueGetter: (_, row) =>
-                row.jobPositionName ?? '-',
+                row.jobPositionName ?? t.users.notSpecified,
         },
         {
             field: 'isActive',
             headerName:
-                language === 'tr' ? 'Durum' : 'Status',
+                t.users.status,
             flex: 0.75,
             minWidth: 120,
             sortable: true,
@@ -495,12 +508,8 @@ export default function UsersPage() {
                         }}
                     >
                         {params.value
-                            ? language === 'tr'
-                                ? 'Aktif'
-                                : 'Active'
-                            : language === 'tr'
-                                ? 'Pasif'
-                                : 'Inactive'}
+                                ? t.common.active
+                                : t.common.inactive}
                     </Typography>
                 </Box>
             ),
@@ -521,9 +530,7 @@ export default function UsersPage() {
                 >
                     <Tooltip
                         title={
-                            language === 'tr'
-                                ? 'Düzenle'
-                                : 'Edit'
+                            t.common.edit
                         }
                     >
                         <IconButton
@@ -551,9 +558,7 @@ export default function UsersPage() {
 
                     <Tooltip
                         title={
-                            language === 'tr'
-                                ? 'Sil'
-                                : 'Delete'
+                            t.common.delete
                         }
                     >
                         <IconButton
@@ -643,9 +648,7 @@ export default function UsersPage() {
                                 letterSpacing: '-0.6px',
                             }}
                         >
-                            {language === 'tr'
-                                ? 'Kullanıcı Yönetimi'
-                                : 'User Management'}
+                            {t.users.title}
                         </Typography>
                     </Box>
 
@@ -656,9 +659,7 @@ export default function UsersPage() {
                             ml: 2,
                         }}
                     >
-                        {language === 'tr'
-                            ? 'Sistem kullanıcılarını, rollerini ve erişim durumlarını yönetin.'
-                            : 'Manage system users, roles and access status.'}
+                        {t.users.description}
                     </Typography>
                 </Box>
 
@@ -685,9 +686,7 @@ export default function UsersPage() {
                         },
                     }}
                 >
-                    {language === 'tr'
-                        ? 'Yeni Kullanıcı'
-                        : 'New User'}
+                    {t.users.newUser}
                 </Button>
             </Box>
 
@@ -705,9 +704,7 @@ export default function UsersPage() {
                 <SummaryCard
                     icon={<PeopleAlt />}
                     label={
-                        language === 'tr'
-                            ? 'Toplam Kullanıcı'
-                            : 'Total Users'
+                        t.users.totalUsers
                     }
                     value={stats.total}
                     delay={80}
@@ -716,9 +713,7 @@ export default function UsersPage() {
                 <SummaryCard
                     icon={<Group />}
                     label={
-                        language === 'tr'
-                            ? 'Aktif Kullanıcı'
-                            : 'Active Users'
+                        t.users.activeUsers
                     }
                     value={stats.active}
                     delay={140}
@@ -728,9 +723,7 @@ export default function UsersPage() {
                 <SummaryCard
                     icon={<AdminPanelSettings />}
                     label={
-                        language === 'tr'
-                            ? 'Yönetici'
-                            : 'Administrators'
+                        t.users.administrators
                     }
                     value={stats.admins}
                     delay={200}
@@ -739,9 +732,7 @@ export default function UsersPage() {
                 <SummaryCard
                     icon={<PersonOff />}
                     label={
-                        language === 'tr'
-                            ? 'Pasif Kullanıcı'
-                            : 'Inactive Users'
+                        t.users.inactiveUsers
                     }
                     value={stats.inactive}
                     delay={260}
@@ -790,9 +781,7 @@ export default function UsersPage() {
                             setSearch(e.target.value)
                         }
                         placeholder={
-                            language === 'tr'
-                                ? 'Ad, e-posta, departman veya pozisyon ara...'
-                                : 'Search name, email, department or position...'
+                            t.users.searchPlaceholder
                         }
                         sx={{
                             flex: 1,
@@ -841,9 +830,7 @@ export default function UsersPage() {
                             },
                         }}
                     >
-                        {language === 'tr'
-                            ? 'Filtrele'
-                            : 'Filter'}
+                        {t.common.filter}
                     </Button>
 
                     <Typography
@@ -857,9 +844,7 @@ export default function UsersPage() {
                         }}
                     >
                         {visibleUsers.length}{' '}
-                        {language === 'tr'
-                            ? 'kullanıcı gösteriliyor'
-                            : 'users shown'}
+                        {t.users.usersShown}
                     </Typography>
                 </Box>
 
@@ -885,9 +870,7 @@ export default function UsersPage() {
                                 color: 'text.secondary',
                             }}
                         >
-                            {language === 'tr'
-                                ? 'Aktif filtre:'
-                                : 'Active filter:'}
+                            {t.users.activeFilter}
                         </Typography>
 
                         <Chip
@@ -1042,9 +1025,7 @@ export default function UsersPage() {
                                 mb: 1.5,
                             }}
                         >
-                            {language === 'tr'
-                                ? 'Kullanıcıları Filtrele'
-                                : 'Filter Users'}
+                            {t.users.filterUsers}
                         </Typography>
 
                         <TextField
@@ -1052,9 +1033,7 @@ export default function UsersPage() {
                             fullWidth
                             size="small"
                             label={
-                                language === 'tr'
-                                    ? 'Alan'
-                                    : 'Field'
+                                t.users.field
                             }
                             value={filterField}
                             onChange={(event) =>
@@ -1071,29 +1050,19 @@ export default function UsersPage() {
                             }}
                         >
                             <MenuItem value="fullName">
-                                {language === 'tr'
-                                    ? 'Ad Soyad'
-                                    : 'Full Name'}
+                                {t.users.fullName}
                             </MenuItem>
                             <MenuItem value="email">
-                                {language === 'tr'
-                                    ? 'E-posta'
-                                    : 'Email'}
+                                {t.users.email}
                             </MenuItem>
                             <MenuItem value="role">
-                                {language === 'tr'
-                                    ? 'Rol'
-                                    : 'Role'}
+                                {t.users.role}
                             </MenuItem>
                             <MenuItem value="departmentName">
-                                {language === 'tr'
-                                    ? 'Departman'
-                                    : 'Department'}
+                                {t.users.department}
                             </MenuItem>
                             <MenuItem value="jobPositionName">
-                                {language === 'tr'
-                                    ? 'Pozisyon'
-                                    : 'Position'}
+                                {t.users.position}
                             </MenuItem>
                         </TextField>
 
@@ -1101,14 +1070,10 @@ export default function UsersPage() {
                             fullWidth
                             size="small"
                             label={
-                                language === 'tr'
-                                    ? 'Değer'
-                                    : 'Value'
+                                t.users.value
                             }
                             placeholder={
-                                language === 'tr'
-                                    ? 'Filtre değerini yazın...'
-                                    : 'Enter filter value...'
+                                t.users.filterValuePlaceholder
                             }
                             value={filterValue}
                             onChange={(event) =>
@@ -1136,22 +1101,20 @@ export default function UsersPage() {
                 jobPositions={jobPositions}
                 submitting={submitting}
                 onSubmit={handleSubmit}
-                onClose={() =>
-                    setDialogOpen(false)
-                }
+                onChangePassword={handleChangePassword}
+                onClose={() => setDialogOpen(false)}
             />
 
             <ConfirmDialog
                 open={!!deleteTarget}
                 title={
-                    language === 'tr'
-                        ? 'Kullanıcıyı Sil'
-                        : 'Delete User'
+                    t.users.deleteTitle
                 }
                 description={
-                    language === 'tr'
-                        ? `"${deleteTarget?.firstName} ${deleteTarget?.lastName}" adlı kullanıcıyı silmek istediğine emin misin? Kullanıcı sistemden silinmez, yalnızca tablolardan gizlenir.`
-                        : `Are you sure you want to deactivate "${deleteTarget?.firstName} ${deleteTarget?.lastName}"? The user will be deleted rather than permanently deleted.`
+                    t.users.deleteDescription.replace(
+                        '{name}',
+                        `${deleteTarget?.firstName} ${deleteTarget?.lastName}`,
+                    )
                 }
                 loading={deleting}
                 onConfirm={handleDelete}

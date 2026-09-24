@@ -65,10 +65,14 @@ const existingUser: UserDto = {
 function renderDialog(
     overrides: Partial<
         ComponentProps<typeof UserFormDialog>
-    > = {}
+    > = {},
 ) {
     const onSubmit = vi.fn()
     const onClose = vi.fn()
+
+    const onChangePassword = vi
+        .fn()
+        .mockResolvedValue(undefined)
 
     const utils = render(
         <LanguageProvider>
@@ -79,15 +83,17 @@ function renderDialog(
                 jobPositions={jobPositions}
                 submitting={false}
                 onSubmit={onSubmit}
+                onChangePassword={onChangePassword}
                 onClose={onClose}
                 {...overrides}
             />
-        </LanguageProvider>
+        </LanguageProvider>,
     )
 
     return {
         ...utils,
         onSubmit,
+        onChangePassword,
         onClose,
     }
 }
@@ -95,7 +101,7 @@ function renderDialog(
 async function selectMuiOption(
     user: ReturnType<typeof userEvent.setup>,
     labelText: string,
-    optionName: string | RegExp
+    optionName: string | RegExp,
 ) {
     const combobox = screen.getByRole('combobox', {
         name: labelText,
@@ -104,14 +110,14 @@ async function selectMuiOption(
     await user.click(combobox)
 
     const listbox = await screen.findByRole(
-        'listbox'
+        'listbox',
     )
 
     const option = within(listbox).getByRole(
         'option',
         {
             name: optionName,
-        }
+        },
     )
 
     await user.click(option)
@@ -126,49 +132,49 @@ describe('UserFormDialog', () => {
         renderDialog()
 
         expect(
-            screen.getByLabelText(/^ad$/i)
+            screen.getByLabelText(/^ad$/i),
         ).toBeInTheDocument()
 
         expect(
-            screen.getByLabelText(/^soyad$/i)
+            screen.getByLabelText(/^soyad$/i),
         ).toBeInTheDocument()
 
         expect(
-            screen.getByLabelText(/e-posta/i)
+            screen.getByLabelText(/e-posta/i),
         ).toBeInTheDocument()
 
         expect(
-            screen.getByLabelText(/şifre/i)
+            screen.getByLabelText(/şifre/i),
         ).toBeInTheDocument()
 
         expect(
             screen.getByRole('combobox', {
                 name: /rol/i,
-            })
+            }),
         ).toBeInTheDocument()
 
         expect(
             screen.getByRole('combobox', {
                 name: /departman/i,
-            })
+            }),
         ).toBeInTheDocument()
 
         expect(
             screen.getByRole('combobox', {
                 name: /pozisyon/i,
-            })
+            }),
         ).toBeInTheDocument()
 
         expect(
             screen.queryByText(
-                /kullanıcı durumu/i
-            )
+                /kullanıcı durumu/i,
+            ),
         ).not.toBeInTheDocument()
 
         expect(
             screen.getByRole('button', {
                 name: /oluştur/i,
-            })
+            }),
         ).toBeInTheDocument()
     })
 
@@ -179,31 +185,31 @@ describe('UserFormDialog', () => {
         })
 
         expect(
-            screen.getByDisplayValue('Ayşe')
+            screen.getByDisplayValue('Ayşe'),
         ).toBeInTheDocument()
 
         expect(
-            screen.getByDisplayValue('Yılmaz')
+            screen.getByDisplayValue('Yılmaz'),
         ).toBeInTheDocument()
 
         expect(
-            screen.queryByLabelText(/e-posta/i)
+            screen.queryByLabelText(/e-posta/i),
         ).not.toBeInTheDocument()
 
         expect(
-            screen.getByText('ayse@example.com')
+            screen.getByText('ayse@example.com'),
         ).toBeInTheDocument()
 
         expect(
             screen.getByText(
-                /kullanıcı durumu/i
-            )
+                /kullanıcı durumu/i,
+            ),
         ).toBeInTheDocument()
 
         expect(
             screen.getByRole('button', {
                 name: /güncelle/i,
-            })
+            }),
         ).toBeInTheDocument()
     })
 
@@ -214,40 +220,42 @@ describe('UserFormDialog', () => {
         await user.click(
             screen.getByRole('button', {
                 name: /oluştur/i,
-            })
+            }),
         )
 
         expect(
             await screen.findByText(
-                'Ad gereklidir'
-            )
+                'Ad gereklidir',
+            ),
         ).toBeInTheDocument()
 
         expect(
             screen.getByText(
-                'Soyad gereklidir'
-            )
+                'Soyad gereklidir',
+            ),
         ).toBeInTheDocument()
 
         expect(
             screen.getByText(
-                'Email gereklidir'
-            )
+                'Email gereklidir',
+            ),
         ).toBeInTheDocument()
 
         expect(
             screen.getByText(
-                'Şifre gereklidir'
-            )
+                'Şifre gereklidir',
+            ),
         ).toBeInTheDocument()
 
         expect(
             screen.getByText(
-                'Departman seçin'
-            )
+                'Departman seçin',
+            ),
         ).toBeInTheDocument()
 
-        expect(onSubmit).not.toHaveBeenCalled()
+        expect(
+            onSubmit,
+        ).not.toHaveBeenCalled()
     })
 
     it('büyük harf içermeyen şifre için ilgili kural hatasını göstermeli', async () => {
@@ -256,37 +264,39 @@ describe('UserFormDialog', () => {
 
         await user.type(
             screen.getByLabelText(/^ad$/i),
-            'Mehmet'
+            'Mehmet',
         )
 
         await user.type(
             screen.getByLabelText(/^soyad$/i),
-            'Demir'
+            'Demir',
         )
 
         await user.type(
             screen.getByLabelText(/e-posta/i),
-            'mehmet@example.com'
+            'mehmet@example.com',
         )
 
         await user.type(
             screen.getByLabelText(/şifre/i),
-            'sifre123!'
+            'sifre123!',
         )
 
         await user.click(
             screen.getByRole('button', {
                 name: /oluştur/i,
-            })
+            }),
         )
 
         expect(
             await screen.findByText(
-                'Şifre en az bir büyük harf içermeli'
-            )
+                'Şifre en az bir büyük harf içermeli',
+            ),
         ).toBeInTheDocument()
 
-        expect(onSubmit).not.toHaveBeenCalled()
+        expect(
+            onSubmit,
+        ).not.toHaveBeenCalled()
     })
 
     it('geçerli verilerle gönderildiğinde onSubmit doğru değerlerle çağrılmalı', async () => {
@@ -295,71 +305,71 @@ describe('UserFormDialog', () => {
 
         await user.type(
             screen.getByLabelText(/^ad$/i),
-            'Mehmet'
+            'Mehmet',
         )
 
         await user.type(
             screen.getByLabelText(/^soyad$/i),
-            'Demir'
+            'Demir',
         )
 
         await user.type(
             screen.getByLabelText(/e-posta/i),
-            'mehmet@example.com'
+            'mehmet@example.com',
         )
 
         await user.type(
             screen.getByLabelText(/şifre/i),
-            'Sifre123!'
+            'Sifre123!',
         )
 
         await selectMuiOption(
             user,
             'Rol',
-            /değerlendirici/i
+            /değerlendirici/i,
         )
 
         await selectMuiOption(
             user,
             'Departman',
-            /bilgi teknolojileri/i
+            /bilgi teknolojileri/i,
         )
 
         await user.click(
             screen.getByRole('button', {
                 name: /oluştur/i,
-            })
+            }),
         )
 
         expect(
-            onSubmit
+            onSubmit,
         ).toHaveBeenCalledTimes(1)
 
         const submitted =
             onSubmit.mock.calls[0][0] as UserFormValues
 
         expect(
-            submitted.firstName
+            submitted.firstName,
         ).toBe('Mehmet')
 
         expect(
-            submitted.lastName
+            submitted.lastName,
         ).toBe('Demir')
 
         expect(
-            submitted.email
+            submitted.email,
         ).toBe('mehmet@example.com')
 
         expect(
-            submitted.password
+            submitted.password,
         ).toBe('Sifre123!')
 
         expect(
-            submitted.role
+            submitted.role,
         ).toBe('Evaluator')
 
         expect(
-            submitted.departmentId
+            submitted.departmentId,
         ).toBe(1)
     })
 
@@ -370,11 +380,11 @@ describe('UserFormDialog', () => {
         await user.click(
             screen.getByRole('button', {
                 name: /vazgeç/i,
-            })
+            }),
         )
 
         expect(
-            onClose
+            onClose,
         ).toHaveBeenCalledTimes(1)
     })
 
@@ -389,7 +399,7 @@ describe('UserFormDialog', () => {
             })
 
         expect(
-            submitButton
+            submitButton,
         ).toBeDisabled()
     })
 
@@ -400,8 +410,8 @@ describe('UserFormDialog', () => {
 
         expect(
             screen.queryByText(
-                'Yeni Kullanıcı'
-            )
+                'Yeni Kullanıcı',
+            ),
         ).not.toBeInTheDocument()
     })
 })
