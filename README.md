@@ -212,7 +212,7 @@ The backend is organized into four main layers:
                      ▼
 ┌──────────────────────────────────────────┐
 │             Infrastructure               │
-│ EF Core · DbContext · Repositories        │
+│ EF Core · DbContext · Repositories       │
 │ Migrations · Data Access                 │
 └────────────────────┬─────────────────────┘
                      ▼
