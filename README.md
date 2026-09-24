@@ -1,316 +1,278 @@
-# 📊 Performance Evaluation System
+# VakıfBank 360 — Performance Evaluation System
 
-<div align="center">
+A role-based, criteria-driven performance evaluation platform for organizations with multiple departments.
 
-*A role-based, criteria-driven performance evaluation platform for organizations with multiple departments, built with .NET 8, React, TypeScript and SQL Server, following Onion Architecture. Admins define weighted evaluation criteria per job position, Evaluators (team leads / managers) score the employees assigned to them across any department, and Employees track their own performance history — producing a transparent, weighted final score and ranking, department by department.*
+The system is built with **.NET 8, React, TypeScript, SQL Server and Docker**. It follows an **Onion Architecture** on the backend and a feature-based structure on the frontend.
 
-![.NET](https://img.shields.io/badge/.NET_8-512BD4?style=for-the-badge&logo=dotnet)
-![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=csharp)
-![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript)
-![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite)
-![MUI](https://img.shields.io/badge/MUI-007FFF?style=for-the-badge&logo=mui)
-![Zustand](https://img.shields.io/badge/Zustand-433E38?style=for-the-badge)
-![SQL Server](https://img.shields.io/badge/SQL_Server-CC2927?style=for-the-badge&logo=microsoftsqlserver)
-![Entity Framework Core](https://img.shields.io/badge/EF_Core-512BD4?style=for-the-badge)
-![JWT](https://img.shields.io/badge/JWT-Authentication-black?style=for-the-badge&logo=jsonwebtokens)
-![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger)
-![xUnit](https://img.shields.io/badge/xUnit-512BD4?style=for-the-badge)
-![Vitest](https://img.shields.io/badge/Vitest-6E9F18?style=for-the-badge&logo=vitest)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker)
-![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx)
-
-</div>
+Administrators manage users, departments, job positions, evaluation periods and weighted performance criteria. Evaluators assess employees assigned to them, while employees can view their own performance history and score trends.
 
 ---
 
-## 📌 Project Overview
+## 1. Project Overview
 
-The **Performance Evaluation System** is a full-stack web application built to measure employee performance across an entire organization — not limited to a single department — in an objective, transparent, and score-based way.
+### Problem Solved
 
-Traditional performance reviews are often subjective and inconsistent across teams and departments. This project solves that by introducing **job-position-specific, weighted evaluation criteria**: every job position is measured against the same top-level categories, but each category can carry job-position-specific sub-criteria and descriptions. Scores are combined using a weighted formula to produce one comparable, auditable number per employee, per evaluation period — regardless of which department that employee belongs to.
+The system provides a centralized and standardized performance evaluation process by:
 
-The system supports three roles — **Admin**, **Evaluator**, and **Employee** — each with a distinct view and permission set, and produces per-department dashboards, rankings, and exportable reports.
-
-### Problem it solves
-- Inconsistent, undocumented performance reviews across different departments and job positions
-- No standardized, weighted way to compare employees who hold different job positions
-- No historical record employees can review their own feedback and score trend against
-- No centralized reporting/ranking view for managers across departments, periods, and teams
+- Defining performance criteria according to job positions
+- Assigning configurable weights to performance categories
+- Restricting Evaluators to the employees assigned to them
+- Calculating weighted performance scores
+- Maintaining evaluation history by period
+- Providing department and team rankings
+- Providing employees with access to their own performance history
+- Supporting Excel report export
+- Supporting Turkish and English user interfaces
+- Providing role-based access control and protected API endpoints
 
 ### User Roles
-| Role | Summary |
-|------|---------|
-| 🛠️ **Admin** | Manages users, departments, job positions, roles, criteria and weights; views all departments' scores and reports |
-| 👨‍💼 **Evaluator** (Team Lead / Manager) | Evaluates only the employees assigned to them, regardless of department; adds comments; views their team's history and ranking |
-| 👩‍💻 **Employee** (any job position, any department) | Views their own score history, feedback, and progress over time |
+
+| Role | Main Responsibilities |
+|---|---|
+| **Admin** | Manages users, departments, job positions, criteria, weights, evaluation periods and evaluator assignments; monitors evaluation results and reports |
+| **Evaluator** | Evaluates assigned employees, enters criterion scores and comments, and views team results and rankings |
+| **Employee** | Views personal performance scores, evaluation history and score trends |
 
 ---
 
-# 🚀 Features
+# 2. Main Features
 
-## 🔐 Authentication & Authorization
-- JWT-based stateless authentication
-- Passwords hashed with BCrypt
-- Role-Based Access Control (RBAC): Admin / Evaluator / Employee
-- Resource-level authorization — an Evaluator can only access data for employees explicitly assigned to them
-- Protected REST endpoints with role- and ownership-based middleware
+## Authentication & Authorization
 
-> 🖼️ *Add a screenshot of the login page here:*
-> ```markdown
-> <img src="images/login.png" width="60%" alt="Login Page"/>
-> ```
+- JWT-based authentication
+- BCrypt password hashing
+- Role-Based Access Control (RBAC)
+- Admin / Evaluator / Employee authorization
+- Resource-level authorization for Evaluator access
+- Protected API endpoints
+- Login rate limiting
+- Password change functionality for administrators
 
-## 🏢 Department, Job Position & User Management
-- Manage multiple departments across the organization
-- Manage job positions independently of department (criteria descriptions are tailored per job position)
-- Create, list, and manage users (name, email, role, department, job position)
-- Activate / deactivate user accounts
+## User & Organization Management
 
-> 🖼️ *Add a screenshot of the Admin dashboard here:*
-> ```markdown
-> <img src="images/dashboard-admin.png" width="70%" alt="Admin Dashboard"/>
-> ```
+- Department management
+- Job position management
+- User creation and management
+- Role assignment
+- Department and job-position assignment
+- User activation/deactivation
 
-## 🧩 Job-Position-Based Criteria Management
-- Admin defines top-level performance **categories** (e.g. Quality of Work, Communication, Delivery/Timeliness) that apply organization-wide
-- Each category contains **sub-criteria**, with descriptions that can differ per job position while sharing the same category — so a Developer and a QA Engineer (or an HR specialist and a Sales rep) are scored on comparable categories, worded appropriately for their role
-- Category weights (percentages) are fully configurable
-- Criteria and categories can be activated/deactivated without deleting historical data
+## Criteria & Category Management
 
-> 🖼️ *Add a screenshot of the criteria management page here:*
-> ```markdown
-> <img src="images/criteria-management.png" width="70%" alt="Criteria Management"/>
-> ```
+- Performance category management
+- Performance criterion management
+- Job-position-specific criterion descriptions
+- Configurable category weights
+- Activation/deactivation of criteria and categories
+- Preservation of historical evaluation data
 
-## ⚖️ Weighted Scoring Engine
-- Evaluators score each sub-criterion on a 1–5 scale
-- Category score is calculated as the average of its sub-criterion scores, multiplied by the category weight
-- Total score is the sum of all weighted category scores
+## Evaluation Management
 
-```
+- Evaluation period management
+- Evaluator–Employee assignments
+- Criterion-based scoring from 1 to 5
+- Comments on evaluations
+- Evaluation status management
+- Historical evaluations by period
+
+## Weighted Scoring
+
+The system calculates performance using weighted category scores.
+
+```text
 Category Score = Average(Criterion Scores) × Category Weight
-Total Score     = Σ (Category Score)
+
+Total Score = Σ(Category Score)
 ```
 
-> 🖼️ *Add a screenshot of the evaluation form (1–5 scoring) here:*
-> ```markdown
-> <img src="images/evaluation-form.png" width="70%" alt="Evaluation Form"/>
-> ```
+Example:
 
-## 🗓️ Evaluation Periods & Evaluator Assignment
-- Admin defines evaluation periods (e.g. quarterly, semi-annual)
-- Evaluator–Employee assignments determine who can evaluate whom, across any department
-- Repeat evaluations of the same employee are supported across different periods
+```text
+Quality of Work
+Weight: 30%
+Criterion scores: 4, 5
 
-## 🏆 Ranking & Reporting
-- Organization-wide and per-department ranking (Admin view)
-- Team-level ranking (Evaluator view)
-- Personal score history and trend (Employee view), presented as charts and tables
-- Reports exportable to **Excel**
+Average = 4.5
+Category contribution = 4.5 × 0.30 = 1.35
+```
 
-> 🖼️ *Add screenshots of the reports/ranking page and an exported Excel file here:*
-> ```markdown
-> <img src="images/reports-ranking.png" width="70%" alt="Reports & Ranking"/>
-> <img src="images/excel-export.png" width="70%" alt="Excel Export"/>
-> ```
+The same calculation is applied to all categories and summed to obtain the employee's total score.
 
-## 🌍 Internationalization (i18n)
-- Multi-language UI support
+## Dashboards & Reporting
 
-## 🛡 Rate Limiting
-- Login endpoint protected against brute-force attacks using ASP.NET Core's built-in Rate Limiting middleware (.NET 8)
-- Fixed Window limiter: max **5 login attempts per IP per minute**
-- No external dependency (e.g. Redis) required — sufficient for a single-instance deployment
+- Admin dashboard
+- Evaluator dashboard
+- Employee dashboard
+- Department rankings
+- Team rankings
+- Personal score history
+- Score trend visualization
+- Excel export
 
-## 🧪 Testing & Coverage
-- Backend unit and integration tests (xUnit)
-- Frontend component/page tests (Vitest + React Testing Library)
-- Role-based authorization tests (Admin / Evaluator / Employee access rules)
-- Score-calculation accuracy tests
-- A dedicated coverage pipeline collects and reports coverage for both suites (see [Testing & Coverage](#-testing--coverage-1) below)
+## Internationalization
 
-## 🐳 Containerization
-- Fully Dockerized: SQL Server, backend API, and frontend (served via Nginx)
-- Separate `Dockerfile.backend` and `Dockerfile.frontend`, orchestrated with a single `docker-compose.yml`
-- One-command startup with Docker Compose
+- Turkish / English interface
+- Centralized translation structure
+- Language selection persisted on the client
 
-> 🖼️ *Add a screenshot of the running containers (Docker Desktop) here:*
-> ```markdown
-> <img src="images/docker-containers.png" width="70%" alt="Docker Containers"/>
-> ```
+## Security
+
+- JWT authentication
+- BCrypt password hashing
+- Role-based authorization
+- Resource-level access control
+- FluentValidation for input validation
+- Login rate limiting
+- Unique email constraint
+- Soft-delete / active-state handling where applicable
+
+## Containerization
+
+The application is containerized with Docker:
+
+```text
+SQL Server
+    │
+    ▼
+.NET 8 Web API
+    │
+    ▼
+React + Vite + Nginx
+```
+
+The complete stack can be started with Docker Compose.
 
 ---
 
-# 🛠 Technology Stack
+# 3. Technology Stack
 
 ## Backend
-```text
-C#
-.NET 8
-ASP.NET Core Web API
-Entity Framework Core
-FluentValidation
-AutoMapper
-JWT Authentication
-BCrypt.Net (password hashing)
-ASP.NET Core Rate Limiting Middleware
-Swagger / OpenAPI
-```
+
+- C#
+- .NET 8
+- ASP.NET Core Web API
+- Entity Framework Core
+- FluentValidation
+- AutoMapper
+- JWT Authentication
+- BCrypt.Net
+- ASP.NET Core Rate Limiting
+- Swagger / OpenAPI
 
 ## Frontend
-```text
-React
-TypeScript
-Vite
-MUI (Material UI)
-Zustand (state management)
-Axios (with interceptors)
-React Router (ProtectedRoute)
-i18next (internationalization)
-```
+
+- React
+- TypeScript
+- Vite
+- Material UI (MUI)
+- Zustand
+- Axios
+- React Router
 
 ## Database
-```text
-Microsoft SQL Server
-EF Core Migrations
-```
 
-## Testing & Coverage Tooling
-```text
-xUnit
-Integration Tests (WebApplicationFactory)
-Vitest
-React Testing Library (RTL)
-coverlet / coverage.runsettings (backend coverage collection)
-PowerShell coverage script (scripts/coverage.ps1)
-```
+- Microsoft SQL Server
+- Entity Framework Core Migrations
 
-## Infrastructure & Deployment
-```text
-Docker
-Docker Compose
-Dockerfile.backend / Dockerfile.frontend
-Nginx (frontend static hosting / reverse proxy)
-```
+## Testing
+
+- xUnit
+- ASP.NET Core integration tests / WebApplicationFactory
+- Vitest
+- React Testing Library
+- Coverlet
+- PowerShell coverage scripts
+
+## Infrastructure
+
+- Docker
+- Docker Compose
+- Nginx
 
 ---
 
-# 🏗 Architecture — Onion Architecture
+# 4. Architecture
 
-The backend follows **Onion Architecture**, keeping the domain model at the center and isolating it from infrastructure and delivery concerns. Dependencies always point **inward**, toward the Domain.
+## Backend — Onion Architecture
+
+The backend is organized into four main layers:
 
 ```text
-                ┌─────────────────────────────────────────┐
-                │                   API                    │
-                │   Controllers · Middleware · Program.cs  │
-                │        (JWT Auth, Rate Limiting)         │
-                └───────────────────┬───────────────────────┘
-                                    ▼
-                ┌─────────────────────────────────────────┐
-                │               Application                │
-                │  Services · DTOs · Interfaces · Mappings │
-                │      Validators (FluentValidation)       │
-                └───────────────────┬───────────────────────┘
-                                    ▼
-                ┌─────────────────────────────────────────┐
-                │             Infrastructure                │
-                │  EF Core DbContext · Repositories        │
-                │        Migrations · External Services    │
-                └───────────────────┬───────────────────────┘
-                                    ▼
-                ┌─────────────────────────────────────────┐
-                │                 Domain                    │
-                │      Entities · Enums · Core Interfaces   │
-                │         (no external dependencies)       │
-                └─────────────────────────────────────────┘
+┌──────────────────────────────────────────┐
+│                    API                   │
+│ Controllers · Middleware · Program.cs    │
+│ JWT Authentication · Rate Limiting       │
+└────────────────────┬─────────────────────┘
+                     ▼
+┌──────────────────────────────────────────┐
+│               Application                │
+│ Services · DTOs · Interfaces             │
+│ Validators · Mappings                    │
+└────────────────────┬─────────────────────┘
+                     ▼
+┌──────────────────────────────────────────┐
+│             Infrastructure               │
+│ EF Core · DbContext · Repositories        │
+│ Migrations · Data Access                 │
+└────────────────────┬─────────────────────┘
+                     ▼
+┌──────────────────────────────────────────┐
+│                 Domain                   │
+│ Entities · Enums · Core Interfaces       │
+└──────────────────────────────────────────┘
 ```
 
-- **Domain** — Pure entities and enums (`User`, `Evaluation`, `PerformanceCriterion`, etc.) with zero dependency on any other layer.
-- **Application** — Business logic, use cases, DTOs, interfaces implemented by Infrastructure, and validation rules.
-- **Infrastructure** — EF Core implementation, repositories, database migrations, and any external integrations.
-- **API** — Controllers, JWT authentication, rate-limiting middleware, and request/response handling; depends on Application only through interfaces.
+Dependencies are directed inward toward the Domain layer.
 
-The frontend follows a **feature-based architecture**, grouping components, hooks, services and state by business feature (e.g. `criteria`, `evaluations`, `reports`) rather than by technical type.
+### Domain
 
-> 🖼️ *Optional: add an architecture diagram (e.g. drawn in draw.io/Excalidraw) here:*
-> ```markdown
-> <img src="images/architecture-diagram.png" width="70%" alt="Onion Architecture Diagram"/>
-> ```
+Contains the core business entities and enums.
+
+### Application
+
+Contains business logic, DTOs, service interfaces, validators and mappings.
+
+### Infrastructure
+
+Contains Entity Framework Core, repositories, database configuration and migrations.
+
+### API
+
+Contains controllers, authentication, middleware and HTTP request/response handling.
+
+## Frontend
+
+The React application uses a feature-oriented structure with reusable components, services, state management, protected routes and centralized language/theme handling.
 
 ---
 
-# 📂 Project Structure
+# 5. Project Structure
 
 ```text
-performance-evaluation-system
-├── .github                     # CI/CD workflows
-├── coverage-config
-│   └── coverage.runsettings    # Backend coverage collection settings
-├── coverage-report
-│   └── backend                 # Generated HTML/summary coverage report
-├── coverage-temp                # Raw coverage output (git-ignored)
-│   ├── integration
-│   └── unit
-├── scripts
-│   └── coverage.ps1            # Runs tests + generates the coverage report
-├── src                          # Backend source (Onion layers)
-│   ├── PerformanceEvaluationSystem.API
-│   │     ├── Controllers
-│   │     │     ├── AuthController.cs
-│   │     │     ├── UserController.cs
-│   │     │     ├── CriteriaController.cs
-│   │     │     ├── EvaluationPeriodController.cs
-│   │     │     ├── EvaluatorEmployeesController.cs
-│   │     │     ├── EvaluationsController.cs
-│   │     │     └── ReportsController.cs
-│   │     ├── Middleware
-│   │     └── Program.cs
-│   ├── PerformanceEvaluationSystem.Application
-│   │     ├── DTOs
-│   │     ├── Interfaces
-│   │     ├── Services
-│   │     ├── Mappings          # AutoMapper profiles
-│   │     └── Validators         # FluentValidation
-│   ├── PerformanceEvaluationSystem.Domain
-│   │     ├── Entities
-│   │     │     ├── User.cs
-│   │     │     ├── Department.cs
-│   │     │     ├── JobPosition.cs
-│   │     │     ├── PerformanceCategory.cs
-│   │     │     ├── PerformanceCriterion.cs
-│   │     │     ├── CriterionJobPosition.cs
-│   │     │     ├── EvaluationPeriod.cs
-│   │     │     ├── EvaluatorEmployee.cs
-│   │     │     ├── Evaluation.cs
-│   │     │     └── EvaluationDetail.cs
-│   │     ├── Enums
-│   │     │     └── EvaluationStatus.cs
-│   │     └── Interfaces
-│   └── PerformanceEvaluationSystem.Infrastructure
-│         ├── Data               # DbContext
-│         ├── Repositories
-│         └── Migrations
-├── tests
-│   ├── UnitTests
-│   └── IntegrationTests
-├── frontend
-│   ├── src
-│   │   ├── features
-│   │   │     ├── auth
-│   │   │     ├── users
-│   │   │     ├── criteria
-│   │   │     ├── evaluations
-│   │   │     └── reports
-│   │   ├── components            # Shared/reusable UI components
-│   │   ├── store                 # Zustand stores
-│   │   ├── services               # Axios instance + interceptors
-│   │   ├── routes                 # ProtectedRoute, role guards
-│   │   ├── i18n                   # Language files
-│   │   └── theme                  # MUI theme (brand colors)
-│   └── coverage                  # Frontend coverage output (git-ignored)
+performance-evaluation-system/
+│
+├── .github/                    # CI/CD workflows
+├── coverage-config/            # Coverage configuration
+├── db-transfer/                # Database-related transfer/scripts
+├── scripts/                    # Utility scripts
+│
+├── src/                        # .NET backend
+│   ├── PerformanceEvaluationSystem.API/
+│   ├── PerformanceEvaluationSystem.Application/
+│   ├── PerformanceEvaluationSystem.Domain/
+│   └── PerformanceEvaluationSystem.Infrastructure/
+│
+├── tests/
+│   ├── UnitTests/
+│   └── IntegrationTests/
+│
+├── frontend/                   # React frontend
+│   ├── src/
+│   ├── public/
+│   └── package.json
+│
 ├── .dockerignore
-├── .env
+├── .env                        # Local/Docker environment configuration
 ├── .gitignore
 ├── docker-compose.yml
 ├── Dockerfile.backend
@@ -319,324 +281,432 @@ performance-evaluation-system
 └── README.md
 ```
 
----
-
-# 🧬 Domain Model
-
-| Entity | Description |
-|--------|-------------|
-| `User` | Application user — name, email, hashed password, role, department, job position, active/inactive status |
-| `Department` | Any organizational department (not limited to a single one) that a user belongs to |
-| `JobPosition` | A job position independent of department — determines which criterion descriptions apply |
-| `PerformanceCategory` | Top-level, organization-wide scoring category with a configurable weight (%) |
-| `PerformanceCriterion` | Sub-criterion belonging to a category, scored 1–5 |
-| `CriterionJobPosition` | Maps a criterion to a job-position-specific description |
-| `EvaluationPeriod` | A defined time window in which evaluations take place |
-| `EvaluatorEmployee` | Assignment linking an Evaluator to the Employees they may score, independent of department |
-| `Evaluation` | A single evaluation record — evaluator, employee, period, date, comment, total score |
-| `EvaluationDetail` | Individual criterion score within an `Evaluation` |
-
-### Scoring Logic
-
-```
-Category Score = Average(Criterion Scores) × Category Weight
-Total Score     = Σ (Category Score)
-```
-
-Example: if "Quality of Work" (weight 30%) has criterion scores of 4 and 5 → average 4.5 → category score = 4.5 × 0.30 = 1.35. This is repeated for every category and summed into the employee's final score for that period.
+Generated folders such as `node_modules`, `bin`, `obj`, `coverage-temp`, `coverage-report` and frontend build/coverage output are not required to run the application and should not be included in the source-code delivery package.
 
 ---
 
-# 🔒 Security
+# 6. Requirements
 
-| Concern | Implementation |
-|---------|----------------|
-| Authentication | JWT (stateless) |
-| Password storage | BCrypt hashing |
-| Authorization | Role-Based Access Control (Admin / Evaluator / Employee) |
-| Data scoping | Resource-level authorization — Evaluators only see assigned Employees |
-| Brute-force protection | ASP.NET Core Rate Limiting middleware — Fixed Window, 5 requests/IP/minute on `/api/auth/login` |
-| Input validation | FluentValidation on all write endpoints |
-| Data integrity | Unique constraints (e.g. one active user per email) |
-| Data retention | Soft delete on key entities instead of hard deletion |
-| Standards | Designed with OWASP guidelines in mind |
+## Recommended: Docker Desktop
 
-All protected endpoints require a valid JWT:
+For the easiest setup, install:
 
-```http
-Authorization: Bearer <jwt-token>
-```
+- Docker Desktop
+- Git (if cloning from a repository)
 
----
+With Docker, you do **not** need to install SQL Server, .NET 8 SDK or Node.js separately just to run the complete application.
 
-# 📦 API Overview
+## Optional: Local Development
 
-Swagger UI is available after running the backend:
+For running the services outside Docker:
 
-```
-https://localhost:7170/swagger/index.html
-```
-
-> 🖼️ *Add a screenshot of the Swagger endpoint list here:*
-> ```markdown
-> <img src="images/swagger-ui.png" width="70%" alt="Swagger UI"/>
-> ```
-
-## 🔐 Auth
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| POST | `/api/auth/register` | Register a new user | Admin |
-| POST | `/api/auth/login` | Authenticate and receive a JWT | Public |
-
-## 👤 Users
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| GET | `/api/users` | List users | Admin |
-| PUT | `/api/users/{id}` | Update role/department/status | Admin |
-
-## 🧩 Criteria
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| GET | `/api/criteria` | List categories & criteria | Admin / Evaluator |
-| POST | `/api/criteria` | Create category or criterion | Admin |
-| PUT | `/api/criteria/{id}` | Update criterion / weight | Admin |
-| PATCH | `/api/criteria/{id}/status` | Activate / deactivate | Admin |
-
-## 🗓️ Evaluation Periods
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| GET | `/api/evaluation-periods` | List periods | Admin / Evaluator |
-| POST | `/api/evaluation-periods` | Create a period | Admin |
-
-## 🔗 Evaluator–Employee Assignments
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| GET | `/api/evaluator-employees` | List assignments | Admin |
-| POST | `/api/evaluator-employees` | Assign an employee to an evaluator | Admin |
-
-## 📝 Evaluations
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| POST | `/api/evaluations` | Submit an evaluation | Evaluator |
-| GET | `/api/evaluations/{id}` | Get evaluation details | Admin / Evaluator / Employee (own) |
-| GET | `/api/evaluations/my` | Get the authenticated employee's evaluations | Employee |
-
-## 📊 Reports
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| GET | `/api/reports/department-ranking` | Ranking within a chosen department | Admin |
-| GET | `/api/reports/team-ranking` | Team ranking | Evaluator |
-| GET | `/api/reports/my-history` | Personal score history | Employee |
-| GET | `/api/reports/export` | Export report to Excel | Admin / Evaluator |
-
----
-
-# ⚙️ Installation
-
-## Prerequisites
 - .NET 8 SDK
-- Node.js & npm
-- Docker Desktop & Docker Compose
-- SQL Server (or use the Dockerized instance)
-- Visual Studio / VS Code
-- PowerShell (for the coverage script)
-
-## Clone Repository
-```bash
-git clone https://github.com/<your-username>/performance-evaluation-system.git
-cd performance-evaluation-system
-```
+- Node.js and npm
+- SQL Server
+- Visual Studio or VS Code
 
 ---
 
-# 🐳 Run with Docker (recommended)
+# 7. Configuration
 
-The full stack — SQL Server, backend API, and frontend (Nginx) — is defined in `docker-compose.yml`, building the backend and frontend from their own `Dockerfile.backend` and `Dockerfile.frontend`.
+The project uses environment variables for Docker-based configuration.
 
-```bash
-docker compose up -d
+Before starting the application, make sure the required environment variables are configured in the project's `.env` file.
+
+Example structure:
+
+```env
+SA_PASSWORD=your_sql_server_password
+JWT_SECRET=your_jwt_secret
 ```
 
-Check running containers:
-```bash
+> **Security:** Never commit real production passwords, JWT secrets or other sensitive credentials to a public repository. For source-code distribution, use an `.env.example` file with placeholder values. If a demo `.env` is distributed with the project, its credentials must be dedicated to the demo environment and must not be reused elsewhere.
+
+---
+
+# 8. Run the Application with Docker
+
+Docker Compose is the recommended way to run the complete system.
+
+## Step 1 — Open the project directory
+
+Open PowerShell or a terminal in:
+
+```text
+performance-evaluation-system
+```
+
+## Step 2 — Check Docker
+
+Run:
+
+```powershell
+docker --version
+docker compose version
+```
+
+Make sure Docker Desktop is running.
+
+## Step 3 — Start the application
+
+Run:
+
+```powershell
+docker compose up -d --build
+```
+
+The `--build` option ensures that the backend and frontend images are rebuilt from the current source code.
+
+## Step 4 — Check the containers
+
+Run:
+
+```powershell
 docker ps
 ```
 
-View logs:
-```bash
+The application should have containers for:
+
+- SQL Server
+- Backend API
+- Frontend
+
+## Step 5 — Open the application
+
+### Frontend
+
+```text
+http://localhost
+```
+
+### Backend API
+
+```text
+http://localhost:8080
+```
+
+### Swagger
+
+```text
+http://localhost:8080/swagger
+```
+
+Swagger provides interactive documentation for the REST API.
+
+## Step 6 — Check application logs
+
+If there is a problem during startup:
+
+```powershell
 docker compose logs -f
 ```
 
-Stop services:
-```bash
+For a specific service:
+
+```powershell
+docker compose logs -f backend
+```
+
+or:
+
+```powershell
+docker compose logs -f frontend
+```
+
+## Step 7 — Stop the application
+
+```powershell
 docker compose down
 ```
 
-Stop and remove volumes (resets the database):
-```bash
+## Reset the database
+
+To stop the containers and remove Docker volumes:
+
+```powershell
 docker compose down -v
 ```
 
-> 🖼️ *Add the running-containers screenshot from Docker Desktop here (see the Containerization section above for the same placeholder).*
+> **Warning:** `docker compose down -v` removes the SQL Server volume and therefore resets the database stored in that Docker volume.
+
+After that, start again with:
+
+```powershell
+docker compose up -d --build
+```
 
 ---
 
-# ▶️ Run Locally (without Docker)
+# 9. First Use
 
-## Backend
-```bash
+After the containers are running:
+
+1. Open `http://localhost`.
+2. Log in with a valid user account.
+3. Depending on the user's role, the corresponding dashboard and menus are displayed.
+4. Admin users can configure departments, job positions, users, criteria, evaluation periods and evaluator assignments.
+5. Evaluators can evaluate employees assigned to them.
+6. Employees can view their own evaluation results and history.
+7. Authorized users can access the available ranking and reporting features.
+
+If the project is delivered with demo/seed data, use the credentials documented with that delivery package.
+
+---
+
+# 10. Running the Backend Locally
+
+Docker is recommended for the complete application. For backend development without Docker:
+
+```powershell
 cd src/PerformanceEvaluationSystem.API
 dotnet restore
+dotnet build
 dotnet ef database update
 dotnet run
 ```
-API available at: `https://localhost:7170`
-Swagger UI: `https://localhost:7170/swagger/index.html`
 
-## Frontend
-```bash
+The local development URL depends on the configured ASP.NET Core launch profile.
+
+Swagger is available under:
+
+```text
+/swagger
+```
+
+For example, if the application is running on HTTPS port `7170`:
+
+```text
+https://localhost:7170/swagger
+```
+
+> When running through Docker, use `http://localhost:8080/swagger` instead.
+
+---
+
+# 11. Running the Frontend Locally
+
+Open another terminal:
+
+```powershell
 cd frontend
 npm install
 npm run dev
 ```
-Frontend available at: `http://localhost:5173`
+
+Vite normally starts the development server at:
+
+```text
+http://localhost:5173
+```
+
+The frontend must be configured to use the correct backend API URL for the selected environment.
 
 ---
 
-# 🗄 Database & EF Core Migrations
+# 12. Database & Migrations
 
-Connection string and other settings are configured in `appsettings.json` / `appsettings.Development.json` (and `.env` for containerized runs):
+The project uses SQL Server and Entity Framework Core migrations.
 
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=...;Database=PerformanceEvaluationSystem;User Id=...;Password=...;TrustServerCertificate=True"
-  },
-  "Jwt": {
-    "Key": "...",
-    "Issuer": "...",
-    "Audience": "...",
-    "ExpiresInMinutes": 60
-  }
-}
-```
+For local development, after configuring the database connection:
 
-Apply migrations:
-```bash
-dotnet ef migrations add <MigrationName>
+```powershell
 dotnet ef database update
 ```
 
+To create a new migration:
+
+```powershell
+dotnet ef migrations add <MigrationName>
+```
+
+Then apply it:
+
+```powershell
+dotnet ef database update
+```
+
+Database-related SQL scripts are also provided separately in the project delivery package where applicable.
+
 ---
 
-# 🌱 Environment Variables
+# 13. API & Swagger
 
-| Variable | Description |
-|----------|--------------|
-| `ConnectionStrings__DefaultConnection` | SQL Server connection string |
-| `Jwt__Key` | Secret key used to sign JWTs |
-| `Jwt__Issuer` / `Jwt__Audience` | JWT issuer/audience validation values |
-| `VITE_API_BASE_URL` | Backend API base URL used by the frontend |
+When the application is running with Docker:
 
-A local `.env` file holds these values for Docker Compose. **Make sure `.env` is listed in `.gitignore` before pushing** — it currently is not, and real secrets should never be committed.
+```text
+http://localhost:8080/swagger
+```
+
+Swagger/OpenAPI documents the available REST endpoints and allows authorized endpoints to be tested interactively.
+
+Main API areas include:
+
+- Authentication
+- Users
+- Criteria and categories
+- Evaluation periods
+- Evaluator–Employee assignments
+- Evaluations
+- Rankings
+- Reports / Excel export
+
+Protected endpoints require authentication with a valid JWT.
 
 ---
 
-# 🧪 Testing & Coverage
+# 14. Testing
 
-## Running the tests
+## Backend Tests
 
-**Backend:**
-```bash
+From the project root:
+
+```powershell
 dotnet test
 ```
 
-**Frontend:**
-```bash
+This runs the backend unit and integration test suites.
+
+## Frontend Tests
+
+```powershell
 cd frontend
 npm run test
 ```
 
-## Coverage pipeline
+## Coverage
 
-Coverage collection is driven by `scripts/coverage.ps1`, using the settings in `coverage-config/coverage.runsettings`:
+The backend coverage pipeline can be executed with:
 
 ```powershell
-./scripts/coverage.ps1
+.\scripts\coverage.ps1
 ```
 
-This script:
-- Runs backend **unit** and **integration** test suites separately, writing raw results to `coverage-temp/unit` and `coverage-temp/integration`
-- Merges the results and generates a human-readable report under `coverage-report/backend`
-- (Frontend coverage is generated separately via `npm run test -- --coverage`, output to `frontend/coverage`)
+The project uses the coverage configuration under:
 
-All raw/generated coverage folders (`coverage-temp/`, `coverage-report/`, `frontend/coverage/`, `.coverage/`) are git-ignored — only the `coverage-config/coverage.runsettings` and `scripts/coverage.ps1` that produce them are committed.
-
-Tests cover:
-- User authentication & registration
-- Role-based authorization rules (Admin / Evaluator / Employee)
-- Criteria and weight management
-- Evaluation submission and score calculation accuracy
-- Report/ranking generation
-- Component/page rendering and protected-route/role-guard behavior (frontend)
-
-> 🖼️ *Add backend and frontend coverage report screenshots here:*
-> ```markdown
-> <img src="images/backend-coverage.png" width="70%" alt="Backend Coverage Report"/>
-> <img src="images/frontend-coverage.png" width="70%" alt="Frontend Coverage Report"/>
-> ```
-
----
-
-# 🎬 Demo Video
-
-> 📌 *Record a 1–2 minute walkthrough: login as Admin → define a criterion/weight → login as Evaluator → score an employee → login as Employee → view score history → export a report to Excel. Upload it directly to GitHub (drag it into a PR/README edit box) or link a YouTube/Loom recording, then embed it here:*
-
-```markdown
-[![Watch the demo](images/video-thumbnail.png)](https://your-video-link)
-```
-
----
-
-# 🗺 Roadmap / Future Improvements
-- Push/email notifications when a new evaluation is submitted
-- Configurable evaluation templates per department (in addition to per job position)
-- PDF export in addition to Excel
-- Audit log for criteria/weight changes
-- Multi-instance deployment with distributed rate limiting (Redis-backed) if scaled horizontally
-
----
-
-# 📚 Key Concepts Covered
 ```text
+coverage-config/
+```
+
+Generated coverage files should be treated as build/test artifacts rather than source files.
+
+---
+
+# 15. Test Results
+
+The project includes a separate test report containing the detailed test strategy, scenarios and coverage results.
+
+The latest backend test execution reported:
+
+```text
+131 / 131 integration tests passed
+```
+
+The reported backend/application coverage includes:
+
+| Area | Line Coverage |
+|---|---:|
+| Overall | 80.6% |
+| API | 88.7% |
+| Application | 82.5% |
+| Domain | 92.8% |
+| Infrastructure | 64.2% |
+
+For complete test results, coverage metrics and test scenarios, refer to the accompanying **Test Report** in the project delivery package.
+
+---
+
+# 16. Security Notes
+
+The application implements several security controls:
+
+- JWT-based authentication
+- BCrypt password hashing
+- Role-based authorization
+- Resource-level authorization
+- FluentValidation
+- Login rate limiting
+- Unique email constraints
+- Soft-delete / active-state handling
+- Protected API endpoints
+
+The login endpoint uses a fixed-window rate limiter:
+
+```text
+Maximum: 5 requests
+Window: 1 minute
+Scope: IP address
+```
+
+This configuration is intended for the current deployment model. A horizontally scaled production deployment would require a distributed rate-limiting strategy.
+
+---
+
+# 17. Additional Documentation
+
+The complete project delivery package includes:
+
+- **ER Diagram**
+- **.NET 8 Web API / Swagger Documentation**
+- **SQL Database Scripts**
+- **User Manual**
+- **Test Report**
+- **Source Code**
+- **Project README**
+
+These documents describe the system from architectural, technical, operational and user perspectives.
+
+---
+
+# 18. Future Improvements
+
+Possible future enhancements include:
+
+- Email or push notifications
+- PDF report export
+- Audit logging for configuration changes
+- More configurable evaluation templates
+- Distributed rate limiting for multi-instance deployments
+- Additional reporting and analytics capabilities
+
+---
+
+# 19. Key Concepts Demonstrated
+
+```text
+.NET 8 / ASP.NET Core Web API
 Onion Architecture
-ASP.NET Core Web API (.NET 8)
-Entity Framework Core & Migrations
+Entity Framework Core
+SQL Server
 JWT Authentication
-Role-Based Access Control (RBAC)
+Role-Based Access Control
 Resource-Level Authorization
 FluentValidation
 AutoMapper
-ASP.NET Core Rate Limiting Middleware
-React + TypeScript + Vite
-MUI (Material UI)
-Zustand State Management
-Axios Interceptors
-Protected Routes / Role Guards
+React
+TypeScript
+Vite
+Material UI
+Zustand
+Axios
+Protected Routes
 Internationalization (i18n)
-Weighted Scoring Algorithms
-Excel Reporting/Export
-xUnit & Integration Testing
-Vitest & React Testing Library
-Automated Code Coverage Pipeline (PowerShell + coverage.runsettings)
-Docker & Docker Compose (separate backend/frontend Dockerfiles)
+Weighted Scoring
+Excel Reporting
+xUnit
+Integration Testing
+Vitest
+React Testing Library
+Code Coverage
+Docker
+Docker Compose
 Nginx
 Swagger / OpenAPI
-Clean Code Principles
 ```
 
 ---
 
-# 👩‍💻 Author
+# 20. Author
 
 **Öykü Eyüboğlu**
+
+**VakıfBank 360 — Performance Evaluation System**
