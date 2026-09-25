@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.37027.9
@@ -8,6 +8,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F527A253-722C-4F38-9E29-CBA217819F01}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{E1B834E3-9E3D-4B22-A1E3-F71738149D51}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\PerformansDeğerlendirmeSistemi\VakıfBank360_Kullanıcı_Kılavuzu.pdf = ..\..\PerformansDeğerlendirmeSistemi\VakıfBank360_Kullanıcı_Kılavuzu.pdf
+		..\..\PerformansDeğerlendirmeSistemi\VakıfBank360_Test_Raporu.pdf = ..\..\PerformansDeğerlendirmeSistemi\VakıfBank360_Test_Raporu.pdf
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceEvaluation.API", "src\PerformanceEvaluation.API\PerformanceEvaluation.API.csproj", "{31882BED-EFFD-4741-A890-16C35B5A008F}"
 EndProject
@@ -79,18 +83,6 @@ Global
 		{E752A22E-C066-43F7-8163-1DFFE0BCC48A}.Release|x64.Build.0 = Release|Any CPU
 		{E752A22E-C066-43F7-8163-1DFFE0BCC48A}.Release|x86.ActiveCfg = Release|Any CPU
 		{E752A22E-C066-43F7-8163-1DFFE0BCC48A}.Release|x86.Build.0 = Release|Any CPU
-		{BEC1AF4D-7070-47DE-541E-D6A8B557E3AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BEC1AF4D-7070-47DE-541E-D6A8B557E3AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BEC1AF4D-7070-47DE-541E-D6A8B557E3AB}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{BEC1AF4D-7070-47DE-541E-D6A8B557E3AB}.Debug|x64.Build.0 = Debug|Any CPU
-		{BEC1AF4D-7070-47DE-541E-D6A8B557E3AB}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{BEC1AF4D-7070-47DE-541E-D6A8B557E3AB}.Debug|x86.Build.0 = Debug|Any CPU
-		{BEC1AF4D-7070-47DE-541E-D6A8B557E3AB}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{BEC1AF4D-7070-47DE-541E-D6A8B557E3AB}.Release|Any CPU.Build.0 = Debug|Any CPU
-		{BEC1AF4D-7070-47DE-541E-D6A8B557E3AB}.Release|x64.ActiveCfg = Release|Any CPU
-		{BEC1AF4D-7070-47DE-541E-D6A8B557E3AB}.Release|x64.Build.0 = Release|Any CPU
-		{BEC1AF4D-7070-47DE-541E-D6A8B557E3AB}.Release|x86.ActiveCfg = Release|Any CPU
-		{BEC1AF4D-7070-47DE-541E-D6A8B557E3AB}.Release|x86.Build.0 = Release|Any CPU
 		{762090C0-9279-4BA4-BCFF-F3A9FB5655DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{762090C0-9279-4BA4-BCFF-F3A9FB5655DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{762090C0-9279-4BA4-BCFF-F3A9FB5655DB}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -131,6 +123,3 @@ Global
 		SolutionGuid = {BBB388C8-6BC3-4691-A6C2-59D95B1F46D2}
 	EndGlobalSection
 EndGlobal
-
-
-
