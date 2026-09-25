@@ -676,20 +676,7 @@ These documents describe the system from architectural, technical, operational a
 
 ---
 
-# 18. Future Improvements
-
-Possible future enhancements include:
-
-- Email or push notifications
-- PDF report export
-- Audit logging for configuration changes
-- More configurable evaluation templates
-- Distributed rate limiting for multi-instance deployments
-- Additional reporting and analytics capabilities
-
----
-
-# 19. Key Concepts Demonstrated
+# 18. Key Concepts Demonstrated
 
 ```text
 .NET 8 / ASP.NET Core Web API
