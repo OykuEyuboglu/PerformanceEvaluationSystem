@@ -711,7 +711,7 @@ Swagger / OpenAPI
 
 ---
 
-# 20. Author
+# 19. Author
 
 **Öykü Eyüboğlu**
 
